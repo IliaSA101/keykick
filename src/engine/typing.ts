@@ -234,7 +234,7 @@ export function accuracy(stats: TypingStats): number {
   return total === 0 ? 1 : stats.correct / total;
 }
 
-/** Пауза длиннее — «задумался»: в скорость и ровность идёт за PAUSE_COUNTS_AS (как в «СОЛО»). */
+/** Пауза длиннее — «задумался»: в скорость и ровность идёт за PAUSE_COUNTS_AS. */
 export const PAUSE_LONG_MS = 2500;
 export const PAUSE_COUNTS_AS_MS = 1000;
 

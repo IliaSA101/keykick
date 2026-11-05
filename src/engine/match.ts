@@ -139,7 +139,7 @@ export function matchStats(halves: readonly TypingStats[]): TypingStats {
 }
 
 /**
- * Зачёт урока (решение 04.11, как в «СОЛО»): ошибок во всей решающей серии — не больше запаса лиги.
+ * Зачёт урока (решение 04.11): ошибок во всей решающей серии — не больше запаса лиги.
  * decisiveErrors — сумма по атакам серии.
  */
 export function lessonPassed(decisiveErrors: number, rules: LeagueRules): boolean {
