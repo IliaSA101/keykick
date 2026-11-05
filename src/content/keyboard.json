@@ -1,0 +1,69 @@
+{
+  "about": "Клавиатура ноутбука ребёнка: Windows, стандартная русская раскладка, ряды как на ANSI. Пальцы — по таблице docs/idea.md. chars: [без Shift, с Shift]; bump — клавиша с засечкой.",
+  "rows": [
+    [
+      { "code": "Backquote", "finger": "lp", "ru": ["ё", "Ё"], "en": ["`", "~"] },
+      { "code": "Digit1", "finger": "lp", "ru": ["1", "!"], "en": ["1", "!"] },
+      { "code": "Digit2", "finger": "lr", "ru": ["2", "\""], "en": ["2", "@"] },
+      { "code": "Digit3", "finger": "lm", "ru": ["3", "№"], "en": ["3", "#"] },
+      { "code": "Digit4", "finger": "li", "ru": ["4", ";"], "en": ["4", "$"] },
+      { "code": "Digit5", "finger": "li", "ru": ["5", "%"], "en": ["5", "%"] },
+      { "code": "Digit6", "finger": "ri", "ru": ["6", ":"], "en": ["6", "^"] },
+      { "code": "Digit7", "finger": "ri", "ru": ["7", "?"], "en": ["7", "&"] },
+      { "code": "Digit8", "finger": "rm", "ru": ["8", "*"], "en": ["8", "*"] },
+      { "code": "Digit9", "finger": "rr", "ru": ["9", "("], "en": ["9", "("] },
+      { "code": "Digit0", "finger": "rp", "ru": ["0", ")"], "en": ["0", ")"] },
+      { "code": "Minus", "finger": "rp", "ru": ["-", "_"], "en": ["-", "_"] },
+      { "code": "Equal", "finger": "rp", "ru": ["=", "+"], "en": ["=", "+"] },
+      { "code": "Backspace", "finger": "rp", "label": "⌫", "width": 2 }
+    ],
+    [
+      { "code": "Tab", "finger": "lp", "label": "Tab", "width": 1.5 },
+      { "code": "KeyQ", "finger": "lp", "ru": ["й", "Й"], "en": ["q", "Q"] },
+      { "code": "KeyW", "finger": "lr", "ru": ["ц", "Ц"], "en": ["w", "W"] },
+      { "code": "KeyE", "finger": "lm", "ru": ["у", "У"], "en": ["e", "E"] },
+      { "code": "KeyR", "finger": "li", "ru": ["к", "К"], "en": ["r", "R"] },
+      { "code": "KeyT", "finger": "li", "ru": ["е", "Е"], "en": ["t", "T"] },
+      { "code": "KeyY", "finger": "ri", "ru": ["н", "Н"], "en": ["y", "Y"] },
+      { "code": "KeyU", "finger": "ri", "ru": ["г", "Г"], "en": ["u", "U"] },
+      { "code": "KeyI", "finger": "rm", "ru": ["ш", "Ш"], "en": ["i", "I"] },
+      { "code": "KeyO", "finger": "rr", "ru": ["щ", "Щ"], "en": ["o", "O"] },
+      { "code": "KeyP", "finger": "rp", "ru": ["з", "З"], "en": ["p", "P"] },
+      { "code": "BracketLeft", "finger": "rp", "ru": ["х", "Х"], "en": ["[", "{"] },
+      { "code": "BracketRight", "finger": "rp", "ru": ["ъ", "Ъ"], "en": ["]", "}"] },
+      { "code": "Backslash", "finger": "rp", "ru": ["\\", "/"], "en": ["\\", "|"], "width": 1.5 }
+    ],
+    [
+      { "code": "CapsLock", "finger": "lp", "label": "Caps", "width": 1.75 },
+      { "code": "KeyA", "finger": "lp", "ru": ["ф", "Ф"], "en": ["a", "A"] },
+      { "code": "KeyS", "finger": "lr", "ru": ["ы", "Ы"], "en": ["s", "S"] },
+      { "code": "KeyD", "finger": "lm", "ru": ["в", "В"], "en": ["d", "D"] },
+      { "code": "KeyF", "finger": "li", "ru": ["а", "А"], "en": ["f", "F"], "bump": true },
+      { "code": "KeyG", "finger": "li", "ru": ["п", "П"], "en": ["g", "G"] },
+      { "code": "KeyH", "finger": "ri", "ru": ["р", "Р"], "en": ["h", "H"] },
+      { "code": "KeyJ", "finger": "ri", "ru": ["о", "О"], "en": ["j", "J"], "bump": true },
+      { "code": "KeyK", "finger": "rm", "ru": ["л", "Л"], "en": ["k", "K"] },
+      { "code": "KeyL", "finger": "rr", "ru": ["д", "Д"], "en": ["l", "L"] },
+      { "code": "Semicolon", "finger": "rp", "ru": ["ж", "Ж"], "en": [";", ":"] },
+      { "code": "Quote", "finger": "rp", "ru": ["э", "Э"], "en": ["'", "\""] },
+      { "code": "Enter", "finger": "rp", "label": "Enter", "width": 2.25 }
+    ],
+    [
+      { "code": "ShiftLeft", "finger": "lp", "label": "Shift", "width": 2.25 },
+      { "code": "KeyZ", "finger": "lp", "ru": ["я", "Я"], "en": ["z", "Z"] },
+      { "code": "KeyX", "finger": "lr", "ru": ["ч", "Ч"], "en": ["x", "X"] },
+      { "code": "KeyC", "finger": "lm", "ru": ["с", "С"], "en": ["c", "C"] },
+      { "code": "KeyV", "finger": "li", "ru": ["м", "М"], "en": ["v", "V"] },
+      { "code": "KeyB", "finger": "li", "ru": ["и", "И"], "en": ["b", "B"] },
+      { "code": "KeyN", "finger": "ri", "ru": ["т", "Т"], "en": ["n", "N"] },
+      { "code": "KeyM", "finger": "ri", "ru": ["ь", "Ь"], "en": ["m", "M"] },
+      { "code": "Comma", "finger": "rm", "ru": ["б", "Б"], "en": [",", "<"] },
+      { "code": "Period", "finger": "rr", "ru": ["ю", "Ю"], "en": [".", ">"] },
+      { "code": "Slash", "finger": "rp", "ru": [".", ","], "en": ["/", "?"] },
+      { "code": "ShiftRight", "finger": "rp", "label": "Shift", "width": 2.75 }
+    ],
+    [
+      { "code": "Space", "finger": "th", "ru": [" ", " "], "en": [" ", " "], "width": 6.25 }
+    ]
+  ]
+}

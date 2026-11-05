@@ -1,0 +1,59 @@
+#!/bin/sh
+# Ловит механические ошибки до того, как они попадут в историю:
+# лишние файлы, выросшие файлы, ошибки линтера и типов. Тесты — в pre-push.
+# Включение: git config core.hooksPath .githooks
+# Осознанный обход: git commit --no-verify (причину — в описание коммита).
+set -u
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$staged" ] && exit 0
+fail=0
+
+# 1. Чего в репозитории быть не должно.
+for file in $staged; do
+  case "$file" in
+    node_modules/*|*/node_modules/*|dist/*|*.tsbuildinfo|art-src/*|art-work/*)
+      echo "pre-commit: $file не место в репозитории"; fail=1 ;;
+    .claude/compact-next.md|.claude/measurements/*|.claude/settings.local.json)
+      echo "pre-commit: $file — рабочие данные Claude Code"; fail=1 ;;
+    .env.example) ;;
+    .env|.env.*)
+      echo "pre-commit: $file — локальные настройки"; fail=1 ;;
+  esac
+done
+
+# 2. Размер файлов кода: порог 600 строк (правило из общих знаний).
+# Новый файл сверх порога и файл, перешагнувший порог этим коммитом, — блок;
+# давно крупный файл, который ещё вырос, — предупреждение.
+LIMIT=600
+for file in $staged; do
+  case "$file" in
+    src/*.ts|src/*.vue|tools/*.mjs|tests/*.ts|.claude/hooks/*.mjs) ;;
+    *) continue ;;
+  esac
+  [ -f "$file" ] || continue
+  now=$(git show ":$file" | wc -l | tr -d ' ')
+  [ "$now" -le "$LIMIT" ] && continue
+  was=$(git show "HEAD:$file" 2>/dev/null | wc -l | tr -d ' ')
+  : "${was:=0}"
+  if [ "$was" -le "$LIMIT" ]; then
+    echo "pre-commit: $file — $now строк при пороге $LIMIT, разрежьте по обязанностям"
+    fail=1
+  elif [ "$now" -gt "$was" ]; then
+    echo "pre-commit: предупреждение — $file и так большой ($was), стал $now"
+  fi
+done
+
+# 3. Линтер по изменённым файлам кода: он стережёт правила проекта.
+code=$(echo "$staged" | grep -E '\.(ts|vue)$' || true)
+if [ -n "$code" ]; then
+  # shellcheck disable=SC2086
+  npx eslint --max-warnings 0 $code || fail=1
+
+  # 4. Типы по всему проекту: ошибка в одном файле ломает импорт в другом (так уже прошло
+  # в коммит 176910f). vue-tsc смотрит рабочую копию, а не индекс, — для обычного коммита
+  # «всё изменённое» это одно и то же.
+  npx vue-tsc --noEmit || fail=1
+fi
+
+[ "$fail" -eq 0 ] || { echo "pre-commit: коммит остановлен"; exit 1; }

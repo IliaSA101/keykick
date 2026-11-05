@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.DS_Store
+*.local
+.vite/
+
+# Рабочие данные Claude Code: файл восстановления, замеры, личные настройки.
+# Хуки и общие настройки проекта (.claude/hooks, .claude/settings.json) — в git.
+.claude/compact-next.md
+.claude/measurements/
+.claude/settings.local.json
+.claude/worktrees/
+.claude/LOCAL.md
+# Оснастка в приватном keykick-ops (общее рабочее дерево, см. там OPS.md).
+.claude/ops/
+
+# Исходники и промежуточная графика (большие генерации) — вне git.
+art-src/
+art-work/
+.claude/scheduled_tasks.lock

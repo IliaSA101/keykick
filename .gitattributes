@@ -1,0 +1,6 @@
+# Весь текст — в LF: на Windows git иначе переводит в CRLF, и правки шумят переводами строк.
+* text=auto eol=lf
+
+# Хуки запускает Git Bash: с переводами строк CRLF он ругается
+# «bad interpreter» и хук молча не работает. Держим их в LF.
+.githooks/* text eol=lf

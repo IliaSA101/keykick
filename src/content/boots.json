@@ -1,0 +1,13 @@
+[
+  { "id": "basic", "name": "Обычные", "kind": "basic", "upper": "#24262e", "accent": "#ffffff", "laces": "#ffffff" },
+  { "id": "blue", "name": "Синие", "kind": "shop", "price": 150, "upper": "#1f4fd1", "accent": "#ffffff", "laces": "#ffffff" },
+  { "id": "red", "name": "Красные", "kind": "shop", "price": 150, "upper": "#d0202e", "accent": "#ffffff", "laces": "#ffffff" },
+  { "id": "green", "name": "Зелёные", "kind": "shop", "price": 150, "upper": "#1f9d4a", "accent": "#16161a", "laces": "#ffffff" },
+  { "id": "orange", "name": "Оранжевые", "kind": "shop", "price": 150, "upper": "#ff7a00", "accent": "#16161a", "laces": "#16161a" },
+  { "id": "white", "name": "Белые", "kind": "shop", "price": 300, "upper": "#f4f4f4", "accent": "#1f4fd1", "laces": "#16161a" },
+  { "id": "neon", "name": "Неоновые", "kind": "shop", "price": 300, "upper": "#c6ff00", "accent": "#16161a", "laces": "#16161a" },
+  { "id": "violet", "name": "Фиолетовые", "kind": "shop", "price": 300, "upper": "#7b2fd6", "accent": "#ffd400", "laces": "#ffffff" },
+  { "id": "cup-yard", "name": "Кубковые: двор", "kind": "cup", "league": "yard", "upper": "#d3dae4", "accent": "#7d8aa0", "laces": "#ffffff" },
+  { "id": "cup-district", "name": "Кубковые: район", "kind": "cup", "league": "district", "upper": "#ebb534", "accent": "#ffffff", "laces": "#ffffff" },
+  { "id": "cup-city", "name": "Кубковые: город", "kind": "cup", "league": "city", "upper": "#ebb534", "accent": "#16161a", "laces": "#16161a" }
+]

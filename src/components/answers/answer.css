@@ -1,0 +1,109 @@
+/*
+ * Общий облик полей ответа на листе олимпиады: белые поля, тёмный текст, видимый фокус,
+ * цели не меньше 44 px. Подключается в компоненты ответа как <style scoped src>.
+ */
+.group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.label {
+  display: block;
+  margin-bottom: var(--space-1);
+  padding: 0;
+  font-weight: 600;
+}
+
+.note {
+  margin: 0 0 var(--space-2);
+  color: #4a4a4a;
+  font-size: 0.95rem;
+}
+
+.paper-input {
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--paper-field);
+  color: var(--paper-text);
+  border: 1px solid var(--paper-border);
+  border-radius: 4px;
+  font: inherit;
+}
+
+.paper-input[aria-invalid='true'] {
+  border-color: var(--paper-wrong);
+  box-shadow: inset 0 0 0 1px var(--paper-wrong);
+}
+
+.paper-input:disabled {
+  background: var(--paper-note);
+  color: var(--paper-text);
+}
+
+.paper-input:focus-visible {
+  outline: 3px solid var(--paper-focus);
+  outline-offset: 2px;
+}
+
+/* Строка варианта (выбор одного и нескольких): вся строка — цель для клика. */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--paper-border);
+  border-radius: 4px;
+  background: var(--paper-field);
+  cursor: pointer;
+}
+
+.option:hover {
+  background: var(--paper-note);
+}
+
+.option.checked {
+  border-color: var(--paper-button);
+  background: #eaf0fb;
+}
+
+.option.locked {
+  cursor: default;
+}
+
+.option:has(input:focus-visible) {
+  outline: 3px solid var(--paper-focus);
+  outline-offset: 2px;
+}
+
+.option input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--paper-button);
+  cursor: inherit;
+}
+
+/* Фокус рисует вся строка: у самого кружка/квадрата обводку убираем, чтобы не было двух. */
+.option input:focus-visible {
+  outline: none;
+}
+
+.letter {
+  flex: none;
+  min-width: 1.6em;
+  font-weight: 600;
+}

@@ -1,0 +1,55 @@
+#!/bin/sh
+# Pre-push: что уходит на GitHub (разделение публичного и приватного, 05.11).
+# Включение: git config core.hooksPath .githooks. Ловит любой push, в том числе из скрипта — то, чего хук
+# Claude Code push-guard (разбор команды) может не увидеть. Адрес сверяется по URL, а не по имени remote.
+#   открытый keykick: refs/heads/main — только из локального main (сжатый коммит tools/publish-main.mjs),
+#     метки refs/tags/vX.Y.Z под своим именем; удаление и прочее — отказ; перед push — npm run check;
+#   приватный keykick-dev: любые ветки, без удаления;
+#   оснастка keykick-ops: только main;
+#   адреса не на github.com (локальные копии, наборы случаев) — пропуск.
+set -u
+url=$(printf '%s' "${2:-}" | tr '[:upper:]' '[:lower:]')
+case "$url" in
+  *github.com*iliasa101/keykick-dev*) kind=private ;;
+  *github.com*iliasa101/keykick-ops*) kind=ops ;;
+  *github.com*) kind=public ;;
+  *) exit 0 ;;
+esac
+
+bad=""
+while read -r local_ref local_sha remote_ref _; do
+  [ -z "$remote_ref" ] && continue
+  case "$local_sha" in *[!0]*) del=no ;; *) del=yes ;; esac
+  case "$kind" in
+    private)
+      [ "$del" = yes ] && bad="$bad\n  $remote_ref — удаление в keykick-dev запрещено" ;;
+    ops)
+      [ "$remote_ref" = refs/heads/main ] || bad="$bad\n  $remote_ref — в keykick-ops только main" ;;
+    public)
+      case "$remote_ref" in
+        refs/heads/main)
+          if [ "$del" = yes ]; then bad="$bad\n  $remote_ref — удалять main нельзя"
+          elif [ "$local_ref" != refs/heads/main ]; then bad="$bad\n  $local_ref -> $remote_ref — в main идёт только локальный main"; fi ;;
+        refs/tags/v[0-9]*)
+          if [ "$del" = yes ]; then bad="$bad\n  $remote_ref — удалять метки версий нельзя"
+          elif [ "$local_ref" != "$remote_ref" ]; then bad="$bad\n  $local_ref -> $remote_ref — метка идёт под своим именем"; fi ;;
+        *) bad="$bad\n  $remote_ref — в открытый репозиторий не публикуется" ;;
+      esac ;;
+  esac
+done
+
+if [ -n "$bad" ]; then
+  {
+    echo "pre-push: push в $2 отклонён:"
+    printf '%b\n' "$bad"
+    echo "В открытый keykick (origin): main — сначала node tools/publish-main.mjs <коммит dev> -m \"keykick X.Y.Z\","
+    echo "затем git push origin main; метки — git push origin vX.Y.Z. Вся история — в приватный: git push private <ветка>."
+  } >&2
+  exit 1
+fi
+
+if [ "$kind" = public ] && [ -z "${KK_PREPUSH_NOCHECK:-}" ]; then
+  echo "pre-push: npm run check (типы, линтер, тесты, сборка)"
+  npm run check || { echo "pre-push: проверка не прошла, push остановлен"; exit 1; }
+fi
+exit 0

@@ -1,0 +1,9 @@
+{
+  "about": "Что открывается и после какого урока (спека 002). Вехи — id уроков: вставка урока их не сдвигает. cup[лига] — вехи 1/8, 1/4, 1/2 и финала; features — { id, after }.",
+  "cup": {
+    "yard": ["yard-4", "yard-8", "yard-10", "yard-12"],
+    "district": ["district-3", "district-6", "district-9", "district-12"],
+    "city": ["city-3", "city-words-b", "city-7", "city-10"]
+  },
+  "features": [{ "id": "midPenalty", "after": "yard-2" }]
+}
