@@ -54,6 +54,19 @@ const ERROR_CAP = 3;
 export const TRAP_FROM = 0.4;
 export const TRAP_TO = 0.6;
 
+/** Прибавка доли знака конца за каждую ошибку на его клавише (с потолком ERROR_CAP): до +0,3. */
+export const MARK_ERROR_SHARE = 0.1;
+
+/**
+ * Прибавка доли знака конца урока («.») по прошлым ошибкам на его клавише: знака нет в весах букв,
+ * а «трудные клавиши» обещают больше тренировки — растёт доля кусков и строк со знаком (009-Р21).
+ */
+export function markBoost(lesson: Lesson, map: Keymap, mark: string, stats?: TypingStats): number {
+  const code = mark ? findChar(map, lesson.layout, mark)?.key.code : undefined;
+  const errors = code ? (stats?.keyErrors[code] ?? 0) : 0;
+  return MARK_ERROR_SHARE * Math.min(ERROR_CAP, errors);
+}
+
 /** Вес каждой буквы урока с учётом прошлых ошибок ребёнка. Знаков («.») в весах нет (спека 009). */
 export function letterWeights(lesson: Lesson, map: Keymap, stats?: TypingStats): Map<string, number> {
   const weights = new Map<string, number>();

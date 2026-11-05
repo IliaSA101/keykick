@@ -43,6 +43,8 @@ const props = defineProps<{
   opened?: readonly UnlockId[];
   /** Монеты за пенальти по ходу матча (оба тайма) — к звёздным, одним числом. */
   penaltyCoins?: number;
+  /** Монеты начислены; в быстрой проверке родителя (app/matchJump) — нет, и строки «+N» нет, как в перерыве. */
+  paid?: boolean;
 }>();
 
 const result = computed(() => outcome(props.score));
@@ -106,7 +108,10 @@ onMounted(() => box.value?.querySelector<HTMLElement>('.primary')?.focus());
           aria-hidden="true"
         >★</span>
       </p>
-      <p class="coins">
+      <p
+        v-if="paid !== false"
+        class="coins"
+      >
         +{{ coins }} {{ plural(coins, ru.pack.coinWords) }}
       </p>
       <p

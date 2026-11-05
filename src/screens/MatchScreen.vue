@@ -227,6 +227,7 @@ onBeforeUnmount(() => {
     :opened="opened"
     :cup-to="cupTo"
     :penalty-coins="matchPenaltyCoins"
+    :paid="!preview"
   />
   <MatchHalftime
     v-else-if="phase === 'halftime'"
@@ -287,6 +288,7 @@ onBeforeUnmount(() => {
           :task="penaltyTask"
           :turn="turn"
           :fresh="penaltyFresh"
+          :paid="!preview"
           @answered="(correct) => flow.answerPenalty(correct ? 'scored' : 'missed')"
           @skip="flow.answerPenalty('skipped')"
           @resume="flow.resumePlay()"

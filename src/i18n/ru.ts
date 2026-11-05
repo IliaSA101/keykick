@@ -4,7 +4,7 @@
  * Блоки лежат в ./ru/ по экранам (один файл не влезал в 600 строк), здесь — сборка в `ru`.
  * Страж tests/guards.test.ts не пускает кириллицу в остальной код.
  */
-import { nav, home, locker, boots, club, pack } from './ru/menu';
+import { nav, home, news, locker, boots, club, pack } from './ru/menu';
 import { penalty } from './ru/penalty';
 import { keyboard, handsHelp } from './ru/keyboard';
 import { match, midPenalty, penaltyScreen, halftime } from './ru/match';
@@ -18,6 +18,7 @@ export const ru = {
 
   nav,
   home,
+  news,
   locker,
   boots,
   club,

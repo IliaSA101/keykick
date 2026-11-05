@@ -19,6 +19,7 @@ import {
   applyHandsHelpSeen,
   applyLessonBest,
   applyMinigame,
+  applyNewsSeen,
   applyPack,
   applyPenalty,
   applyPuzzleRecord,
@@ -55,6 +56,7 @@ import { players, playingId } from './players';
 import { SHARED_KEY, onKeyChange, readJson, saveKey, writeJson } from './storage';
 import { tasks } from './tasks';
 import { plan } from './unlocks';
+import { APP_VERSION } from './version';
 
 /** id уроков по порядку: по ним сохранение хранит урок игрока (спека 007). */
 const lessonIds = lessons.map((l) => l.id);
@@ -64,6 +66,7 @@ const context = {
   bootIds: shopIds(boots),
   lessonIds,
   taskIds: tasks.map((t) => t.id),
+  version: APP_VERSION,
 };
 
 /** Сохранение игрока из хранилища; нет или битое — чистое. Для карточек «Кто играет?» и родителя. */
@@ -88,7 +91,7 @@ export function currentSaveKey(): string | null {
   return activeRef.value === null ? null : saveKey(activeRef.value);
 }
 
-const state = reactive<SaveData>(activeRef.value === null ? emptySave() : peekSave(activeRef.value));
+const state = reactive<SaveData>(activeRef.value === null ? emptySave(APP_VERSION) : peekSave(activeRef.value));
 
 /** Только чтение: менять прогресс можно лишь функциями ниже. */
 export const progress: Readonly<SaveData> = state;
@@ -133,7 +136,7 @@ function commit(next: SaveData): void {
  */
 export function loadPlayer(id: string | null, fresh = false): void {
   activeRef.value = id;
-  replaceState(id === null || fresh ? emptySave() : peekSave(id));
+  replaceState(id === null || fresh ? emptySave(APP_VERSION) : peekSave(id));
 }
 
 /** Клуб без reactive-обёрток; имя и номер на спине — только если они есть. */
@@ -310,6 +313,12 @@ export function clubFirst(): true | '/club' {
 /** Справка «Как держать руки» показана: перед следующим матчем сама не откроется. */
 export function markHandsHelpSeen(): void {
   if (!state.handsHelpSeen) commit(applyHandsHelpSeen(snapshot()));
+}
+
+/** Игрок увидел новости до версии version (карточка «Что нового» закрыта): отметка у этого игрока. */
+export function markNewsSeen(version: string = APP_VERSION): void {
+  const next = applyNewsSeen(snapshot(), version);
+  if (next.newsSeen !== state.newsSeen) commit(next);
 }
 
 export function setClub(club: Club): void {

@@ -14,6 +14,7 @@ import { emptySave } from '../engine/save';
 import { commitList, players, playingId, setTabPlayer } from './players';
 import { activeId, loadPlayer } from './progress';
 import { removeKey, saveKey, writeJson } from './storage';
+import { APP_VERSION } from './version';
 
 /** Играть за игрока id в этой вкладке: прогресс подменяется без перезагрузки страницы. */
 export function choosePlayer(id: string): void {
@@ -41,7 +42,7 @@ export function createPlayer(name: string, play: boolean): string | null {
   const playing = playingId.value;
   if (playing !== null) setTabPlayer(playing);
   // Чистое сохранение — до списка: ключ с тем же id от удалённого игрока не воскреснет.
-  writeJson(saveKey(added.id), emptySave());
+  writeJson(saveKey(added.id), emptySave(APP_VERSION));
   commitList(play ? added.data : { ...added.data, current: players.current });
   if (play) choosePlayer(added.id);
   return added.id;

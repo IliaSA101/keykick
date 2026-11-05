@@ -32,9 +32,13 @@ const weak = computed(() =>
   weakKeys(progress.keyErrors, keymap, lesson.layout).map((w) => ({
     ...w,
     label: w.label.trim() === '' ? ru.stats.space : w.label,
+    // Знак — с именем под плашкой: одна «.» на плашке читается как пустая клавиша (009-Р22).
+    name: ru.keyboard.marks[w.label] ?? null,
     count: `${w.errors} ${plural(w.errors, ru.stats.errors)}`,
   })),
 );
+// Есть знак с именем — строка имени у всех плашек (у букв пустая): иначе число ошибок у знака ниже соседних (009 Т5).
+const anyNamed = computed(() => weak.value.some((w) => w.name !== null));
 </script>
 
 <template>
@@ -81,6 +85,10 @@ const weak = computed(() =>
               class="key"
             >
               <span class="cap">{{ w.label }}</span>
+              <span
+                v-if="anyNamed"
+                class="name"
+              >{{ w.name ?? '\u00a0' }}</span>
               <span class="count">{{ w.count }}</span>
             </li>
           </ul>
@@ -239,6 +247,11 @@ const weak = computed(() =>
   color: #fff6e0;
   font-size: 1.5rem;
   font-weight: 800;
+}
+
+.name {
+  color: #fff6e0;
+  font-weight: 700;
 }
 
 .count {

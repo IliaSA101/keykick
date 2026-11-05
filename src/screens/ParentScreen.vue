@@ -9,6 +9,7 @@ import { computed, nextTick, ref, watch } from 'vue';
 import ParentCheck from '../components/ParentCheck.vue';
 import ParentLesson from '../components/ParentLesson.vue';
 import ParentPlayers from '../components/ParentPlayers.vue';
+import ParentVersions from '../components/ParentVersions.vue';
 import { keymap } from '../app/keymap';
 import { kits } from '../app/kits';
 import { lessons } from '../app/lessons';
@@ -70,6 +71,8 @@ const weak = computed(() =>
   weakKeys(viewed.value.keyErrors, keymap, lesson.value.layout).map((w) => ({
     ...w,
     label: w.label.trim() === '' ? t.space : w.label,
+    // Знак — с именем: «. точка» (009-Р22).
+    name: ru.keyboard.marks[w.label] ?? '',
     count: `${w.errors} ${plural(w.errors, t.errors)}`,
   })),
 );
@@ -169,7 +172,7 @@ function doReset(): void {
             v-for="w in weak"
             :key="w.code"
           >
-            <span class="cap">{{ w.label }}</span> {{ w.count }}
+            <span class="cap">{{ w.label }}</span> {{ w.name }} {{ w.count }}
           </li>
         </ul>
         <p class="muted">
@@ -236,6 +239,8 @@ function doReset(): void {
         {{ t.breakNow }} {{ breakClock }}
       </p>
     </section>
+
+    <ParentVersions />
 
     <section class="block danger">
       <h2>{{ t.reset }}: {{ viewedName }}</h2>

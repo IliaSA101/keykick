@@ -98,11 +98,17 @@ const back = shirtBack(progress.club);
           class="focus"
         >
           {{ freshLabel }}
-          <b
+          <template
             v-for="ch in [...lesson.newKeys]"
             :key="ch"
-            class="letter"
-          >{{ ch.toUpperCase() }}</b>
+          >
+            <b class="letter">{{ ch.toUpperCase() }}</b>
+            <!-- Знак — с именем: плашка с крошечной точкой читается как пустая (009-Р22). -->
+            <span
+              v-if="ru.keyboard.marks[ch]"
+              class="mark-name"
+            >{{ ru.keyboard.marks[ch] }}</span>
+          </template>
         </span>
         <button
           type="button"
@@ -220,6 +226,11 @@ const back = shirtBack(progress.club);
   padding: 0 4px;
   border-radius: 6px;
   background: var(--accent-soft);
+}
+
+.mark-name {
+  margin-right: 4px;
+  font-weight: 700;
 }
 
 /* Совет мельче основного шрифта: самый длинный (урок city-pinky) — в три строки, и вступление

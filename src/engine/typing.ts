@@ -160,7 +160,22 @@ export function step(map: Keymap, state: TypingState, press: KeyPress): TypingSt
 
   if (press.code.startsWith('Numpad')) return { ...state, hint: 'numpad', last: 'hint' };
 
-  if (press.key === expected) {
+  const target = keyFor(map, state.layout, expected);
+  const pressed = map.byCode.get(press.code);
+  const otherLayout = layouts.find((l) => l !== state.layout);
+  // Символ другой раскладки с этой клавиши: в латинице «.» — на клавише Ю, а в русской точка только на Slash.
+  const foreignChar = Boolean(
+    otherLayout &&
+      pressed?.chars?.[otherLayout].includes(press.key) &&
+      !pressed.chars[state.layout].includes(press.key),
+  );
+
+  // Знак совпал, клавиша нет: «.» с клавиши Ю в латинице — палец не тот, это ошибка, как другая клавиша
+  // в латинице; с ней — подсказка раскладки, иначе непонятно, почему «.» не засчитана (009-Р20).
+  // Латинская буква в русской строке ищется в латинице — там клавиша её же, это не подмена.
+  const mimic = press.key === expected && foreignChar && pressed !== target?.key;
+
+  if (press.key === expected && !mimic) {
     return {
       ...state,
       pos: state.pos + 1,
@@ -172,21 +187,12 @@ export function step(map: Keymap, state: TypingState, press: KeyPress): TypingSt
     };
   }
 
-  const target = keyFor(map, state.layout, expected);
-  const pressed = map.byCode.get(press.code);
   // Та же клавиша, но символ другой раскладки — пальцы правы, раскладка нет.
-  const otherLayout = layouts.find((l) => l !== state.layout);
-  if (
-    target &&
-    pressed === target.key &&
-    otherLayout &&
-    pressed.chars?.[otherLayout].includes(press.key) &&
-    !pressed.chars[state.layout].includes(press.key)
-  ) {
+  if (target && pressed === target.key && foreignChar) {
     return { ...state, hint: 'layout', last: 'hint' };
   }
   // Не тот регистр при включённом Caps Lock — не ошибка пальцев.
-  if (press.caps && press.key.toLowerCase() === expected.toLowerCase()) {
+  if (!mimic && press.caps && press.key.toLowerCase() === expected.toLowerCase()) {
     return { ...state, hint: 'caps', last: 'hint' };
   }
   // Первое нажатие тайма неверное — прощаем: ни в строку, ни в ошибки клавиш. Буква другой
@@ -195,7 +201,7 @@ export function step(map: Keymap, state: TypingState, press: KeyPress): TypingSt
     // Пробел до начала строки (строки с пробела не начинаются) — молча мимо, прощение цело:
     // второй быстрый Пробел после «Пробел — играем дальше» у пенальти (спека 005, 005-Р26).
     if (press.key === ' ') return { ...state, last: 'ignored' };
-    const foreign = otherLayout && !findChar(map, state.layout, press.key) && findChar(map, otherLayout, press.key);
+    const foreign = mimic || (otherLayout && !findChar(map, state.layout, press.key) && findChar(map, otherLayout, press.key));
     return foreign
       ? { ...state, forgive: false, hint: 'layout', last: 'hint' }
       : { ...state, forgive: false, last: 'ignored' };
@@ -210,7 +216,7 @@ export function step(map: Keymap, state: TypingState, press: KeyPress): TypingSt
     // Курсор при ошибке стоит: повтор на той же позиции — та же отметка.
     missed: state.missed.at(-1) === state.pos ? state.missed : [...state.missed, state.pos],
     streak,
-    hint: streak >= FINGER_HINT_AFTER ? 'finger' : null,
+    hint: streak >= FINGER_HINT_AFTER ? 'finger' : mimic ? 'layout' : null,
     last: 'error',
     stats: {
       ...state.stats,
