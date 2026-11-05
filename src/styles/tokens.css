@@ -1,0 +1,104 @@
+/*
+ * Цвета и размеры одним местом. Палитра одна — «вечерняя», как на главном экране
+ * (тёмно-синий, золото, кремовый): игра всегда выглядит как игра, светлой и тёмной тем нет
+ * (docs/design.md, 04.11). Лист олимпиады (пенальти) — белый, свой набор --paper-*.
+ */
+:root {
+  --font: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-size: 18px; /* базовый шрифт не меньше 18px — правило идеи */
+  --radius: 10px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  /* Множитель вёрстки от окна (app/viewport): 1 на 1024×640; внутри экранов vh и vw делить на него. */
+  --ui-scale: 1;
+  /* Множитель страниц и верхней панели (там же): растёт вдвое медленнее, потолок 1,5. */
+  --page-scale: 1;
+
+  --bg: #15143a;
+  --surface: #24235a;
+  --border: #4a4990;
+  --text: #fff6e0;
+  --text-muted: #c9c6ec;
+  --accent: #f4c24a;
+  --accent-soft: rgb(244 194 74 / 0.22);
+
+  /* Лист олимпиады (пенальти): строгий облик как у настоящих олимпиад — белый. */
+  --paper: #ffffff;
+  --paper-text: #1f1f1f;
+  --paper-border: #c8c8c8;
+  --paper-field: #ffffff;
+  --paper-button: #2860c8;
+  --paper-button-text: #ffffff;
+  --paper-focus: #1a4fb0;
+  --paper-correct: #1b6e2f;
+  --paper-wrong: #b3261e;
+  --paper-note: #f3f5f8;
+
+  /* Зоны пальцев: левая и правая рука — зеркальные пары одного цвета, как в учебниках.
+     Здесь яркие цвета (нужная клавиша и палец); приглушённые компоненты смешивают с --surface. */
+  --zone-pinky: #b9a2f2;
+  --zone-ring: #77b8f4;
+  --zone-middle: #6fd89c;
+  --zone-index: #f6c065;
+  --zone-thumb: #f3a6cc;
+  --finger-lp: var(--zone-pinky);
+  --finger-lr: var(--zone-ring);
+  --finger-lm: var(--zone-middle);
+  --finger-li: var(--zone-index);
+  --finger-ri: var(--zone-index);
+  --finger-rm: var(--zone-middle);
+  --finger-rr: var(--zone-ring);
+  --finger-rp: var(--zone-pinky);
+  --finger-th: var(--zone-thumb);
+  --on-zone: #10231b; /* текст на ярком цвете зоны — тёмный */
+  --error: #ff6b6b;
+
+  color-scheme: dark;
+}
+
+html {
+  font-size: var(--font-size);
+  /* Место под полосу прокрутки всегда занято: при смене вкладок вёрстка не прыгает вбок. */
+  scrollbar-gutter: stable;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+select,
+button,
+input {
+  font: inherit;
+}
+
+/* Видимый фокус одинаковый везде: толстая рамка цвета акцента, только для клавиатуры. */
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Заголовки экранов лежат на рисованном фоне — тень держит их читаемыми. */
+h1 {
+  text-shadow: 0 2px 10px rgb(0 0 0 / 0.6);
+}
+
+/*
+ * Панель на рисованном фоне — общая для экранов: вечерний градиент и золотая кромка,
+ * как карточки шкафчика и табло. Экран добавляет класс panel к своему блоку.
+ */
+.panel {
+  padding: var(--space-4) var(--space-5);
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgb(58 63 134 / 0.94), rgb(31 33 82 / 0.94));
+  box-shadow:
+    0 0 0 2px rgb(244 194 74 / 0.55),
+    0 12px 28px rgb(0 0 0 / 0.4);
+}

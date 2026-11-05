@@ -1,0 +1,121 @@
+[
+  {
+    "id": "pages-base-lost",
+    "file": "vite.config.ts",
+    "find": "base: '/keykick/',",
+    "replace": "base: '/',",
+    "note": "на GitHub Pages игра открывается пустой страницей"
+  },
+  {
+    "id": "theme-auto-sticks",
+    "file": "src/app/store.ts",
+    "find": "if (choice === 'auto') delete root.dataset.theme;",
+    "replace": "if (choice === 'auto') root.dataset.theme = 'light';",
+    "note": "«как в системе» залипает на светлой теме"
+  },
+  {
+    "id": "text-empty",
+    "file": "src/i18n/ru.ts",
+    "find": "play: 'На матч!',",
+    "replace": "play: '',",
+    "note": "главная кнопка «На матч!» без надписи"
+  },
+  {
+    "id": "parent-link-on-home",
+    "file": "src/screens/HomeScreen.vue",
+    "find": "to=\"/stats\"",
+    "replace": "to=\"/parent\"",
+    "note": "ребёнок попадает в родительскую панель с главной"
+  },
+  {
+    "id": "text-in-component",
+    "file": "src/components/ScreenStub.vue",
+    "find": "<p>{{ ru.placeholder }}</p>",
+    "replace": "<p>Скоро</p>",
+    "note": "текст интерфейса зашит в компонент мимо ru.ts"
+  },
+  {
+    "id": "kit-gloss-lost",
+    "file": "src/engine/kit.ts",
+    "find": "out[i + c] = Math.round(255 * (base + (1 - base) * gloss));",
+    "replace": "out[i + c] = Math.round(255 * base);",
+    "note": "формы без бликов — плоские, как вырезанные из бумаги"
+  },
+  {
+    "id": "kit-split-reversed",
+    "file": "src/engine/kit.ts",
+    "find": "< 0.5 ? body : alt);",
+    "replace": "< 0.5 ? alt : body);",
+    "note": "у «половинок» рукава не в цвет своей половины"
+  },
+  {
+    "id": "kit-alpha-lost",
+    "file": "src/engine/kit.ts",
+    "find": "out[i + 3] = opacity;",
+    "replace": "out[i + 3] = opacity > 0 ? 255 : 0;",
+    "note": "край формы рубленый, без сглаживания"
+  },
+  {
+    "id": "kit-bad-pattern-passes",
+    "file": "src/engine/kit.ts",
+    "find": "if (!(kitPatterns as readonly string[]).includes(pattern)) throw",
+    "replace": "if (pattern === '') throw",
+    "note": "опечатка в узоре формы в JSON доходит до экрана ребёнка"
+  },
+  {
+    "id": "engine-random",
+    "file": "src/engine/kit.ts",
+    "find": "export const GLOSS = 0.85;",
+    "replace": "export const GLOSS = 0.8 + Math.random() * 0.1;",
+    "note": "случайность внутри движка: тест перестаёт быть повторяемым"
+  },
+  {
+    "id": "keymap-wrong-finger",
+    "file": "src/content/keyboard.json",
+    "find": "{ \"code\": \"KeyF\", \"finger\": \"li\"",
+    "replace": "{ \"code\": \"KeyF\", \"finger\": \"lm\"",
+    "note": "«А» подсвечивает средний палец вместо указательного — ребёнок учит неверную постановку"
+  },
+  {
+    "id": "keymap-bump-lost",
+    "file": "src/content/keyboard.json",
+    "find": "\"en\": [\"j\", \"J\"], \"bump\": true",
+    "replace": "\"en\": [\"j\", \"J\"]",
+    "note": "у «О» пропала засечка — правая рука не находит место"
+  },
+  {
+    "id": "typing-cursor-skips-error",
+    "file": "src/engine/typing.ts",
+    "find": "hint: streak >= FINGER_HINT_AFTER ? 'finger' : null,",
+    "replace": "hint: streak >= FINGER_HINT_AFTER ? 'finger' : null, pos: state.pos + 1,",
+    "note": "курсор уходит дальше при ошибке — неверное движение не исправляется"
+  },
+  {
+    "id": "typing-layout-is-error",
+    "file": "src/engine/typing.ts",
+    "find": "pressed === target.key &&",
+    "replace": "pressed === undefined &&",
+    "note": "забытая раскладка считается ошибкой пальцев — ребёнка наказывают зря"
+  },
+  {
+    "id": "typing-numpad-counts",
+    "file": "src/engine/typing.ts",
+    "find": "if (press.code.startsWith('Numpad'))",
+    "replace": "if (press.code.startsWith('NumpadX'))",
+    "note": "цифры с numpad засчитываются — верхний ряд не тренируется"
+  },
+  {
+    "id": "typing-repeat-counts",
+    "file": "src/engine/typing.ts",
+    "find": "return press.repeat || press.mod ||",
+    "replace": "return press.mod ||",
+    "note": "зажатая клавиша даёт десятки ошибок"
+  },
+  {
+    "id": "typing-error-on-wrong-key",
+    "file": "src/engine/typing.ts",
+    "find": "const code = target?.key.code ?? press.code;",
+    "replace": "const code = press.code;",
+    "note": "ошибка пишется на нажатую клавишу, а не на трудную — подстройка тренирует не то"
+  }
+]
