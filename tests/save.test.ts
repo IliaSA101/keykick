@@ -67,6 +67,7 @@ const full: SaveData = {
   cups: { yard: { stage: 4, won: true, finalOpen: true }, district: { stage: 2, won: false } },
   puzzleBest: { 'home:ваол': 41_000, 'top:йцук': 63_250 },
   lessonBest: { 'yard-1': { cpm: 87, acc: 0.95 }, 'yard-2': { cpm: 112, acc: 1 } },
+  newsSeen: '0.10.0',
 };
 
 describe('разбор сохранения', () => {

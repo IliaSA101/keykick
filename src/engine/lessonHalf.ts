@@ -3,7 +3,7 @@
  */
 import { findChar, type Keymap } from './keymap';
 import { endMark, fail, HOME_KEYS, lettersOf, unique, wordsFor, type Lesson, type Material } from './lessonModel';
-import { attackPlan, letterWeights, TRAP_FROM, TRAP_TO, type Attack } from './lessonPlan';
+import { attackPlan, letterWeights, markBoost, TRAP_FROM, TRAP_TO, type Attack } from './lessonPlan';
 import { createRandom, randomInt } from './random';
 import type { TypingStats } from './typing';
 
@@ -138,14 +138,17 @@ interface Source {
   early: readonly string[];
   /** Знак конца урока («.»); пусто — строки без знаков, случайность на знак не тратится. */
   mark: string;
-  /** Доля кусков со знаком-хвостом: MARK_TAIL_SHARE на уроке знака, иначе 0. */
+  /** Доля кусков со знаком-хвостом: MARK_TAIL_SHARE (+ ошибки на знаке) на уроке знака, иначе 0. */
   tail: number;
+  /** Прибавка доли знака за ошибки на его клавише (markBoost): строки слов со знаком — чаще. */
+  boost: number;
 }
 
-/** Кончится ли строка знаком: после урока знака — по доле ступени (MARK_END_SHARE). */
+/** Кончится ли строка знаком: после урока знака — по доле ступени (MARK_END_SHARE) с прибавкой за ошибки. */
 function endsWithMark(src: Source, material: Material): boolean {
   if (!src.mark || src.tail > 0) return false;
-  const share = MARK_END_SHARE[material] ?? 0;
+  const base = MARK_END_SHARE[material] ?? 0;
+  const share = base > 0 ? base + src.boost : 0;
   return share >= 1 || (share > 0 && src.rnd() < share);
 }
 
@@ -261,6 +264,7 @@ export function makeHalf(
   const pool = wordsFor(lesson, words);
   const short = pool.filter((w) => w.length <= SHORT_WORD);
   const mark = endMark(lesson) ?? '';
+  const boost = markBoost(lesson, map, mark, stats);
   const src: Source = {
     rnd: createRandom(seed),
     weights: letterWeights(lesson, map, stats),
@@ -269,7 +273,8 @@ export function makeHalf(
     short: short.length >= MIN_POOL ? short : pool,
     early: earlyWords(lesson, pool),
     mark,
-    tail: mark && lesson.newKeys.includes(mark) ? MARK_TAIL_SHARE : 0,
+    tail: mark && lesson.newKeys.includes(mark) ? MARK_TAIL_SHARE + boost : 0,
+    boost,
   };
   return attackPlan(lesson, decisive).map((attack) => makeLine(src, attack));
 }

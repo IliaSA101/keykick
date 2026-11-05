@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { RouterLink } from 'vue-router';
+import { computed, nextTick, ref } from 'vue';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
+import WhatsNew from '../components/WhatsNew.vue';
 import { homeLeague } from '../app/cup';
 import { playerName, players } from '../app/players';
-import { progress } from '../app/progress';
+import { markNewsSeen, progress } from '../app/progress';
 import { soon } from '../app/unlocks';
+import { APP_VERSION } from '../app/version';
+import { pending, replay, type NewsCard } from '../app/whatsNew';
 import { kicksLeft } from '../engine/save';
 import { artUrl } from '../art/assets';
 import { plural } from '../i18n/plural';
@@ -31,6 +34,45 @@ const soonText = computed(() => {
 // Игроков двое и больше — кто играет и «Сменить» (у главной нет верхней панели).
 const who = computed(() => (players.players.length >= 2 ? playerName.value : null));
 
+/*
+ * «Что нового» (спека 010). Карточка сама встаёт поверх главной, если игрок не видел новостей;
+ * по плашке в углу и по ссылке родителя (#/?news) — снова. Отметка «видел» — только по закрытию:
+ * перезагрузка с открытой карточкой покажет её опять.
+ */
+const route = useRoute();
+const router = useRouter();
+const replayAsked = route.query.news !== undefined;
+const card = ref<NewsCard | null>(replayAsked ? replay() : pending(progress.newsSeen));
+// Ссылка есть, только если есть что показать: у версий без новостей для ребёнка её нет.
+const canReplay = replay() !== null;
+const plate = ref<HTMLButtonElement | null>(null);
+// Открыта по ссылке — после закрытия фокус возвращается на неё, иначе у клавиатуры он пропадает.
+let opener = replayAsked;
+
+function openNews(): void {
+  card.value = replay();
+  opener = true;
+}
+
+/** Зажатый Enter на ссылке не должен открывать карточку заново, пока ребёнок её закрывает. */
+function onPlateKey(e: KeyboardEvent): void {
+  if (e.repeat) e.preventDefault();
+}
+
+// Двойной клик по «Отлично!»: второй клик приходится вплотную к «На матч!» (тестировщик 010 Т3) — главная ещё
+// SETTLE_MS после закрытия не принимает нажатий, чтобы ребёнок не ушёл в матч случайно.
+const SETTLE_MS = 400;
+const settling = ref(false);
+
+function closeNews(): void {
+  card.value = null;
+  settling.value = true;
+  globalThis.setTimeout(() => (settling.value = false), SETTLE_MS);
+  markNewsSeen();
+  if (route.query.news !== undefined) void router.replace({ path: '/' });
+  if (opener) void nextTick(() => plate.value?.focus());
+}
+
 // Фон задаётся из скрипта: путь зависит от подраздела сайта (BASE_URL).
 const bgStyle = { backgroundImage: `url(${artUrl('menuBg')})` };
 </script>
@@ -40,7 +82,11 @@ const bgStyle = { backgroundImage: `url(${artUrl('menuBg')})` };
     class="home"
     :style="bgStyle"
   >
-    <div class="panel">
+    <!-- Пока карточка открыта, главная «неактивна»: Tab и Enter не уходят на кнопки под затемнением. -->
+    <div
+      class="panel"
+      :inert="card !== null || settling"
+    >
       <h1 class="logo">
         <img
           :src="artUrl('logo')"
@@ -133,6 +179,30 @@ const bgStyle = { backgroundImage: `url(${artUrl('menuBg')})` };
         {{ soonText }}
       </p>
     </div>
+    <!-- Номер версии: по нему сверяют присланный файл и ошибку; по ссылке — «Что нового» снова. -->
+    <p
+      class="plate"
+      :inert="card !== null"
+    >
+      {{ ru.news.plate }} {{ APP_VERSION }}
+      <template v-if="canReplay">
+        ·
+        <button
+          ref="plate"
+          type="button"
+          class="plate-link"
+          @click="openNews"
+          @keydown.enter="onPlateKey"
+        >
+          {{ ru.news.link }}
+        </button>
+      </template>
+    </p>
+    <WhatsNew
+      v-if="card !== null"
+      :card="card"
+      @close="closeNews"
+    />
   </section>
 </template>
 
@@ -352,6 +422,43 @@ const bgStyle = { backgroundImage: `url(${artUrl('menuBg')})` };
 .btn:focus-visible {
   outline: 4px solid #f4c24a;
   outline-offset: 4px;
+}
+
+/* Номер версии — мелко в правом нижнем углу; кнопки главной он не двигает (fixed). */
+.plate {
+  position: fixed;
+  right: 12px;
+  bottom: 10px;
+  margin: 0;
+  padding: 4px 12px;
+  border: 1px solid #4a4990;
+  border-radius: 999px;
+  background: rgb(21 20 58 / 0.85);
+  color: #c9c6ec;
+  font-size: 0.85rem;
+}
+
+.plate-link {
+  position: relative;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #f4c24a;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Надпись мелкая (макет), а цель нажатия — не меньше 44 px: невидимая зона вокруг ссылки. */
+.plate-link::before {
+  content: '';
+  position: absolute;
+  inset: -12px -8px;
+}
+
+.plate-link:focus-visible {
+  outline: 3px solid #f4c24a;
+  outline-offset: 3px;
 }
 
 /* Узкий экран: панель по центру, под ней затемнение, иначе текст теряется на трибунах.

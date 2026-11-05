@@ -10,6 +10,7 @@ import { parseCups, type Cups } from './cup';
 import { isPuzzleKey, isPuzzleTime } from './keyboardPuzzle';
 import { resolveLessonIndex } from './lessonOrder';
 import { parseKitColors, type Kit, type KitColors, type KitRarity } from './kit';
+import { NEWS_LEGACY_SEEN, isVersion, laterVersion } from './news';
 import { MISS_COINS, penaltyCoins, scoredTasks, type MidKick } from './midPenalty';
 import { DUP_COINS, MINIGAME_COINS, PACK_PRICE, PENALTY_COINS, STAR_COINS } from './rewards';
 import { parseSession } from './session';
@@ -77,6 +78,12 @@ export interface SaveData {
    * сохранениях — пусто; версия та же (как coins, cups).
    */
   lessonBest: Record<string, LessonBest>;
+  /**
+   * «Видел новости до версии X» (спека 010, engine/news): карточка «Что нового» покажет записи новее X.
+   * Поля нет или оно битое — NEWS_LEGACY_SEEN; новый игрок получает текущую версию (emptySave, SaveContext.version).
+   * Версия формата та же.
+   */
+  newsSeen: string;
 }
 
 /** Лучший матч урока: скорость за оба тайма, знаков в минуту, и точность 0…1 (matchStats). */
@@ -117,6 +124,11 @@ export interface SaveContext {
   /** id уроков по порядку: номер урока выводится из lessonId, режется до последнего. */
   lessonIds?: readonly string[];
   taskIds?: readonly string[];
+  /**
+   * Текущая версия игры (app/version). Нужна для «чистого» игрока — сохранения нет или оно сброшено:
+   * он не видел старого и карточки «Что нового» не получает. Без неё — NEWS_LEGACY_SEEN.
+   */
+  version?: string;
 }
 
 /**
@@ -133,7 +145,8 @@ const COUNT_MAX = 1_000_000;
 /** Монет больше не бывает: потолок от мусора, ребёнку столько не накопить. */
 export const COINS_MAX = 100_000;
 
-export function emptySave(): SaveData {
+/** Чистое сохранение. newsSeen — версия игры для нового игрока; по умолчанию — NEWS_LEGACY_SEEN. */
+export function emptySave(newsSeen: string = NEWS_LEGACY_SEEN): SaveData {
   return {
     version: SAVE_VERSION,
     club: null,
@@ -154,6 +167,7 @@ export function emptySave(): SaveData {
     cups: {},
     puzzleBest: {},
     lessonBest: {},
+    newsSeen: isVersion(newsSeen) ? newsSeen : NEWS_LEGACY_SEEN,
   };
 }
 
@@ -294,9 +308,9 @@ function withLessonId(index: number, lessonIds: readonly string[]): Pick<SaveDat
 }
 
 export function parseSave(raw: unknown, ctx: SaveContext = {}): SaveData {
-  if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) return emptySave();
+  if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) return emptySave(ctx.version);
   const r = raw as Record<string, unknown>;
-  if (r.version !== SAVE_VERSION) return emptySave();
+  if (r.version !== SAVE_VERSION) return emptySave(ctx.version);
   const ownedKits = ids(r.ownedKits, ctx.kitIds);
   return {
     version: SAVE_VERSION,
@@ -319,6 +333,7 @@ export function parseSave(raw: unknown, ctx: SaveContext = {}): SaveData {
     cups: parseCups(r.cups),
     puzzleBest: puzzleBest(r.puzzleBest),
     lessonBest: lessonBest(r.lessonBest),
+    newsSeen: isVersion(r.newsSeen) ? r.newsSeen : NEWS_LEGACY_SEEN,
   };
 }
 
@@ -336,6 +351,12 @@ export function applySetLesson(save: SaveData, index: number, lessonIds: readonl
 /** Справка «Как держать руки» показана: сама больше не откроется. */
 export function applyHandsHelpSeen(save: SaveData): SaveData {
   return save.handsHelpSeen ? save : { ...save, handsHelpSeen: true };
+}
+
+/** Игрок увидел новости до версии version: отметка только растёт (старая или битая версия её не опустит). */
+export function applyNewsSeen(save: SaveData, version: string): SaveData {
+  const next = laterVersion(save.newsSeen, version);
+  return next === save.newsSeen ? save : { ...save, newsSeen: next };
 }
 
 /** Итог тайма — то, что экран матча отдаёт в прогресс. */

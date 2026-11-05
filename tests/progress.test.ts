@@ -8,6 +8,7 @@ import { isProxy } from 'vue';
 import lessonsJson from '../src/content/lessons.json';
 import { CLUB_KIT_ID } from '../src/engine/club';
 import { LEGACY_ORDER } from '../src/engine/lessonOrder';
+import { APP_VERSION } from '../src/app/version';
 import { PENALTY_KICKS, emptySave, parseSave } from '../src/engine/save';
 import { DUP_COINS } from '../src/engine/rewards';
 import { emptyStats } from '../src/engine/typing';
@@ -59,7 +60,8 @@ describe('обёртка прогресса и хранилище', () => {
   it('битый JSON в хранилище — чистое состояние', async () => {
     vi.stubGlobal('localStorage', fakeStorage({ 'keykick.save': '{не json' }));
     const p = await load();
-    expect(p.progress).toEqual(emptySave());
+    // Как новый игрок: отметка новостей — текущая версия, карточки нет (010-Р6).
+    expect(p.progress).toEqual(emptySave(APP_VERSION));
   });
 
   it('кубок: зачёт последнего урока курса открывает финал кубка его лиги; матч кубка урок не сдвигает', async () => {
@@ -363,6 +365,6 @@ describe('обёртка прогресса и хранилище', () => {
     expect(storage.data.has(key)).toBe(true);
     resetPlayer(p.activeId() ?? '');
     expect(storage.data.has(key)).toBe(false);
-    expect(p.progress).toEqual(emptySave());
+    expect(p.progress).toEqual(emptySave(APP_VERSION));
   });
 });

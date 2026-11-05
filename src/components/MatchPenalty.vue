@@ -19,6 +19,8 @@ const props = defineProps<{
   turn: PenaltyTurn;
   /** «Новое!» у повода: первый урок после вехи (app/unlocks, featureFresh). */
   fresh?: boolean;
+  /** Монеты начислены; в быстрой проверке родителя — нет, и «+N» не показываем. */
+  paid?: boolean;
 }>();
 const emit = defineEmits<{ answered: [correct: boolean]; skip: []; resume: [] }>();
 
@@ -106,7 +108,7 @@ watch(
       >
         {{ verdict }}
         <span
-          v-if="coins > 0"
+          v-if="coins > 0 && paid !== false"
           class="coins"
         >+{{ coins }} {{ plural(coins, ru.pack.coinWords) }}</span>
       </h2>

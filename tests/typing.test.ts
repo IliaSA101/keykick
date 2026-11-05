@@ -70,6 +70,29 @@ describe('движок печати: события', () => {
     expect(s.hint).toBe('layout');
   });
 
+  it('«.» в латинице (клавиша Ю) — не засчитана: ошибка на точку и правый мизинец, подсказка раскладки (009-Р20)', () => {
+    const en: KeyPress = { ...press('.'), code: 'Period' };
+    const s = step(keymap, startLine('ю.', 'ru', begun, false, false), press('ю'));
+    const wrong = step(keymap, s, en);
+    expect([wrong.pos, wrong.last, wrong.hint, wrong.stats.errors]).toEqual([1, 'error', 'layout', 1]);
+    expect(wrong.stats.keyErrors).toEqual({ Slash: 1 });
+    expect(wrong.stats.fingerErrors).toEqual({ rp: 1 });
+    // Первое нажатие тайма — прощается, как буква другой раскладки: только подсказка.
+    const first = step(keymap, startLine('.', 'ru'), en);
+    expect([first.pos, first.last, first.hint, first.stats.errors]).toEqual([0, 'hint', 'layout', 0]);
+    // С Caps Lock — та же ошибка, а не подсказка про Caps Lock.
+    expect(step(keymap, s, { ...en, caps: true }).last).toBe('error');
+    // Точка с её клавиши в русской раскладке — как была.
+    expect(step(keymap, s, press('.')).last).toBe('ok');
+  });
+
+  it('не подмена: латинская буква в русской строке со своей клавиши и «.» с Period в латинской строке — засчитаны (009-Р20)', () => {
+    const q = step(keymap, startLine('q', 'ru'), press('q'));
+    expect([q.pos, q.last, q.hint, q.stats.errors]).toEqual([1, 'ok', null, 0]);
+    const dot = step(keymap, startLine('.', 'en'), { ...press('.'), code: 'Period' });
+    expect([dot.pos, dot.last, dot.stats.errors]).toEqual([1, 'ok', 0]);
+  });
+
   it('Caps Lock и не тот регистр — подсказка; без Caps Lock — ошибка (забыт Shift)', () => {
     const caps = step(keymap, startLine('ф', 'ru'), press('Ф', { caps: true }));
     expect([caps.last, caps.hint, caps.stats.errors]).toEqual(['hint', 'caps', 0]);
