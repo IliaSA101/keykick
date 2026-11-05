@@ -126,7 +126,7 @@ export function layoutsOf(map: Keymap, ch: string): Layout[] {
 export type Thumb = 'left' | 'right';
 
 /**
- * Пробел — большим пальцем другой руки, чем прошлая буква (как в «Соло», 04.11): после буквы
+ * Пробел — большим пальцем другой руки, чем прошлая буква (04.11): после буквы
  * левой руки — правым, после правой — левым. Начало строки и неясный случай — правым.
  */
 export function thumbAfter(finger: Finger | undefined): Thumb {
