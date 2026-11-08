@@ -24,6 +24,7 @@ import {
   pickQuick,
   pickSeries,
   pickTask,
+  TASK_NO_MAX,
   type Task,
 } from '../src/engine/tasks';
 
@@ -98,6 +99,7 @@ describe('ответ-целое число', () => {
 
 const task = (id: string, level: Task['level'], verified = true): Task => ({
   id,
+  no: 1,
   text: 'text',
   answer: { kind: 'integer', value: 1 },
   solution: 'solution',
@@ -229,13 +231,17 @@ describe('быстрые задачи: пенальти посреди матч�
 });
 
 describe('ошибки в данных задач', () => {
-  const ok = { id: 't-1', text: 'text', answer: 12, solution: 'solution', verified: true, level: 1 };
+  const ok = { id: 't-1', no: 1, text: 'text', answer: 12, solution: 'solution', verified: true, level: 1 };
 
   it('разбор ловит ошибки', () => {
     // Целое можно записать просто числом — внутри оно становится ответом вида integer.
     expect(parseTasks([ok])).toEqual([{ ...ok, answer: { kind: 'integer', value: 12 } }]);
     expect(() => parseTasks({})).toThrow(/array/);
     expect(() => parseTasks([ok, ok])).toThrow(/duplicate/);
+    // Ловит: номер задачи (бит в `school.solved`) не проверяется — повтор, 0, дробь, выше потолка или нет вовсе.
+    expect(() => parseTasks([ok, { ...ok, id: 't-2' }])).toThrow(/duplicate no 1/);
+    for (const no of [0, -1, 1.5, '1', undefined, TASK_NO_MAX + 1]) expect(() => parseTasks([{ ...ok, no }])).toThrow(/\.no/);
+    expect(parseTasks([{ ...ok, no: TASK_NO_MAX }])[0]?.no).toBe(TASK_NO_MAX);
     expect(() => parseTasks([{ ...ok, id: '' }])).toThrow(/id/);
     expect(() => parseTasks([{ ...ok, text: '  ' }])).toThrow(/text/);
     expect(() => parseTasks([{ ...ok, solution: undefined }])).toThrow(/solution/);

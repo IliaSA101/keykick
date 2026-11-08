@@ -1,75 +1,48 @@
 /**
- * Каркас приложения: адрес на GitHub Pages, маршруты, адреса быстрых проверок, масштаб экрана от окна.
+ * Каркас приложения: адрес на GitHub Pages, маршруты, масштаб экрана от окна.
  * Сами экраны здесь не поднимаются — их проверяем глазами в браузере.
  */
 import { describe, expect, it } from 'vitest';
-import { lessons } from '../src/app/lessons';
-import { checkQuery, jumpPlan, previewOf } from '../src/app/matchJump';
-import { leagueRules, lessonPassed } from '../src/engine/match';
 import { MAX_SCALE, PAGE_MAX, hasSideRoom, pageScale, uiScale } from '../src/engine/viewport';
-import viteConfig from '../vite.config';
+import { sitePlan } from '../tools/site-plan.mjs';
 
 describe('публикация', () => {
-  it('сборка знает свой подраздел на GitHub Pages', () => {
+  const site = { root: 'v1', versions: { v1: 'v0.10.1' } };
+
+  it('план сборки: три адреса со своим base', () => {
     // Без префикса игра на iliasa101.github.io/keykick/ грузит пустую страницу: файлы ищутся в корне.
-    expect(viteConfig.base).toBe('/keykick/');
-  });
-});
-
-describe('быстрые проверки матча', () => {
-  it('адрес со страницы родителя разбирается матчем в то же место', () => {
-    const lesson = lessons[3];
-    expect(lesson).toBeDefined();
-    if (!lesson) return;
-    expect(previewOf(checkQuery({ at: 'decisive', lessonId: lesson.id }))).toEqual({
-      at: 'decisive',
-      stars: 2,
-      lesson,
-      cup: null,
-      game: null,
-    });
-    expect(previewOf(checkQuery({ at: 'result', stars: 3, lessonId: lesson.id }))?.stars).toBe(3);
-    expect(previewOf(checkQuery({ at: 'result', stars: 1 }))?.stars).toBe(1);
-    // Пенальти по ходу матча (спека 005): слой с задачей посреди первого тайма.
-    expect(previewOf(checkQuery({ at: 'penalty' }))?.at).toBe('penalty');
-    expect(previewOf(checkQuery({ at: 'halftime', game: 'tab', lessonId: lesson.id }))).toMatchObject({
-      at: 'halftime',
-      game: 'tab',
-      lesson,
-    });
-    // Раунд кубка — без места: матч кубка со вступления, урок — свой у раунда.
-    expect(previewOf(checkQuery({ cup: { league: 'district', round: 2 } }))).toEqual({
-      at: null,
-      stars: 2,
-      lesson: null,
-      cup: { league: 'district', round: 2 },
-      game: null,
-    });
-  });
-
-  it('итог проверки (&stars=) по правилам лиги: двор — [0], [1], [3]; район — [0, 0], [1, 1], [2, 2]', () => {
-    const decisive = (league: string) => ([3, 2, 1] as const).map((s) => jumpPlan(s, leagueRules(league)).decisive);
-    expect(decisive('yard')).toEqual([[0], [1], [3]]);
-    expect(decisive('district')).toEqual([
-      [0, 0],
-      [1, 1],
-      [2, 2],
+    const plan = sitePlan(site);
+    expect(plan.map((s) => [s.name, s.base, s.dir])).toEqual([
+      ['next', '/keykick/next/', 'next'],
+      ['v1', '/keykick/v1/', 'v1'],
+      ['root', '/keykick/', ''],
     ]);
-    // ★ — серия не зачтена, ★★ и ★★★ — зачтена: план совпадает со звёздами, которые матч сам посчитает.
-    for (const league of ['yard', 'district', 'city']) {
-      const rules = leagueRules(league);
-      const passed = ([3, 2, 1] as const).map((s) => {
-        const sum = jumpPlan(s, rules).decisive.reduce((a, b) => a + b, 0);
-        return lessonPassed(sum, rules);
-      });
-      expect(passed, league).toEqual([true, true, false]);
-    }
   });
 
-  it('обычный матч и обычный матч кубка — не проверка: они пишут в сохранение', () => {
-    expect(previewOf({})).toBeNull();
-    expect(previewOf({ cup: 'yard' })).toBeNull();
-    expect(previewOf(checkQuery({}))).toBeNull();
+  it('корень и vN собираются из одной метки с одним каналом', () => {
+    const plan = sitePlan(site);
+    const root = plan.find((s) => s.name === 'root');
+    const v1 = plan.find((s) => s.name === 'v1');
+    expect(root?.ref).toBe('v0.10.1');
+    expect(root?.ref).toBe(v1?.ref);
+    expect(root?.channel).toBe(v1?.channel);
+    // Голова — канал next, метка линии v1 — без переменной.
+    expect(plan.find((s) => s.name === 'next')).toMatchObject({ ref: null, channel: 'next' });
+    expect(v1?.channel).toBeNull();
+  });
+
+  it('метки v2+ собираются каналом release', () => {
+    const plan = sitePlan({ root: 'v2', versions: { v1: 'v0.10.1', v2: 'v2.0.1' } });
+    expect(plan.filter((s) => s.channel === 'release').map((s) => s.name)).toEqual(['v2', 'root']);
+    expect(plan.find((s) => s.name === 'root')?.ref).toBe('v2.0.1');
+  });
+
+  it('неверный указатель — ошибка', () => {
+    expect(() => sitePlan({ root: 'v3', versions: { v1: 'v0.10.1' } })).toThrow();
+    expect(() => sitePlan({ root: 'v1', versions: { v1: 'v0.10.2' } })).toThrow();
+    expect(() => sitePlan({ root: 'v1', versions: { one: 'v0.10.1' } })).toThrow();
+    expect(() => sitePlan({ root: 'v1', versions: { v1: 'main' } })).toThrow();
+    expect(() => sitePlan({ root: 'v2', versions: { v2: 'v1.0.0' } })).toThrow();
   });
 });
 

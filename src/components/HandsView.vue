@@ -6,14 +6,15 @@
  *
  * Рисунок — в единицах клавиатуры и с тем же верхом (VIEW_PAD), что у KeyboardView: при одной
  * ширине указательные и средние стоят над своими клавишами основного ряда (engine/keyboardLayout.
- * fitHands — единый масштаб, без растяжения). Метки — на кончиках картинки (art/hands), не на клавишах.
+ * fitHands — масштаб общий, без растяжения; сдвиг у каждой руки свой, поэтому картинка рисуется
+ * двумя половинами по HANDS_SPLIT). Метки — на кончиках картинки (art/hands), не на клавишах.
  * Что ниже клавиатуры, обрезает родитель. Прозрачность картинки задаёт родитель через
  * --hands-opacity, метки всегда непрозрачны.
  */
 import { computed } from 'vue';
 import { keymap } from '../app/keymap';
 import { artUrl } from '../art/assets';
-import { HAND_TIPS, HANDS_SIZE, THUMB_TIPS } from '../art/hands';
+import { HAND_TIPS, HANDS_SIZE, HANDS_SPLIT, THUMB_TIPS } from '../art/hands';
 import { VIEW_PAD, fitHands, layoutKeys, type ImagePoint } from '../engine/keyboardLayout';
 import type { Finger, Thumb } from '../engine/keymap';
 import { ru } from '../i18n/ru';
@@ -33,30 +34,46 @@ const props = withDefaults(
 );
 
 const geo = layoutKeys(keymap);
-/*
- * Подъём над подгонкой, в шагах клавиши. Подгонка ставит ногти на середину основного ряда, но там
- * метка закрывает букву, а большие пальцы картинки уходят на 0,9 клавиши ниже пробела и в окно
- * 1024×640 не влезают. С подъёмом в полклавиши ногти указательных — у верхнего края своих клавиш
- * (буква видна), средние — на зазоре над рядом, большие — сразу под пробелом.
- */
-const LIFT = 0.5;
-const fitted = fitHands(geo, HAND_TIPS);
-const fit = { ...fitted, y: fitted.y - LIFT };
+const fit = fitHands(geo, HAND_TIPS);
 
-const picture = {
-  href: artUrl('hands'),
-  x: fit.x,
-  y: fit.y,
-  width: HANDS_SIZE.width * fit.scale,
-  height: HANDS_SIZE.height * fit.scale,
-};
+/** Половина картинки: свой сдвиг и окно viewBox, вырезающее нужную часть файла. */
+interface Half {
+  side: Thumb;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  viewBox: string;
+}
+
+const { width: W, height: H } = HANDS_SIZE;
+const href = artUrl('hands');
+const halves: Half[] = [
+  {
+    side: 'left',
+    x: fit.left.x,
+    y: fit.left.y,
+    width: HANDS_SPLIT * fit.scale,
+    height: H * fit.scale,
+    viewBox: `0 0 ${HANDS_SPLIT} ${H}`,
+  },
+  {
+    side: 'right',
+    x: fit.right.x + HANDS_SPLIT * fit.scale,
+    y: fit.right.y,
+    width: (W - HANDS_SPLIT) * fit.scale,
+    height: H * fit.scale,
+    viewBox: `${HANDS_SPLIT} 0 ${W - HANDS_SPLIT} ${H}`,
+  },
+];
+const bottom = Math.max(...halves.map((h) => h.y + h.height));
 
 /** Метка: радиус обычной и горящей, кольцо вокруг горящей — в единицах клавиатуры (шаг клавиши = 1). */
 const MARK_R = 0.11;
 const LIT_R = 0.17;
 const HALO_R = 0.27;
 
-const viewBox = `${-VIEW_PAD} ${-VIEW_PAD} ${geo.width + 2 * VIEW_PAD} ${picture.y + picture.height + VIEW_PAD}`;
+const viewBox = `${-VIEW_PAD} ${-VIEW_PAD} ${geo.width + 2 * VIEW_PAD} ${bottom + VIEW_PAD}`;
 
 interface Mark {
   id: string;
@@ -71,19 +88,17 @@ interface Hand {
   marks: Mark[];
 }
 
-const place = (id: string, finger: Finger, p: ImagePoint): Mark => ({
-  id,
-  finger,
-  x: fit.x + p.x * fit.scale,
-  y: fit.y + p.y * fit.scale,
-});
+const place = (side: Thumb, id: string, finger: Finger, p: ImagePoint): Mark => {
+  const o = fit[side];
+  return { id, finger, x: o.x + p.x * fit.scale, y: o.y + p.y * fit.scale };
+};
 
 function hand(side: Thumb): Hand {
   const own = side === 'left' ? (['lp', 'lr', 'lm', 'li'] as const) : (['ri', 'rm', 'rr', 'rp'] as const);
   return {
     side,
     title: side === 'left' ? ru.keyboard.leftHand : ru.keyboard.rightHand,
-    marks: [...own.map((f) => place(f, f, HAND_TIPS[f])), place(`th-${side}`, 'th', THUMB_TIPS[side])],
+    marks: [...own.map((f) => place(side, f, f, HAND_TIPS[f])), place(side, `th-${side}`, 'th', THUMB_TIPS[side])],
   };
 }
 
@@ -116,14 +131,24 @@ const ariaLabel = computed(() => {
     role="img"
     :aria-label="ariaLabel"
   >
-    <image
-      class="picture"
-      :href="picture.href"
-      :x="picture.x"
-      :y="picture.y"
-      :width="picture.width"
-      :height="picture.height"
-    />
+    <svg
+      v-for="h in halves"
+      :key="h.side"
+      :x="h.x"
+      :y="h.y"
+      :width="h.width"
+      :height="h.height"
+      :viewBox="h.viewBox"
+    >
+      <image
+        class="picture"
+        :href="href"
+        x="0"
+        y="0"
+        :width="W"
+        :height="H"
+      />
+    </svg>
     <g
       v-for="h in hands"
       :key="h.side"

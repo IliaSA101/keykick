@@ -9,9 +9,11 @@
     "typecheck": "vue-tsc --noEmit",
     "lint": "eslint . --cache --cache-location node_modules/.cache/eslint --max-warnings 0",
     "test": "vitest run",
-    "check": "npm run typecheck && npm run lint && npm run test && vite build",
+    "check": "node tools/check.mjs",
     "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "e2e": "playwright test",
+    "shots": "node tools/shots.mjs"
   },
   "dependencies": {
     "vue": "^3.5.44",
@@ -19,6 +21,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.65.0",
     "@types/node": "^26.6.6",
     "@vitejs/plugin-vue": "^6.0.10",
     "eslint": "^10.14.0",

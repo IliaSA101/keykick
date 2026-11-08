@@ -21,6 +21,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Метки нужны сборке старых версий (site.json).
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -32,6 +35,10 @@ jobs:
 
       - name: Проверка и сборка (то же, что npm run check локально)
         run: npm run check
+
+      - name: Сборка трёх адресов по site.json (заменяет dist от check)
+        if: github.ref == 'refs/heads/main'
+        run: node tools/build-site.mjs
 
       - uses: actions/configure-pages@v5
         if: github.ref == 'refs/heads/main'

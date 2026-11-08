@@ -56,6 +56,19 @@
   --on-zone: #10231b; /* текст на ярком цвете зоны — тёмный */
   --error: #ff6b6b;
 
+  /* Карта клуба (019): вечернее поле, тропа к целям и туман над ещё не открытым.
+     Подписи и точки читаются на --map-ground (tests/tokens.test.ts). */
+  --map-ground: #17342f;
+  --map-path: #c9b27a;
+  --map-point: #77b8f4;
+  --map-point-done: #6fd89c;
+  --map-current: #f4c24a;
+  --map-fog: radial-gradient(circle at 50% 50%, rgb(21 20 58 / 0) 35%, rgb(21 20 58 / 0.92) 100%);
+  --map-flag: #ff6b6b;
+  --map-label: #fff6e0;
+  /* Рамка полей ввода: --border к --surface даёт 1,81 — поле почти не видно, нужно не меньше 3. */
+  --field-border: #8d8cd6;
+
   color-scheme: dark;
 }
 

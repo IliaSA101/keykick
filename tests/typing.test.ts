@@ -109,6 +109,8 @@ describe('движок печати: события', () => {
     const start = startLine('ф', 'ru');
     const noise: KeyPress[] = [
       press('в', { repeat: true }),
+      // Автоповтор верной буквы: без защиты он двигал бы курсор (первую неверную и так прощаем).
+      press('ф', { repeat: true }),
       press('c', { mod: true }),
       { ...press('x'), code: 'ShiftLeft', key: 'Shift' },
       { ...press('x'), code: 'AltLeft', key: 'Alt', mod: true },

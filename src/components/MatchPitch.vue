@@ -7,7 +7,7 @@
 import KitView from './KitView.vue';
 import { artUrl } from '../art/assets';
 import type { Kit } from '../engine/kit';
-import type { AttackResult } from '../engine/match';
+import type { AttackOutcome } from '../engine/match/score';
 import { ru } from '../i18n/ru';
 
 defineProps<{
@@ -28,7 +28,7 @@ defineProps<{
   /** Секундомер тайма «мм:сс»; null — не показывать (вступление, разминка). */
   clock: string | null;
   /** Итог последнего удара — пока он не null, мяч летит и горит надпись. */
-  shot: AttackResult | null;
+  shot: AttackOutcome | null;
   /** Номер удара: новый номер — анимация мяча заново. */
   shotId: string;
   /** Своя надпись удара (разминка — «В сетку!»); нет — по итогу удара. */
@@ -141,8 +141,8 @@ const ballUrl = artUrl('ball');
   justify-content: center;
   align-items: center;
   gap: 4px 16px;
-  margin-top: 10px;
-  padding: 6px 18px;
+  margin-top: 6px;
+  padding: 4px 18px;
   border-radius: 12px;
   background: rgb(10 20 40 / 0.78);
   color: #ffffff;
@@ -299,7 +299,7 @@ const ballUrl = artUrl('ball');
 .line-slot {
   position: relative;
   z-index: 1;
-  padding: 6px 10px;
+  padding: 4px 10px;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,30 +1,37 @@
 <script setup lang="ts">
 /*
  * Страница родителя: поставить игроку любой урок — проверить урок, лигу или кубок, не проходя всё
- * заново (просьба владельца 04.11). Кубки открываются сами: они смотрят на номер урока (engine/cup).
+ * заново (просьба владельца 04.11). Уроки — курса v2 (`courseLessons`); уроки до выбранного засчитываются пройденными.
  */
 import { ref, watch } from 'vue';
-import { lessons } from '../app/lessons';
-import { setLessonOf } from '../app/progress';
+import { courseLessons } from '../app/course/load';
+import { updatePlayer } from '../app/save/sections';
+import { section as courseSection, type CourseSave } from '../engine/course/save';
+import { firstOpenIndex, lessonIndexOf, setLesson } from '../engine/parent/view';
 import { ru } from '../i18n/ru';
 
 const props = defineProps<{
   /** Чей прогресс открыт на странице. */
   playerId: string;
-  /** Урок игрока сейчас (индекс с 0). */
-  current: number;
+  /** id текущего урока игрока ('' — первый). */
+  current: string;
+  /** Пройденные уроки игрока: раньше первого не пройденного поставить нельзя (018-Р31). */
+  passed: readonly string[];
 }>();
 const emit = defineEmits<{ changed: [] }>();
 
 const t = ru.parent;
-const picked = ref(props.current);
+const ids = courseLessons.map((l) => l.id);
+const floor = (): number => firstOpenIndex(props.passed, ids);
+const index = (): number => Math.max(lessonIndexOf(props.current, ids), floor());
+const picked = ref(index());
 const done = ref<number | null>(null);
 
 // Выбран другой игрок или урок сменился в игре — список показывает его текущий урок.
 watch(
-  () => [props.playerId, props.current] as const,
-  ([, current]) => {
-    picked.value = current;
+  () => [props.playerId, props.current, props.passed.length] as const,
+  () => {
+    picked.value = index();
   },
 );
 watch(
@@ -35,7 +42,7 @@ watch(
 );
 
 function apply(): void {
-  setLessonOf(props.playerId, picked.value);
+  updatePlayer((tx) => tx.set(courseSection, setLesson(tx.get(courseSection) as CourseSave, picked.value, ids)), { player: props.playerId });
   done.value = picked.value;
   emit('changed');
 }
@@ -52,9 +59,10 @@ function apply(): void {
         {{ t.setLessonPick }}
         <select v-model.number="picked">
           <option
-            v-for="(l, i) in lessons"
+            v-for="(l, i) in courseLessons"
             :key="l.id"
             :value="i"
+            :disabled="i < floor()"
           >
             {{ i + 1 }}. {{ l.name }}
           </option>
@@ -63,7 +71,7 @@ function apply(): void {
       <button
         type="button"
         class="btn"
-        :disabled="picked === current"
+        :disabled="picked === index()"
         @click="apply"
       >
         {{ t.setLesson }}

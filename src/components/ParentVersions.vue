@@ -6,6 +6,7 @@
  */
 import { RouterLink } from 'vue-router';
 import { APP_VERSION } from '../app/version';
+import { oldVersionUrl } from '../app/versions/build';
 import { formatDate, parentList, replay } from '../app/whatsNew';
 import { ru } from '../i18n/ru';
 
@@ -17,6 +18,8 @@ const releases = parentList().map((n) => ({
 }));
 // Нет версии со строками для ребёнка — показывать на главной нечего, кнопки нет.
 const canReplay = replay() !== null;
+// Старая версия игры (v1) живёт по своему адресу со своим прогрессом — обычная ссылка, не роутер.
+const oldUrl = oldVersionUrl(import.meta.env.BASE_URL);
 </script>
 
 <template>
@@ -53,6 +56,14 @@ const canReplay = replay() !== null;
         {{ t.versionsAgainHint }}
       </p>
     </template>
+    <p class="old">
+      <a
+        class="btn"
+        :href="oldUrl"
+      >
+        {{ t.versionsOld }}
+      </a>
+    </p>
   </section>
 </template>
 
@@ -98,6 +109,10 @@ h2 {
 .muted {
   margin: var(--space-2) 0 0;
   color: #555;
+}
+
+.old {
+  margin: var(--space-3) 0 0;
 }
 
 .btn {

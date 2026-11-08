@@ -4,12 +4,17 @@
  * Блоки лежат в ./ru/ по экранам (один файл не влезал в 600 строк), здесь — сборка в `ru`.
  * Страж tests/guards.test.ts не пускает кириллицу в остальной код.
  */
-import { nav, home, news, locker, boots, club, pack } from './ru/menu';
+import { nav, news, locker, boots } from './ru/menu';
 import { penalty } from './ru/penalty';
 import { keyboard, handsHelp } from './ru/keyboard';
-import { match, midPenalty, penaltyScreen, halftime } from './ru/match';
-import { stats, session, players, parent } from './ru/parent';
-import { unlocks, sound, cup } from './ru/cup';
+import { match, midPenalty, halftime } from './ru/match';
+import { match2 } from './ru/match2';
+import { match2Result } from './ru/match2Result';
+import { session, players, parent } from './ru/parent';
+import { sound } from './ru/cup';
+import { crash, backup } from './ru/system';
+import { clubForm, firstRun } from './ru/firstRun';
+import { map, clubPath } from './ru/map';
 
 export const ru = {
   appTitle: 'Клавиатурная лига',
@@ -17,24 +22,25 @@ export const ru = {
   placeholder: 'Этот экран скоро появится.',
 
   nav,
-  home,
   news,
   locker,
   boots,
-  club,
-  pack,
+  clubForm,
+  firstRun,
+  map,
+  clubPath,
   penalty,
   keyboard,
   handsHelp,
   match,
+  match2,
+  match2Result,
   midPenalty,
-  penaltyScreen,
   halftime,
-  stats,
   session,
   players,
   parent,
-  unlocks,
   sound,
-  cup,
+  crash,
+  backup,
 } as const;

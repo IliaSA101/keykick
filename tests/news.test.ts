@@ -2,7 +2,7 @@
  * «Что нового» (спека 010): сравнение версий, отбор строк для ребёнка и родителя, контент news.json
  * и поле сохранения «видел новости до версии» (сюда, а не в save.test.ts — тот у предела 600 строк).
  */
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import newsJson from '../src/content/news.json';
 import {
   NEWS_KID_MAX,
@@ -15,7 +15,6 @@ import {
   type NewsEntry,
 } from '../src/engine/news';
 import { formatDate, pendingCard, replayCard, shortVersion } from '../src/app/whatsNew';
-import { applyNewsSeen, emptySave, parseSave } from '../src/engine/save';
 
 const entry = (version: string, kid: string[] = [], parent: string[] = []): NewsEntry => ({
   version,
@@ -114,153 +113,6 @@ describe('контент news.json', () => {
   it('ребёнок на 0.9.0 увидит новое, на 0.10.0 — нет', () => {
     expect(unseen(news, NEWS_LEGACY_SEEN, '0.10.0').length).toBeGreaterThan(0);
     expect(unseen(news, '0.10.0', '0.10.0')).toEqual([]);
-  });
-});
-
-describe('поле сохранения newsSeen', () => {
-  it('новый игрок — текущая версия, карточки нет', () => {
-    const fresh = emptySave('0.10.0');
-    expect(fresh.newsSeen).toBe('0.10.0');
-    expect(unseen(newsJson as NewsEntry[], fresh.newsSeen, '0.10.0')).toEqual([]);
-  });
-
-  it('чистое сохранение без версии — как старое (NEWS_LEGACY_SEEN); мусорная версия — то же', () => {
-    expect(emptySave().newsSeen).toBe(NEWS_LEGACY_SEEN);
-    expect(emptySave('мусор').newsSeen).toBe(NEWS_LEGACY_SEEN);
-  });
-
-  it('нет сохранения или чужая версия формата — новый игрок с версией из контекста', () => {
-    expect(parseSave(null, { version: '0.10.0' }).newsSeen).toBe('0.10.0');
-    expect(parseSave({ version: 99 }, { version: '0.10.0' }).newsSeen).toBe('0.10.0');
-    expect(parseSave(null).newsSeen).toBe(NEWS_LEGACY_SEEN);
-  });
-
-  it('старое сохранение без поля — 0.9.0: игрок увидит новости 0.10.0, контекст версии не влияет', () => {
-    const old: Record<string, unknown> = { ...emptySave('0.10.0'), goals: 5 };
-    delete old.newsSeen;
-    const parsed = parseSave(old, { version: '0.10.0' });
-    expect(parsed.goals).toBe(5);
-    expect(parsed.newsSeen).toBe('0.9.0');
-    expect(unseen(newsJson as NewsEntry[], parsed.newsSeen, '0.10.0').length).toBeGreaterThan(0);
-  });
-
-  it('некорректное поле (мусор) — как отсутствующее, остальное живёт', () => {
-    for (const bad of [7, null, {}, [], '', 'v1', '1.2', '0.10', true]) {
-      const parsed = parseSave({ ...emptySave('0.10.0'), goals: 3, newsSeen: bad });
-      expect(parsed.newsSeen).toBe('0.9.0');
-      expect(parsed.goals).toBe(3);
-    }
-  });
-
-  it('пишется и читается без потерь', () => {
-    const s = applyNewsSeen(emptySave(), '0.10.0');
-    expect(parseSave(JSON.parse(JSON.stringify(s))).newsSeen).toBe('0.10.0');
-  });
-
-  it('applyNewsSeen: отметка только растёт, повтор ничего не меняет', () => {
-    const s = emptySave();
-    const seen = applyNewsSeen(s, '0.10.0');
-    expect(seen.newsSeen).toBe('0.10.0');
-    expect(s.newsSeen).toBe('0.9.0');
-    expect(applyNewsSeen(seen, '0.10.0')).toBe(seen);
-    expect(applyNewsSeen(seen, '0.9.0')).toBe(seen);
-    expect(applyNewsSeen(seen, 'мусор')).toBe(seen);
-  });
-});
-
-describe('двое игроков и обёртка прогресса', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.resetModules();
-  });
-
-  /** Хранилище в памяти. */
-  function fakeStorage(initial: Record<string, string> = {}) {
-    const data = new Map(Object.entries(initial));
-    return {
-      data,
-      getItem: (k: string) => data.get(k) ?? null,
-      setItem: (k: string, v: string) => void data.set(k, v),
-      removeItem: (k: string) => void data.delete(k),
-      key: (i: number) => [...data.keys()][i] ?? null,
-      get length() {
-        return data.size;
-      },
-    };
-  }
-
-  const oldSave = (goals: number): string => {
-    const raw: Record<string, unknown> = { ...emptySave(), goals };
-    delete raw.newsSeen;
-    return JSON.stringify(raw);
-  };
-
-  it('отметка у каждого игрока своя', () => {
-    const a = applyNewsSeen(emptySave(), '0.10.0');
-    const b = emptySave();
-    expect([a.newsSeen, b.newsSeen]).toEqual(['0.10.0', '0.9.0']);
-  });
-
-  it('в обёртке: старый игрок видит карточку, отметка пишется только ему, второй не затронут', async () => {
-    const storage = fakeStorage({
-      'keykick.players': JSON.stringify({
-        players: [
-          { id: 'p1', name: 'Первый' },
-          { id: 'p2', name: 'Второй' },
-        ],
-        current: 'p1',
-        lastId: 2,
-      }),
-      'keykick.save.p1': oldSave(1),
-      'keykick.save.p2': oldSave(2),
-    });
-    const stored = (key: string): unknown => (JSON.parse(storage.data.get(key) ?? '{}') as { newsSeen?: unknown }).newsSeen;
-    vi.stubGlobal('localStorage', storage);
-    vi.stubGlobal('sessionStorage', fakeStorage({ 'keykick.player': 'p1' }));
-    const p = await import('../src/app/progress');
-    p.loadPlayer('p1');
-    expect(p.progress.newsSeen).toBe('0.9.0');
-    // Версия задана явно: номер сборки в package.json сам меняется при выпуске.
-    p.markNewsSeen('0.10.0');
-    expect(p.progress.newsSeen).toBe('0.10.0');
-    expect(stored('keykick.save.p1')).toBe('0.10.0');
-    expect(p.peekSave('p2').newsSeen).toBe('0.9.0');
-    expect(stored('keykick.save.p2')).toBeUndefined();
-  });
-
-  // Версия игры подменяется на 0.10.0: пока package.json на 0.9.0, текущая версия совпадает с NEWS_LEGACY_SEEN,
-  // и «новый игрок без версии» был бы неотличим от правильного (ревью 010 Т1).
-  const NEXT = '0.10.0';
-  const mockVersion = () => vi.doMock('../src/app/version', () => ({ APP_VERSION: NEXT }));
-
-  it('новый игрок через createPlayer — текущая версия, и после перезагрузки тоже', async () => {
-    const storage = fakeStorage();
-    vi.stubGlobal('localStorage', storage);
-    vi.stubGlobal('sessionStorage', fakeStorage());
-    mockVersion();
-    const p = await import('../src/app/progress');
-    expect(p.progress.newsSeen).toBe(NEXT);
-    expect(p.peekSave('nobody').newsSeen, 'нет сохранения — версия из контекста').toBe(NEXT);
-    const { createPlayer } = await import('../src/app/roster');
-    const id = createPlayer('Миша', true);
-    expect(p.peekSave(id ?? '').newsSeen).toBe(NEXT);
-    expect(p.progress.newsSeen).toBe(NEXT);
-  });
-
-  it('сброс игрока — как новый: текущая версия, карточки нет', async () => {
-    const storage = fakeStorage({
-      'keykick.players': JSON.stringify({ players: [{ id: 'p1', name: 'Миша' }], current: 'p1', lastId: 1 }),
-      'keykick.save.p1': oldSave(5),
-    });
-    vi.stubGlobal('localStorage', storage);
-    vi.stubGlobal('sessionStorage', fakeStorage({ 'keykick.player': 'p1' }));
-    mockVersion();
-    const p = await import('../src/app/progress');
-    expect(p.progress.newsSeen).toBe(NEWS_LEGACY_SEEN);
-    const { resetPlayer } = await import('../src/app/roster');
-    resetPlayer('p1');
-    expect(p.progress.newsSeen).toBe(NEXT);
-    expect(p.peekSave('p1').newsSeen).toBe(NEXT);
   });
 });
 

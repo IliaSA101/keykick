@@ -11,7 +11,7 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { loadedKitBase, loadOutfitBases } from '../app/kitBase';
 import type { Boots } from '../engine/boots';
-import type { shirtBack } from '../engine/club';
+import type { shirtBack } from '../engine/club/kit';
 import type { Kit } from '../engine/kit';
 import { ru } from '../i18n/ru';
 import KitView from './KitView.vue';

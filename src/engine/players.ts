@@ -6,8 +6,7 @@
  * Разбор списка не теряет сохранений: битое имя заменяется запасным, а не выкидывает игрока;
  * список пропал или пуст — собирается заново из ключей сохранений, найденных в хранилище.
  */
-import { parseSave } from './save';
-import { emptyShared, parseShared, type SharedSession } from './session';
+import { emptyShared, type SharedSession } from './session';
 
 export const PLAYERS_MAX = 4;
 export const PLAYER_NAME_MIN = 2;
@@ -116,6 +115,21 @@ export function parsePlayers(raw: unknown, fallback: FallbackName, savedIds: rea
   return { players, current, lastId };
 }
 
+/**
+ * Список, перечитанный перед записью (другая вкладка могла его поменять). Только то, что лежит в
+ * самом списке: мусор, не объект, пустой или без годных игроков — null (вызывающий оставляет свой
+ * список; из ключей сохранений он НЕ собирается — имена потерялись бы). Ключи сохранений (savedIds)
+ * нужны лишь для lastId: новый id не делит номер с сохранением, которого нет в списке.
+ */
+export function freshPlayers(raw: unknown, fallback: FallbackName, savedIds: readonly string[] = []): PlayersData | null {
+  if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const items = (raw as Record<string, unknown>).players;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const data = parsePlayers(raw, fallback);
+  if (data.players.length === 0) return null;
+  return { ...data, lastId: Math.max(data.lastId, ...savedIds.map(idNumber)) };
+}
+
 /** Свободный id: больше всех выданных — удалённый игрок не делит ключ с новым. */
 export function nextPlayerId(data: PlayersData): string {
   return `p${Math.min(ID_MAX, Math.max(data.lastId, ...data.players.map((p) => idNumber(p.id))) + 1)}`;
@@ -164,18 +178,14 @@ export function tabPlayer(data: PlayersData, tabId: string | null): string | nul
 /** Что лежит в хранилище при запуске. undefined — ключа нет (не путать с битым значением). */
 export interface StartInput {
   list: unknown;
-  /** Старое сохранение одного игрока ('keykick.save'), уже из JSON. */
-  legacy: unknown;
   shared: unknown;
   /** id игроков, чьи сохранения есть в хранилище. */
   savedIds: readonly string[];
 }
 
-/** Что сделать при запуске; app-слой пишет по порядку полей и удаляет старый ключ последним. */
+/** Что сделать при запуске; app-слой пишет по порядку полей. */
 export interface StartPlan {
   data: PlayersData;
-  /** Старое сохранение — в ключ этого игрока как есть (формат его читает); потом удалить старый ключ. */
-  moveLegacyTo: string | null;
   /** Общую часть записать: её не было. null — уже есть. */
   shared: SharedSession | null;
   /** Список записать: его не было, или он был починен. */
@@ -183,40 +193,21 @@ export interface StartPlan {
 }
 
 /**
- * План первого запуска и починки. Есть список — по нему (старое сохранение уже перенесено,
- * не трогаем). Списка нет, есть старое сохранение — оно первый игрок с именем со спины формы
- * (или запасным); общая часть — из него же. Нет ничего — первый игрок с чистым сохранением.
+ * План первого запуска и починки. Есть список — по нему. Списка нет, но есть сохранения — список собирается
+ * из их ключей; нет ничего — первый игрок с чистым сохранением. Перенос голого сохранения 0.x одного игрока
+ * (ключ без номера игрока) ушёл вместе с разделом `legacy` (018-Т6б2, К10).
  */
 export function planStart(input: StartInput, fallback: FallbackName): StartPlan {
-  const sharedPlan = (from: unknown): SharedSession | null =>
-    input.shared === undefined ? (from === undefined ? emptyShared() : parseShared(from)) : null;
+  const sharedPlan = (): SharedSession | null => (input.shared === undefined ? emptyShared() : null);
   if (input.list !== undefined) {
     const data = parsePlayers(input.list, fallback, input.savedIds);
     if (data.players.length > 0) {
       const same = JSON.stringify(data) === JSON.stringify(input.list);
-      return { data, moveLegacyTo: null, shared: sharedPlan(undefined), writeList: !same };
+      return { data, shared: sharedPlan(), writeList: !same };
     }
   }
-  if (input.legacy !== undefined) {
-    const shirt = parseSave(input.legacy).club?.shirtName;
-    const check = shirt === undefined ? null : checkPlayerName(shirt);
-    const player = { id: 'p1', name: check?.ok ? check.name : fallback(1) };
-    return {
-      data: { players: [player], current: player.id, lastId: 1 },
-      moveLegacyTo: player.id,
-      shared: sharedPlan(input.legacy),
-      writeList: true,
-    };
-  }
   const rebuilt = parsePlayers(null, fallback, input.savedIds);
-  if (rebuilt.players.length > 0) {
-    return { data: rebuilt, moveLegacyTo: null, shared: sharedPlan(undefined), writeList: true };
-  }
+  if (rebuilt.players.length > 0) return { data: rebuilt, shared: sharedPlan(), writeList: true };
   const player = { id: 'p1', name: fallback(1) };
-  return {
-    data: { players: [player], current: player.id, lastId: 1 },
-    moveLegacyTo: null,
-    shared: sharedPlan(undefined),
-    writeList: true,
-  };
+  return { data: { players: [player], current: player.id, lastId: 1 }, shared: sharedPlan(), writeList: true };
 }

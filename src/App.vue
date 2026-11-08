@@ -4,18 +4,30 @@ import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router';
 import { artUrl, type ArtKey } from './art/assets';
 import BreakOverlay from './components/BreakOverlay.vue';
 import { ru } from './i18n/ru';
-import { previewOf } from './app/matchJump';
-import { playerName, players } from './app/players';
-import { shared } from './app/progress';
+import { EDIT_QUERY } from './app/map/chrome';
+import { MAP_PATH, PATH_PATH } from './app/map/go';
+import { hasAt } from './app/match/showcase';
+import { playerName, players } from './app/players/list';
+import { shared } from './app/players/shared';
 import { action, breakLeftMs, screenChanged, tick } from './app/session';
 import { muted } from './app/sound';
 
-// Главная — полноэкранная картинка со своим меню, верхняя панель и общий фон ей не нужны.
 const route = useRoute();
 const router = useRouter();
-const isHome = computed(() => route.name === 'home');
 // «Кто играет?» — без верхнего меню: до выбора игрока в игру не пускает страж роутера.
-const showTopbar = computed(() => !isHome.value && route.name !== 'players');
+// Первый запуск (`/start`) — тоже без меню: клуба ещё нет, идти из него некуда (019-Р20).
+// Матч (`/match`) — без меню: выход только через паузу (Esc → «Выйти»), чтобы «Карта» не бросала тайм молча (017-Р42).
+// До первого перехода адрес ещё не разобран (`matched` пуст): меню не мелькает.
+const showTopbar = computed(() => route.matched.length > 0 && route.name !== 'players' && route.name !== 'start' && route.name !== 'match');
+// Какой пункт меню горит: окно правки клуба открыто (`?edit=1`) — «Клуб», иначе на карте — «Карта». Класс
+// `router-link-active` не годится: он не смотрит на query, и горели бы оба.
+const onClub = computed(() => route.path === MAP_PATH && route.query.edit !== undefined);
+const onMap = computed(() => route.path === MAP_PATH && !onClub.value);
+const navItems = computed(() => [
+  { key: 'map', to: MAP_PATH, on: onMap.value, label: ru.nav.map },
+  { key: 'path', to: PATH_PATH, on: route.path === PATH_PATH, label: ru.nav.path },
+  { key: 'club', to: { path: MAP_PATH, query: EDIT_QUERY }, on: onClub.value, label: ru.nav.club },
+]);
 
 // Имя игрока и «Сменить» — когда игроков двое и больше; один игрок — всё как раньше.
 // Смена посреди матча бросает его, как уход со страницы: первый тайм уже сохранён.
@@ -34,9 +46,9 @@ const logoUrl = artUrl('logo');
 
 // Время игры и перерыв (engine/session). Страница родителя — не игра: её время не считается,
 // перерыв её не закрывает (родитель может его выключить). Быстрая проверка матча по ссылке
-// со страницы родителя (app/matchJump) — тоже не игра: в сохранение не пишет и время ребёнка.
+// со страницы родителя (витрина `/match?at=…`, dev-сборка) — тоже не игра: в сохранение не пишет и время ребёнка.
 const isParent = computed(() => route.name === 'parent');
-const notGame = computed(() => isParent.value || (route.name === 'match' && previewOf(route.query) !== null));
+const notGame = computed(() => isParent.value || (route.name === 'match' && hasAt(route.query)));
 const onBreak = computed(() => breakLeftMs.value > 0 && !notGame.value);
 
 // Переход экрана — место, где начинается назначенный перерыв: идущий тайм он не обрывает.
@@ -90,7 +102,6 @@ onBeforeUnmount(() => {
     :inert="onBreak"
   >
     <div
-      v-if="!isHome"
       class="backdrop"
       :style="bgStyle"
       aria-hidden="true"
@@ -101,7 +112,7 @@ onBeforeUnmount(() => {
     >
       <RouterLink
         class="brand"
-        to="/"
+        :to="MAP_PATH"
       >
         <img
           :src="logoUrl"
@@ -111,14 +122,20 @@ onBeforeUnmount(() => {
         >
       </RouterLink>
       <nav class="nav">
-        <RouterLink to="/match">
-          {{ ru.nav.match }}
-        </RouterLink>
-        <RouterLink to="/locker">
-          {{ ru.nav.locker }}
-        </RouterLink>
-        <RouterLink to="/stats">
-          {{ ru.nav.stats }}
+        <!-- Своя ссылка, а не класс и `aria-current` самого RouterLink: он не смотрит на query, и у «Карта» и «Клуб» горело бы одно. -->
+        <RouterLink
+          v-for="item in navItems"
+          :key="item.key"
+          v-slot="{ href, navigate }"
+          custom
+          :to="item.to"
+        >
+          <a
+            :href="href"
+            :class="{ on: item.on }"
+            :aria-current="item.on ? 'page' : undefined"
+            @click="navigate"
+          >{{ item.label }}</a>
         </RouterLink>
       </nav>
       <div
@@ -172,7 +189,7 @@ onBeforeUnmount(() => {
     </header>
     <main
       class="content"
-      :class="{ home: isHome, match: route.name === 'match' }"
+      :class="{ match: route.name === 'match' }"
     >
       <!-- Ключ — кубок из адреса: «Матч» в меню посреди матча кубка (#/match?cup=…) открывает
            обычный матч заново, а не оставляет тот же экран (Vue переиспользует его на смене query). -->
@@ -270,7 +287,7 @@ onBeforeUnmount(() => {
   background: rgb(255 255 255 / 0.1);
 }
 
-.nav a.router-link-active {
+.nav a.on {
   background: #f4c24a;
   color: #1b1b1f;
 }
@@ -341,10 +358,6 @@ onBeforeUnmount(() => {
 /* Всё, кроме матча, — страница: её множитель и её деление vh. */
 .content:not(.match) {
   --ui-scale: var(--page-scale);
-}
-
-.content.home {
-  padding: 0;
 }
 
 /* Матч: низ — у клавиатуры с руками (MatchScreen, .board), иначе 1024×640 прокручивается;

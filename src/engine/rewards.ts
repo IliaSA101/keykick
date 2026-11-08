@@ -15,14 +15,6 @@ export const rarityWeights: Readonly<Record<KitRarity, number>> = { common: 70, 
  * пока есть неполученные, пак выдаёт новую (openPack ниже).
  */
 export const DUP_COINS: Readonly<Record<KitRarity, number>> = { common: 10, rare: 25, epic: 50 };
-/**
- * Монеты за игру: за звезду тайма и за забитый пенальти. Без них монеты шли бы только
- * от повторов, а повторы бывают лишь у собранной коллекции — пак за монеты был бы недостижим.
- */
-export const STAR_COINS = 10;
-export const PENALTY_COINS = 10;
-/** Монеты за доделанное задание перерыва: мини-игры не обязательны, «Пропустить» — без монет. */
-export const MINIGAME_COINS = 10;
 /** Цена пака в шкафчике. */
 export const PACK_PRICE = 100;
 /**

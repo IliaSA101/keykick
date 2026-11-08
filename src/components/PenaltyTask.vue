@@ -272,6 +272,8 @@ onMounted(() => control?.focus());
   grid-column: 1;
   grid-row: 2;
   margin: 0 0 var(--space-3);
+  /* Условие — не мельче 18 px и не меньше базового шрифта (017-Р34). */
+  font-size: max(1rem, 18px);
 }
 
 .compact .outcome {
@@ -299,6 +301,8 @@ onMounted(() => control?.focus());
 .compact .submit {
   order: 1;
   margin-top: var(--space-2);
+  /* Цель нажатия — не ниже 44 px (017-Р34). */
+  min-height: 44px;
 }
 
 .compact .hint {

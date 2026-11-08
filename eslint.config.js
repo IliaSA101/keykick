@@ -8,9 +8,9 @@ import tseslint from 'typescript-eslint';
 import pluginVue from 'eslint-plugin-vue';
 
 export default tseslint.config(
-  // tools/*.mjs и служебные папки с точкой — скрипты вне tsconfig: их гоняют руками или хуками.
+  // tools/*.mjs и служебные папки с точкой — скрипты вне tsconfig: их гоняют руками или хуками; tools/*.d.mts — их типы для тестов (проверяет vue-tsc).
   {
-    ignores: ['dist/**', 'node_modules/**', 'art-src/**', 'art-work/**', 'tools/**/*.mjs', '.*/**'],
+    ignores: ['dist/**', 'node_modules/**', 'art-src/**', 'art-work/**', 'tools/**/*.mjs', 'tools/**/*.d.mts', '.*/**'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,

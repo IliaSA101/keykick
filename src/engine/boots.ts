@@ -1,13 +1,18 @@
 /**
  * Бутсы (спека 004, design.md §3): обычные — у всех, лавка — за монеты, кубковые — за трофей лиги.
- * В сохранении — только купленные (boughtBoots) и надетые (wornBoots). Обычные и кубковые
- * выводятся: кубок, взятый до выхода бутс, даёт пару сразу, а «Сыграть кубок снова» трофей
- * не снимает — и пара не пропадает.
+ * Остаток v1 до пересмотра в 022: модель, разбор контента и цвета зон. Владение и «надетые» жили в сохранении v1
+ * (`legacy`, ушёл в 018-Т6б) и придут заново разделом коллекции.
  * Зоны слоёв бутс: R — верх (upper), G — задник и язычок (accent), B — шнурки (laces).
  */
-import { LEAGUES, isLeague, trophies, type League } from './cup';
 import { BOOTS_PRICES } from './rewards';
-import type { SaveData } from './save';
+
+/** Лиги кубка v1: к ним привязаны кубковые бутсы. */
+export const LEAGUES = ['yard', 'district', 'city'] as const;
+export type League = (typeof LEAGUES)[number];
+
+export function isLeague(v: unknown): v is League {
+  return typeof v === 'string' && (LEAGUES as readonly string[]).includes(v);
+}
 
 export const bootsKinds = ['basic', 'shop', 'cup'] as const;
 export type BootsKind = (typeof bootsKinds)[number];
@@ -77,60 +82,6 @@ export function parseBoots(raw: unknown): Boots[] {
     if (out.filter((b) => b.league === league).length !== 1) throw new Error(`boots: need one cup pair for ${league}`);
   }
   return out;
-}
-
-/** id лавки — в SaveContext.bootIds: в boughtBoots может быть только купленное в лавке. */
-export function shopIds(boots: readonly Boots[]): string[] {
-  return boots.filter((b) => b.kind === 'shop').map((b) => b.id);
-}
-
-/** Пары во владении по порядку content: обычные ∪ купленные ∪ кубковые по трофеям. */
-export function ownedBoots(save: SaveData, boots: readonly Boots[]): string[] {
-  const won = trophies(save);
-  return boots
-    .filter(
-      (b) =>
-        b.kind === 'basic' ||
-        (b.kind === 'shop' && save.boughtBoots.includes(b.id)) ||
-        (b.kind === 'cup' && b.league !== undefined && won.includes(b.league)),
-    )
-    .map((b) => b.id);
-}
-
-/** Можно купить: пара из лавки, ещё не куплена, монет хватает. */
-export function canBuyBoots(save: SaveData, boots: readonly Boots[], id: string): boolean {
-  const b = boots.find((x) => x.id === id);
-  if (b?.kind !== 'shop' || b.price === undefined) return false;
-  return !save.boughtBoots.includes(id) && save.coins >= b.price;
-}
-
-/**
- * Покупка: пара и монеты — одной записью (перезагрузка не разделит их). Нельзя (мало монет,
- * повтор, не из лавки) — тот же объект: двойной щелчок «Да» не спишет дважды.
- */
-export function buyBoots(save: SaveData, boots: readonly Boots[], id: string): SaveData {
-  if (!canBuyBoots(save, boots, id)) return save;
-  const price = boots.find((b) => b.id === id)?.price ?? 0;
-  return { ...save, coins: save.coins - price, boughtBoots: [...save.boughtBoots, id] };
-}
-
-/**
- * «Надеть»: только пару во владении; обычные — null (как домашняя форма в wornKit).
- * Не во владении или уже надета — тот же объект.
- */
-export function wearBoots(save: SaveData, boots: readonly Boots[], id: string): SaveData {
-  if (!ownedBoots(save, boots).includes(id)) return save;
-  const next = id === BASIC_BOOTS_ID ? null : id;
-  return next === save.wornBoots ? save : { ...save, wornBoots: next };
-}
-
-/** Надетые бутсы: wornBoots во владении (трофей, контент могли измениться), иначе обычные. */
-export function wornBootsOf(save: SaveData, boots: readonly Boots[]): Boots {
-  const owned = ownedBoots(save, boots);
-  const worn = boots.find((b) => b.id === save.wornBoots && owned.includes(b.id));
-  const basic = boots.find((b) => b.id === BASIC_BOOTS_ID);
-  if (!basic) throw new Error('boots: no basic');
-  return worn ?? basic;
 }
 
 /** Цвета зон слоёв бутс для paintZones: R — верх, G — задник и язычок, B — шнурки. */

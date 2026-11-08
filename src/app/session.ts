@@ -1,10 +1,10 @@
 /**
- * Часы для времени игры и перерыва: движок (engine/session) часов не видит, их даёт этот слой.
+ * Часы для перерыва (время игры по дням вернётся с 040, 018-Р28): движок (engine/session) часов не видит, их даёт этот слой.
  * Сутки — по местной дате устройства.
  */
 import { computed, ref } from 'vue';
-import { breakLeft, playedDays } from '../engine/session';
-import { beginDueBreak, endBreakIfOver, noteAction, progress, shared } from './progress';
+import { breakLeft } from '../engine/session';
+import { beginDueBreak, endBreakIfOver, noteAction, shared } from './players/shared';
 
 /** Местная дата «ГГГГ-ММ-ДД». */
 export function localDay(t: number): string {
@@ -18,15 +18,6 @@ export const now = ref(Date.now());
 
 /** Сколько осталось перерыва, мс; 0 — перерыва нет. */
 export const breakLeftMs = computed(() => breakLeft(shared.clock, now.value, shared.breakSettings));
-
-/** Время игры игрока за сегодня и за 7 дней, мс; days — из его сохранения (по умолчанию — играющего). */
-export function playedToday(days: Readonly<Record<string, number>> = progress.days): number {
-  return playedDays({ days }, localDay(now.value), 1);
-}
-
-export function playedWeek(days: Readonly<Record<string, number>> = progress.days): number {
-  return playedDays({ days }, localDay(now.value), 7);
-}
 
 /** Нажатие или клик ребёнка. */
 export function action(): void {

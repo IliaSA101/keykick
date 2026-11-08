@@ -4,11 +4,13 @@
  * на все атаки серии — после 5-й атаки мячи не возвращаются.
  * Яркий мяч — ещё можно ошибиться, блёклый серый в пунктирной лунке — запас истрачен. Мяч — тот же,
  * что летит в ворота (art/ball.webp). Цифр на экране нет (скорость и ошибки вживую не показываем);
- * экранному диктору — «Запас ошибок: N».
+ * экранному диктору в v1 — «Запас ошибок: N», в v2 — только подпись (hint).
  */
 import { computed } from 'vue';
 import { artUrl } from '../art/assets';
+import type { ReserveHint } from '../engine/match/score';
 import { ru } from '../i18n/ru';
+import { reserveHintText } from './match/labels';
 
 const ballUrl = artUrl('ball');
 
@@ -17,25 +19,44 @@ const props = defineProps<{
   left: number;
   /** Весь запас лиги урока (LeagueRules.maxErrors): двор — 2, район и город — 3. */
   total: number;
-  /** Без подписи «Можно ошибиться:» — только мячи: место нужно длинному предупреждению рядом. */
+  /** Без подписи (v1 «Можно ошибиться:», v2 «ещё N — гол твой») — только мячи: место нужно длинному предупреждению рядом. */
   compact?: boolean;
+  /**
+   * Матч v2 (017-Р13): мячей `c − 1`, ошибка гасит самый левый, первые `goal` мячей — цветом «гол».
+   * Без `goal` — как в v1: горят первые `left` мячей, цвета нет.
+   */
+  goal?: number;
+  /** Подпись матча v2 вместо «Можно ошибиться:» (`reserveView.hint`): «ещё N — гол твой» или «дальше без ошибок». */
+  hint?: ReserveHint;
 }>();
 
-const balls = computed(() => Array.from({ length: props.total }, (_, i) => i < props.left));
+const v2 = computed(() => props.goal !== undefined);
+const balls = computed(() =>
+  Array.from({ length: props.total }, (_, i) => ({
+    // v2: сгоревшие — слева (запас тратится с начала), v1 — справа.
+    on: v2.value ? i >= props.total - props.left : i < props.left,
+    goal: v2.value && i < (props.goal ?? 0),
+  })),
+);
+
+const hintText = computed(() => reserveHintText(props.hint));
+
+// Экранному диктору: v2 — только подпись («Можно ошибиться ещё 1 — гол твой»), без «Запас ошибок: N» (017-Р33); v1 — «Запас ошибок: N».
+const spoken = computed(() => (v2.value ? hintText.value : `${ru.match.reserve.spoken} ${props.left}`));
 </script>
 
 <template>
   <p class="reserve">
     <span
-      v-if="!compact"
+      v-if="!v2 && !compact"
       class="label"
       aria-hidden="true"
     >{{ ru.match.reserve.label }}</span>
     <span
-      v-for="(on, i) in balls"
+      v-for="(b, i) in balls"
       :key="i"
       class="slot"
-      :class="{ on }"
+      :class="{ on: b.on, goal: b.goal }"
       aria-hidden="true"
     >
       <img
@@ -47,9 +68,14 @@ const balls = computed(() => Array.from({ length: props.total }, (_, i) => i < p
       >
     </span>
     <span
+      v-if="v2 && hintText && !compact"
+      class="label hint-after"
+      aria-hidden="true"
+    >{{ hintText }}</span>
+    <span
       class="spoken"
       role="status"
-    >{{ ru.match.reserve.spoken }} {{ left }}</span>
+    >{{ spoken }}</span>
   </p>
 </template>
 
@@ -71,6 +97,10 @@ const balls = computed(() => Array.from({ length: props.total }, (_, i) => i < p
 /* Лунка под мяч: пунктир виден, когда мяч истрачен. */
 .label {
   margin-right: 2px;
+}
+
+.hint-after {
+  margin: 0 0 0 4px;
 }
 
 .slot {
@@ -101,6 +131,11 @@ const balls = computed(() => Array.from({ length: props.total }, (_, i) => i < p
   opacity: 1;
   filter: none;
   transform: scale(1.15);
+}
+
+/* Мяч «гол» (матч v2): золотое кольцо — пока он горит, ошибка ещё не отнимает гол. */
+.slot.goal.on {
+  border-color: var(--accent);
 }
 
 /* Текст для экранного диктора: на экране — мячи. */

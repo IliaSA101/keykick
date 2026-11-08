@@ -5,12 +5,14 @@
  * Выбор здесь не меняет, кто играет во вкладке, — только чей прогресс показан ниже.
  */
 import { computed, nextTick, ref, watch } from 'vue';
-import { players, playingId } from '../app/players';
-import { createPlayer, deletePlayer, newNameError, renameError, renamePlayer } from '../app/roster';
+import { players, playingId } from '../app/players/list';
+import { createPlayer, deletePlayer, newNameError, renameError, renamePlayer, writeRefused } from '../app/roster';
 import { PLAYERS_MAX, PLAYER_NAME_MAX } from '../engine/players';
 import { ru } from '../i18n/ru';
 
 const viewId = defineModel<string>({ required: true });
+/** Игрок удалён (копия «до удаления» появилась): список копий у родителя перечитывается. */
+const emit = defineEmits<{ removed: [] }>();
 const t = ru.parent;
 const errors = ru.players.nameErrors;
 
@@ -18,8 +20,11 @@ const viewed = computed(() => players.players.find((p) => p.id === viewId.value)
 
 // Сообщение о сделанном — одно на блок; новое действие или другой игрок его снимает.
 const done = ref<string | null>(null);
+/** Последнее действие не применено: список игроков не записался (нет места). */
+const refused = ref(false);
 watch(viewId, () => {
   done.value = null;
+  refused.value = false;
 });
 
 // Переименовать выбранного.
@@ -38,7 +43,9 @@ const renameMsg = computed(() => {
 
 function doRename(): void {
   done.value = null;
+  refused.value = false;
   if (renamePlayer(viewId.value, newName.value)) done.value = t.renameDone;
+  refused.value = writeRefused.value;
 }
 
 // Добавить.
@@ -52,9 +59,12 @@ const addMsg = computed(() => {
 
 function doAdd(): void {
   done.value = null;
+  refused.value = false;
   addTouched.value = true;
   if (newNameError(addName.value) !== null) return;
-  if (createPlayer(addName.value, false) === null) return;
+  const id = createPlayer(addName.value, false);
+  refused.value = writeRefused.value;
+  if (id === null) return;
   addName.value = '';
   addTouched.value = false;
   done.value = t.addDone;
@@ -75,6 +85,7 @@ function askRemove(): void {
   removing.value = true;
   removeInput.value = '';
   done.value = null;
+  refused.value = false;
   void nextTick(() => removeField.value?.focus());
 }
 
@@ -86,10 +97,13 @@ function cancelRemove(): void {
 function doRemove(): void {
   if (!removeOk.value) return;
   const id = viewId.value;
-  if (!deletePlayer(id)) return;
+  const deleted = deletePlayer(id);
+  refused.value = writeRefused.value;
+  if (!deleted) return;
   removing.value = false;
   viewId.value = playingId.value ?? players.current ?? players.players[0]?.id ?? id;
   done.value = t.removeDone;
+  emit('removed');
 }
 </script>
 
@@ -246,6 +260,13 @@ function doRemove(): void {
     >
       {{ done }}
     </p>
+    <p
+      v-if="refused"
+      class="bad"
+      role="alert"
+    >
+      {{ t.saveRefused }}
+    </p>
   </section>
 </template>
 
@@ -309,7 +330,7 @@ input[type='radio'] {
 }
 
 .word input {
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 var(--space-2);
   border: 1px solid var(--paper-border);
   border-radius: 8px;

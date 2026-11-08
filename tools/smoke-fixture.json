@@ -1,0 +1,29 @@
+{
+  "marker": "Rocket",
+  "keys": {
+    "keykick.players": { "players": [{ "id": "p1", "name": "Misha" }], "current": "p1", "lastId": 1 },
+    "keykick.save.p1": {
+      "version": 1,
+      "club": { "name": "Rocket", "kit": { "pattern": "plain", "body": "#d62828", "sleeves": "#d62828", "trim": "#ffffff" }, "shirtName": "MISHA", "shirtNumber": 7 },
+      "ownedKits": [],
+      "wornKit": null,
+      "boughtBoots": [],
+      "wornBoots": null,
+      "lessonIndex": 3,
+      "keyErrors": { "f": 2 },
+      "matches": 4,
+      "goals": 6,
+      "pendingPacks": 0,
+      "penalty": null,
+      "solvedTasks": [],
+      "coins": 120,
+      "handsHelpSeen": true,
+      "days": {},
+      "cups": {},
+      "puzzleBest": {},
+      "lessonBest": {},
+      "newsSeen": "0.10.1"
+    },
+    "keykick.muted": "1"
+  }
+}

@@ -1,14 +1,13 @@
 /**
- * Игроки на одном компьютере: разбор списка не теряет сохранений, имена проверяются,
- * первый запуск переносит старое сохранение; через обёртку — у каждого свой прогресс,
- * перерыв общий. Отдельный файл: другая подготовка — хранилище с перечислением ключей
- * и sessionStorage вкладки.
+ * Игроки на одном компьютере, чистые правила: разбор списка не теряет сохранений, имена
+ * проверяются, первый запуск переносит старое сохранение. Через обёртку app/ — tests/players-app.test.ts.
  */
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   PLAYERS_MAX,
   addPlayer,
   checkPlayerName,
+  freshPlayers,
   nextPlayerId,
   parsePlayers,
   planStart,
@@ -18,18 +17,10 @@ import {
   tabPlayer,
   type PlayersData,
 } from '../src/engine/players';
-import { emptySave, parseSave } from '../src/engine/save';
 import { emptyShared, parseShared } from '../src/engine/session';
-import { emptyStats } from '../src/engine/typing';
 
 const fallback = (n: number) => `Игрок ${n}`;
 
-/** Сохранение одного игрока (до 04.11): поля days ещё не было, время — в session.days. */
-function legacySave(patch: Record<string, unknown>): Record<string, unknown> {
-  const { days, ...rest } = emptySave();
-  expect(days).toEqual({});
-  return { ...rest, ...patch };
-}
 const two: PlayersData = {
   players: [
     { id: 'p1', name: 'Маша' },
@@ -197,61 +188,33 @@ describe('действия со списком', () => {
 });
 
 describe('план первого запуска', () => {
-  const club = { name: 'Метеор', kit: { pattern: 'plain', body: '#000000', sleeves: '#ffffff', trim: '#ffffff' } };
-  const clock = { lastAction: 1_800_000_000_000, sinceBreak: 120_000, breakDue: false, breakUntil: 1_800_000_300_000 };
-  const breakSettings = { enabled: true, playMinutes: 20, breakMinutes: 10 };
-  const legacy = legacySave({
-    club: { ...club, shirtName: 'Илья' },
-    goals: 9,
-    session: { days: { '2026-11-04': 60_000 }, ...clock },
-    breakSettings,
-  });
-  const none = { list: undefined, legacy: undefined, shared: undefined, savedIds: [] };
+  const none = { list: undefined, shared: undefined, savedIds: [] };
 
-  it('старое сохранение — первый игрок с именем со спины; перерыв и настройки — в общую часть', () => {
-    const plan = planStart({ ...none, legacy }, fallback);
-    expect(plan.data).toEqual({ players: [{ id: 'p1', name: 'Илья' }], current: 'p1', lastId: 1 });
-    expect(plan.moveLegacyTo).toBe('p1');
-    expect(plan.writeList).toBe(true);
-    expect(plan.shared).toEqual({ clock, breakSettings });
-    // Перенесённое как есть читается новым форматом: время по дням и прогресс на месте.
-    const moved = parseSave(JSON.parse(JSON.stringify(legacy)));
-    expect([moved.goals, moved.days]).toEqual([9, { '2026-11-04': 60_000 }]);
+  it('общая часть уже есть — не перезаписывается; нет — пустая', () => {
+    expect(planStart({ ...none, shared: { clock: {} } }, fallback).shared).toBeNull();
+    expect(planStart(none, fallback).shared).toEqual(emptyShared());
   });
 
-  it('старое сохранение без имени на спине (или с битым) — «Игрок 1»', () => {
-    expect(planStart({ ...none, legacy: { ...legacy, club } }, fallback).data.players[0]?.name).toBe('Игрок 1');
-    expect(planStart({ ...none, legacy: '{битое' }, fallback).data.players[0]?.name).toBe('Игрок 1');
-  });
-
-  it('общая часть уже есть — не перезаписывается', () => {
-    expect(planStart({ ...none, legacy, shared: { clock: {} } }, fallback).shared).toBeNull();
-  });
-
-  it('список есть — по нему; старое сохранение не трогаем; годный список не переписываем', () => {
-    const plan = planStart({ ...none, list: two, legacy, shared: emptyShared(), savedIds: ['p1', 'p2'] }, fallback);
-    expect(plan).toEqual({ data: two, moveLegacyTo: null, shared: null, writeList: false });
+  it('список есть — по нему; годный список не переписываем', () => {
+    const plan = planStart({ ...none, list: two, shared: emptyShared(), savedIds: ['p1', 'p2'] }, fallback);
+    expect(plan).toEqual({ data: two, shared: null, writeList: false });
     const fixed = planStart({ ...none, list: { ...two, current: 'p9' }, shared: emptyShared() }, fallback);
     expect([fixed.data.current, fixed.writeList]).toEqual(['p1', true]);
   });
 
   it('список битый — собирается из сохранений; ничего нет — первый игрок с чистого листа', () => {
     const rebuilt = planStart({ ...none, list: null, savedIds: ['p2'] }, fallback);
-    expect([rebuilt.data.players, rebuilt.moveLegacyTo, rebuilt.writeList]).toEqual([
-      [{ id: 'p2', name: 'Игрок 1' }],
-      null,
-      true,
-    ]);
+    expect([rebuilt.data.players, rebuilt.writeList]).toEqual([[{ id: 'p2', name: 'Игрок 1' }], true]);
     const fresh = planStart(none, fallback);
     expect(fresh).toEqual({
       data: { players: [{ id: 'p1', name: 'Игрок 1' }], current: 'p1', lastId: 1 },
-      moveLegacyTo: null,
       shared: emptyShared(),
       writeList: true,
     });
   });
 
   it('общая часть: свой формат, старое сохранение и мусор', () => {
+    const clock = { lastAction: 1_800_000_000_000, sinceBreak: 120_000, breakDue: false, breakUntil: 1_800_000_300_000 };
     const own = { clock, breakSettings: { enabled: false, playMinutes: 10, breakMinutes: 3 } };
     expect(parseShared(JSON.parse(JSON.stringify(own)))).toEqual(own);
     for (const raw of [null, 'x', [], 5]) expect(parseShared(raw)).toEqual(emptyShared());
@@ -259,160 +222,16 @@ describe('план первого запуска', () => {
   });
 });
 
-describe('обёртка: игроки, перенос и общий перерыв', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.resetModules();
+describe('freshPlayers: список перед записью', () => {
+  const fb = (n: number) => `Игрок ${n}`;
+  it('не объект, без массива или пустой — null: из ключей сохранений список не собирается', () => {
+    for (const raw of [undefined, null, 'x', 5, [], {}, { players: 'x' }, { players: [] }, { players: [{ id: 'bad', name: 'Маша' }] }]) {
+      expect(freshPlayers(raw, fb, ['p1', 'p2'])).toBeNull();
+    }
   });
 
-  /** Хранилище в памяти с перечислением ключей; failKey — запись этого ключа бросает (переполнение). */
-  function fakeStorage(initial: Record<string, string> = {}, failKey = '') {
-    const data = new Map(Object.entries(initial));
-    return {
-      data,
-      get length() {
-        return data.size;
-      },
-      key: (i: number) => [...data.keys()][i] ?? null,
-      getItem: (k: string) => data.get(k) ?? null,
-      setItem: (k: string, v: string) => {
-        if (k === failKey) throw new Error('QuotaExceededError');
-        data.set(k, v);
-      },
-      removeItem: (k: string) => void data.delete(k),
-    };
-  }
-
-  const KIT = { pattern: 'plain', body: '#000000', sleeves: '#ffffff', trim: '#ffffff' } as const;
-  const T0 = 1_800_000_000_000;
-
-  async function boot(local: ReturnType<typeof fakeStorage>, tab = fakeStorage()) {
-    vi.stubGlobal('localStorage', local);
-    vi.stubGlobal('sessionStorage', tab);
-    const players = await import('../src/app/players');
-    const progress = await import('../src/app/progress');
-    const roster = await import('../src/app/roster');
-    return { ...players, ...progress, ...roster };
-  }
-
-  const json = (s: ReturnType<typeof fakeStorage>, key: string) => JSON.parse(s.data.get(key) ?? 'null') as unknown;
-
-  it('перенос: старое сохранение — первый игрок, ключ перенесён, старый удалён, перерыв сохранился', async () => {
-    const legacy = legacySave({
-      club: { name: 'Метеор', kit: KIT, shirtName: 'Илья' },
-      goals: 5,
-      session: { days: { '2026-11-04': 60_000 }, lastAction: T0, sinceBreak: 0, breakDue: false, breakUntil: T0 + 1 },
-    });
-    const local = fakeStorage({ 'keykick.save': JSON.stringify(legacy) });
-    const p = await boot(local);
-    expect(p.players.players).toEqual([{ id: 'p1', name: 'Илья' }]);
-    expect(local.data.has('keykick.save')).toBe(false);
-    expect(parseSave(json(local, 'keykick.save.p1')).goals).toBe(5);
-    expect(p.progress.goals).toBe(5);
-    expect(p.progress.days).toEqual({ '2026-11-04': 60_000 });
-    expect(p.shared.clock.breakUntil).toBe(T0 + 1);
-    // Один игрок — «Кто играет?» не нужен.
-    expect(p.needsChoice.value).toBe(false);
-    // Перезагрузка: переноса больше нет, всё на месте.
-    vi.resetModules();
-    const again = await boot(local);
-    expect(again.progress.goals).toBe(5);
-    expect(again.players.players).toHaveLength(1);
-  });
-
-  it('перенос не записался — старое сохранение остаётся и переносится при следующем запуске', async () => {
-    const local = fakeStorage({ 'keykick.save': JSON.stringify(legacySave({ goals: 3 })) }, 'keykick.players');
-    await boot(local);
-    expect(local.data.has('keykick.save')).toBe(true);
-    vi.resetModules();
-    const healthy = fakeStorage(Object.fromEntries(local.data));
-    const p = await boot(healthy);
-    expect(healthy.data.has('keykick.save')).toBe(false);
-    expect(p.progress.goals).toBe(3);
-  });
-
-  it('у каждого свой прогресс; смена без перезагрузки; двое — нужен выбор во вкладке', async () => {
-    const local = fakeStorage();
-    let p = await boot(local);
-    p.setClub({ name: 'Гром', kit: KIT });
-    p.recordHalf({ lessonId: p.currentLesson().id, stars: 3, goals: 4, stats: emptyStats });
-    const first = p.activeId() ?? '';
-    expect(p.createPlayer('Петя', true)).toBe('p2');
-    expect([p.activeId(), p.progress.club, p.progress.goals, p.progress.lessonIndex]).toEqual(['p2', null, 0, 0]);
-    expect(p.clubFirst()).toBe('/club');
-    p.setClub({ name: 'Ракета', kit: KIT });
-    p.choosePlayer(first);
-    expect([p.progress.club?.name, p.progress.goals, p.progress.lessonIndex]).toEqual(['Гром', 4, 1]);
-    expect(parseSave(json(local, 'keykick.save.p2')).club?.name).toBe('Ракета');
-    // Новая вкладка (пустой sessionStorage): двое — спросить; эта вкладка помнит свой выбор.
-    vi.resetModules();
-    p = await boot(local);
-    expect(p.needsChoice.value).toBe(true);
-    p.choosePlayer('p2');
-    expect([p.needsChoice.value, p.playerName.value, p.progress.club?.name]).toEqual([false, 'Петя', 'Ракета']);
-  });
-
-  it('перерыв общий: смена игрока его не снимает и не обнуляет счёт; время по дням — своё', async () => {
-    const local = fakeStorage();
-    const p = await boot(local);
-    p.setBreakSettings({ enabled: true, playMinutes: 10, breakMinutes: 5 });
-    for (let i = 0; i <= 10; i++) p.noteAction(T0 + i * 30_000, '2026-11-04');
-    const since = p.shared.clock.sinceBreak;
-    expect(since).toBe(300_000);
-    p.createPlayer('Петя', true);
-    expect(p.shared.clock.sinceBreak).toBe(since);
-    expect(p.progress.days).toEqual({});
-    for (let i = 11; i <= 21; i++) p.noteAction(T0 + i * 30_000, '2026-11-04');
-    expect(p.shared.clock.breakDue).toBe(true);
-    // Промежуток от последнего действия первого игрока до первого действия Пети — уже Петин: 11 по 30 с.
-    expect(p.progress.days['2026-11-04']).toBe(330_000);
-    p.beginDueBreak(T0 + 700_000);
-    p.choosePlayer('p1');
-    expect(p.shared.clock.breakUntil).toBe(T0 + 700_000 + 300_000);
-    expect(p.progress.days['2026-11-04']).toBe(300_000);
-    expect(parseShared(json(local, 'keykick.session')).clock.breakUntil).toBe(T0 + 1_000_000);
-  });
-
-  it('удалить игрока: список и ключ; играл во вкладке — выбор снят; последнего не удалить', async () => {
-    const local = fakeStorage();
-    const p = await boot(local);
-    p.createPlayer('Петя', false);
-    // Добавили второго со страницы родителя — вкладка так и играет за первого, без вопроса.
-    expect([p.needsChoice.value, p.playerName.value]).toEqual([false, 'Игрок 1']);
-    p.createPlayer('Ваня', true);
-    p.setClub({ name: 'Ракета', kit: KIT });
-    expect(local.data.has('keykick.save.p3')).toBe(true);
-    expect(p.deletePlayer('p3')).toBe(true);
-    expect(local.data.has('keykick.save.p3')).toBe(false);
-    expect(p.players.players.map((x) => x.id)).toEqual(['p1', 'p2']);
-    expect([p.needsChoice.value, p.progress.club]).toEqual([true, null]);
-    expect(p.deletePlayer('p2')).toBe(true);
-    expect(p.needsChoice.value).toBe(false);
-    expect(p.deletePlayer('p1')).toBe(false);
-  });
-
-  it('сброс — только выбранного игрока; другой и перерыв не меняются', async () => {
-    const local = fakeStorage();
-    const p = await boot(local);
-    p.setClub({ name: 'Гром', kit: KIT });
-    p.setBreakSettings({ enabled: false, playMinutes: 20, breakMinutes: 3 });
-    p.createPlayer('Петя', true);
-    p.setClub({ name: 'Ракета', kit: KIT });
-    p.resetPlayer('p1');
-    expect(local.data.has('keykick.save.p1')).toBe(false);
-    expect(p.progress.club?.name).toBe('Ракета');
-    expect(p.peekSave('p1').club).toBeNull();
-    expect(p.shared.breakSettings.enabled).toBe(false);
-  });
-
-  it('имя нового игрока: ошибки; полный список — не создать', async () => {
-    const p = await boot(fakeStorage());
-    expect(p.newNameError('Игрок 1')).toBe('taken');
-    expect(p.newNameError('Я')).toBe('short');
-    for (const name of ['Петя', 'Ваня', 'Папа']) expect(p.createPlayer(name, false)).not.toBeNull();
-    expect(p.createPlayer('Мама', false)).toBeNull();
-    expect(p.renamePlayer('p1', 'Маша')).toBe(true);
-    expect(p.renameError('p2', 'маша')).toBe('taken');
-    expect(p.players.players[0]?.name).toBe('Маша');
+  it('имена из списка; lastId не меньше номеров ключей сохранений', () => {
+    const raw = { players: [{ id: 'p1', name: 'Маша' }], current: 'p1', lastId: 1 };
+    expect(freshPlayers(raw, fb, ['p1', 'p5', 'p5.reset.1'])).toEqual({ ...raw, lastId: 5 });
   });
 });

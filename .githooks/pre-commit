@@ -44,6 +44,33 @@ for file in $staged; do
   fi
 done
 
+# 2б. Структура (журнал 08.11 «Структура кода»): новый файл кода в engine, app, components, screens —
+# только в папку подсистемы (`src/engine/save/…`), корни слоёв не растут. Файлы v1 в корнях живут,
+# пока их не заменит v2; переезд в подсистему (git mv) — не новый файл.
+added=$(git diff --cached --name-only --diff-filter=A)
+for file in $added; do
+  case "$file" in
+    src/engine/*/*|src/app/*/*|src/components/*/*|src/screens/*/*) ;;
+    src/engine/*.ts|src/app/*.ts|src/components/*.vue|src/screens/*.vue)
+      echo "pre-commit: $file — новый файл в корне слоя; положите в папку подсистемы (например, ${file%/*}/save/)"
+      fail=1 ;;
+  esac
+done
+# Подсистема шире 12 файлов — пора делить на части (предупреждение).
+for dir in $(echo "$added" | grep -E '^src/(engine|app|components|screens)/[^/]+/' | cut -d/ -f1-3 | sort -u); do
+  n=$(git ls-files --cached "$dir" | grep -cE '\.(ts|vue)$')
+  [ "$n" -gt 12 ] && echo "pre-commit: предупреждение — в $dir уже $n файлов кода, разделите подсистему"
+done
+# Мягкий порог 400: файл перешагнул его этим коммитом — время планировать разрез, а не ждать блока на 600.
+for file in $staged; do
+  case "$file" in src/*.ts|src/*.vue) ;; *) continue ;; esac
+  [ -f "$file" ] || continue
+  now=$(git show ":$file" | wc -l | tr -d ' ')
+  was=$(git show "HEAD:$file" 2>/dev/null | wc -l | tr -d ' ')
+  : "${was:=0}"
+  [ "$now" -gt 400 ] && [ "$was" -le 400 ] && echo "pre-commit: предупреждение — $file перешагнул 400 строк ($now): разрез по обязанностям — в ближайшую задачу"
+done
+
 # 3. Линтер по изменённым файлам кода: он стережёт правила проекта.
 code=$(echo "$staged" | grep -E '\.(ts|vue)$' || true)
 if [ -n "$code" ]; then

@@ -3,7 +3,9 @@
 # Включение: git config core.hooksPath .githooks. Ловит любой push, в том числе из скрипта — то, чего хук
 # агента push-guard (разбор команды) может не увидеть. Адрес сверяется по URL, а не по имени remote.
 #   открытый keykick: refs/heads/main — только из локального main (сжатый коммит tools/publish-main.mjs),
-#     метки refs/tags/vX.Y.Z под своим именем; удаление и прочее — отказ; перед push — npm run check;
+#     метки refs/tags/vX.Y.Z под своим именем и только с коммита, уже лежащего в локальном main; удаление и прочее —
+#     отказ; перед push main — tools/check-tree.mjs: приметы кухни и npm run check по самому отправляемому коммиту
+#     во временной копии (спека 013, ТЗ-13.13), а не по рабочей копии;
 #   приватный keykick-dev: любые ветки, без удаления;
 #   оснастка keykick-ops: только main;
 #   адреса не на github.com (локальные копии, наборы случаев) — пропуск.
@@ -17,6 +19,7 @@ case "$url" in
 esac
 
 bad=""
+trees=""
 while read -r local_ref local_sha remote_ref _; do
   [ -z "$remote_ref" ] && continue
   case "$local_sha" in *[!0]*) del=no ;; *) del=yes ;; esac
@@ -29,10 +32,13 @@ while read -r local_ref local_sha remote_ref _; do
       case "$remote_ref" in
         refs/heads/main)
           if [ "$del" = yes ]; then bad="$bad\n  $remote_ref — удалять main нельзя"
-          elif [ "$local_ref" != refs/heads/main ]; then bad="$bad\n  $local_ref -> $remote_ref — в main идёт только локальный main"; fi ;;
+          elif [ "$local_ref" != refs/heads/main ]; then bad="$bad\n  $local_ref -> $remote_ref — в main идёт только локальный main"
+          else trees="$trees $local_sha"; fi ;;
         refs/tags/v[0-9]*)
           if [ "$del" = yes ]; then bad="$bad\n  $remote_ref — удалять метки версий нельзя"
-          elif [ "$local_ref" != "$remote_ref" ]; then bad="$bad\n  $local_ref -> $remote_ref — метка идёт под своим именем"; fi ;;
+          elif [ "$local_ref" != "$remote_ref" ]; then bad="$bad\n  $local_ref -> $remote_ref — метка идёт под своим именем"
+          elif ! git merge-base --is-ancestor "$local_sha^{commit}" refs/heads/main 2>/dev/null; then
+            bad="$bad\n  $remote_ref — коммит метки не в локальном main: сначала публикация и push main"; fi ;;
         *) bad="$bad\n  $remote_ref — в открытый репозиторий не публикуется" ;;
       esac ;;
   esac
@@ -48,8 +54,10 @@ if [ -n "$bad" ]; then
   exit 1
 fi
 
-if [ "$kind" = public ] && [ -z "${KK_PREPUSH_NOCHECK:-}" ]; then
-  echo "pre-push: npm run check (типы, линтер, тесты, сборка)"
-  npm run check || { echo "pre-push: проверка не прошла, push остановлен"; exit 1; }
-fi
+for sha in $trees; do
+  if [ -n "${KK_PREPUSH_NOCHECK:-}" ]; then flag=--no-check; else flag=; fi
+  echo "pre-push: проверка отправляемого дерева $sha (приметы кухни, npm run check во временной копии)"
+  # shellcheck disable=SC2086
+  node tools/check-tree.mjs "$sha" $flag || { echo "pre-push: проверка дерева не прошла, push остановлен"; exit 1; }
+done
 exit 0

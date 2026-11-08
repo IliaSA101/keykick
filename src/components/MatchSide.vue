@@ -7,7 +7,7 @@
  */
 import OutfitView from './OutfitView.vue';
 import type { Boots } from '../engine/boots';
-import type { shirtBack } from '../engine/club';
+import type { shirtBack } from '../engine/club/kit';
 import type { Kit } from '../engine/kit';
 
 defineProps<{

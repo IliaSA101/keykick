@@ -8,3 +8,6 @@ dist/
 # Исходники и промежуточная графика (большие генерации) — вне git.
 art-src/
 art-work/
+test-results/
+# Кадры npm run shots.
+/shots/

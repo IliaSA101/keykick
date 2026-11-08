@@ -1,0 +1,20 @@
+{
+  "about": "Баланс матча v2 (спека 017, design §9): монеты, звёзды, помощь застрявшему, форма пальцев. Числа — только здесь; разбор и проверки — src/engine/match/rules.ts. Имена в squad — черновик, вычитка с 039.",
+  "coinPer": 20,
+  "threeStar": 0.97,
+  "comebackDays": 5,
+  "speedMatches": 3,
+  "help": { "coachAt": 2, "reserveAt": 3, "coachHelpAt": 5, "reserveCap": 2, "coachCap": 1, "softenCap": 2 },
+  "coach": { "keys": 2, "ms": 60000 },
+  "form": { "window": 300, "minPresses": 50, "ranks": [0.9, 0.95, 0.97, 0.99], "fullWindowFrom": 2, "confirm": 2 },
+  "squad": [
+    { "finger": "lp", "keys": "ф", "name": "Левый мизинец" },
+    { "finger": "lr", "keys": "ы", "name": "Левый безымянный" },
+    { "finger": "lm", "keys": "в", "name": "Левый средний" },
+    { "finger": "li", "keys": "ап", "name": "Левый указательный" },
+    { "finger": "ri", "keys": "ор", "name": "Правый указательный" },
+    { "finger": "rm", "keys": "л", "name": "Правый средний" },
+    { "finger": "rr", "keys": "д", "name": "Правый безымянный" },
+    { "finger": "rp", "keys": "жэ", "name": "Правый мизинец" }
+  ]
+}

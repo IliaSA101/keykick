@@ -1,25 +1,13 @@
 /**
  * Пак с формой: повторяем по зерну, без дублей, пока есть неполученные, редкие — реже.
- * Бутсы (спека 004): список в content, владение, покупка и «Надеть».
+ * Бутсы (спека 004): список в content и его разбор. Владение жило в сохранении v1 (ушло в 018-Т6б).
  */
 import { describe, expect, it } from 'vitest';
 import { boots } from '../src/app/boots';
 import { kits } from '../src/app/kits';
-import {
-  BASIC_BOOTS_ID,
-  bootsColors,
-  buyBoots,
-  canBuyBoots,
-  ownedBoots,
-  parseBoots,
-  shopIds,
-  wearBoots,
-  wornBootsOf,
-} from '../src/engine/boots';
-import { LEAGUES, type League } from '../src/engine/cup';
+import { BASIC_BOOTS_ID, LEAGUES, bootsColors, parseBoots } from '../src/engine/boots';
 import type { Kit, KitRarity } from '../src/engine/kit';
 import { BOOTS_PRICES, openPack, rarityWeights } from '../src/engine/rewards';
-import { emptySave, parseSave, type SaveData } from '../src/engine/save';
 
 const kit = (id: string, rarity: KitRarity): Kit => ({
   id,
@@ -92,13 +80,10 @@ describe('пак', () => {
 });
 
 /**
- * id лавки в сохранениях детей: убрать пару из content — купленное пропадёт (parseSave выбросит).
+ * id лавки: убрать пару из content нельзя — у детей она уже куплена (раздел коллекции 022 будет хранить id).
  * Новые пары — дописывать сюда; удалять отсюда нельзя.
  */
 const SHOP_IDS = ['blue', 'red', 'green', 'orange', 'white', 'neon', 'violet'];
-
-const won = (...leagues: League[]): SaveData['cups'] =>
-  Object.fromEntries(leagues.map((l) => [l, { stage: 4, won: true }]));
 
 describe('бутсы: content', () => {
   it('обычные одни, лавка — 4 × 150 и 3 × 300, кубковые — по паре на лигу', () => {
@@ -113,10 +98,9 @@ describe('бутсы: content', () => {
 
   it('id не повторяются и не пропадают; обычные и кубковые не продаются', () => {
     expect(new Set(boots.map((b) => b.id)).size).toBe(boots.length);
-    for (const id of SHOP_IDS) expect(shopIds(boots)).toContain(id);
+    for (const id of SHOP_IDS) expect(boots.filter((b) => b.kind === 'shop').map((b) => b.id)).toContain(id);
     for (const b of boots.filter((x) => x.kind !== 'shop')) {
       expect(b.price).toBeUndefined();
-      expect(canBuyBoots({ ...emptySave(), coins: 10_000 }, boots, b.id)).toBe(false);
     }
     expect(new Set(boots.map((b) => b.name)).size).toBe(boots.length);
   });
@@ -146,61 +130,5 @@ describe('бутсы: content', () => {
     expect(() => parseBoots([basic, ...cups, { ...shop, kind: 'gold' }])).toThrow(/kind/);
     expect(() => parseBoots([basic, ...cups, { ...shop, upper: 'red' }])).toThrow(/upper/);
     expect(() => parseBoots([basic, ...cups, { ...shop, name: '' }])).toThrow(/name/);
-  });
-});
-
-describe('бутсы: владение, покупка, «Надеть»', () => {
-  const rich: SaveData = { ...emptySave(), coins: 400 };
-
-  it('владение: обычные ∪ купленные ∪ кубковые по трофеям, порядок — как в content', () => {
-    expect(ownedBoots(emptySave(), boots)).toEqual([BASIC_BOOTS_ID]);
-    const s = { ...emptySave(), boughtBoots: ['violet', 'blue'], cups: won('district') };
-    expect(ownedBoots(s, boots)).toEqual([BASIC_BOOTS_ID, 'blue', 'violet', 'cup-district']);
-    // Кубок идёт, трофея нет — пары нет; «Сыграть кубок снова» (раунд 0) трофей не снимает.
-    expect(ownedBoots({ ...emptySave(), cups: { yard: { stage: 3, won: false } } }, boots)).toEqual([BASIC_BOOTS_ID]);
-    expect(ownedBoots({ ...emptySave(), cups: { yard: { stage: 0, won: true } } }, boots)).toContain('cup-yard');
-    // Мусор в купленных (разбор без контекста) пар не даёт.
-    expect(ownedBoots({ ...emptySave(), boughtBoots: ['cup-city', 'gone'] }, boots)).toEqual([BASIC_BOOTS_ID]);
-  });
-
-  it('старое сохранение: обычные надеты, кубковые — по трофеям, взятым до выхода бутс', () => {
-    const { boughtBoots, wornBoots, ...old } = { ...emptySave(), cups: won('yard', 'city') };
-    expect([boughtBoots, wornBoots]).toEqual([[], null]);
-    const s = parseSave(JSON.parse(JSON.stringify(old)), { bootIds: shopIds(boots) });
-    expect(wornBootsOf(s, boots).id).toBe(BASIC_BOOTS_ID);
-    expect(ownedBoots(s, boots)).toEqual([BASIC_BOOTS_ID, 'cup-yard', 'cup-city']);
-  });
-
-  it('покупка: минус цена, плюс пара — одной записью; повтор и нехватка — тот же объект', () => {
-    const s = buyBoots(rich, boots, 'white');
-    expect([s.coins, s.boughtBoots]).toEqual([100, ['white']]);
-    expect(rich).toEqual({ ...emptySave(), coins: 400 });
-    expect(buyBoots(s, boots, 'white')).toBe(s);
-    const poor = { ...emptySave(), coins: 149 };
-    expect(canBuyBoots(poor, boots, 'blue')).toBe(false);
-    expect(buyBoots(poor, boots, 'blue')).toBe(poor);
-    expect(buyBoots({ ...poor, coins: 150 }, boots, 'blue').coins).toBe(0);
-    for (const id of [BASIC_BOOTS_ID, 'cup-yard', 'gone']) expect(buyBoots(rich, boots, id)).toBe(rich);
-    expect(buyBoots(s, boots, 'neon')).toBe(s);
-  });
-
-  it('«Надеть»: только свою пару; обычные — null; чужую и уже надетую — тот же объект', () => {
-    const s = buyBoots(rich, boots, 'blue');
-    const worn = wearBoots(s, boots, 'blue');
-    expect(worn.wornBoots).toBe('blue');
-    expect(wornBootsOf(worn, boots).id).toBe('blue');
-    expect(wearBoots(worn, boots, 'blue')).toBe(worn);
-    for (const id of ['red', 'cup-yard', 'gone']) expect(wearBoots(worn, boots, id)).toBe(worn);
-    expect(wearBoots(worn, boots, BASIC_BOOTS_ID).wornBoots).toBeNull();
-    expect(wearBoots(s, boots, BASIC_BOOTS_ID)).toBe(s);
-    const cup = { ...emptySave(), cups: won('yard') };
-    expect(wearBoots(cup, boots, 'cup-yard').wornBoots).toBe('cup-yard');
-  });
-
-  it('надетые не во владении (пара убрана, трофея нет, мусор) — обычные', () => {
-    for (const wornBoots of ['gone', 'red', 'cup-city', null]) {
-      expect(wornBootsOf({ ...emptySave(), wornBoots }, boots).id).toBe(BASIC_BOOTS_ID);
-    }
-    expect(() => wornBootsOf(emptySave(), boots.filter((b) => b.kind !== 'basic'))).toThrow(/basic/);
   });
 });

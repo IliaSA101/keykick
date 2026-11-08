@@ -6,27 +6,18 @@
  */
 import { ref, watch } from 'vue';
 import { artUrl, type ArtKey } from '../art/assets';
+import { MUTE_KEY, readJson, writeJson } from './storage';
 
-const MUTE_KEY = 'keykick.muted';
-
+/** В хранилище лежит число 1 или 0 — тот же текст, что писался раньше. */
 function readMuted(): boolean {
-  try {
-    return localStorage.getItem(MUTE_KEY) === '1';
-  } catch {
-    return false;
-  }
+  return readJson(MUTE_KEY) === 1;
 }
 
 /** Без звука — выбор ребёнка, помнится между заходами. */
 export const muted = ref(readMuted());
 
-watch(muted, (value) => {
-  try {
-    localStorage.setItem(MUTE_KEY, value ? '1' : '0');
-  } catch {
-    // Хранилище недоступно (приватное окно) — выбор живёт до перезагрузки.
-  }
-});
+// Хранилище недоступно (приватное окно) — writeJson вернёт false, выбор живёт до перезагрузки.
+watch(muted, (value) => void writeJson(MUTE_KEY, value ? 1 : 0));
 
 type SfxKey = Extract<ArtKey, `sfx${string}`>;
 const sfxKeys: readonly SfxKey[] = ['sfxKick', 'sfxGoal', 'sfxGroan', 'sfxWhistleStart', 'sfxWhistleEnd'];
@@ -73,7 +64,8 @@ for (const type of ['pointerdown', 'keydown'] as const) {
 function audio(): AudioContext | null {
   if (muted.value) return null;
   const a = createContext();
-  if (a?.state === 'suspended') void a.resume();
+  // Браузер может отказать (нет жеста): звук тогда просто молчит, а не «необработанная ошибка» на экран сбоя.
+  if (a?.state === 'suspended') a.resume().catch(() => undefined);
   return a;
 }
 

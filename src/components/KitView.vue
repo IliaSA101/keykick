@@ -5,8 +5,9 @@
 // по своей рамке (opaqueBox): поля вокруг шорт, гетр и бутс на слоях разные.
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { loadedKitBase, loadKitBase, type View } from '../app/kitBase';
+import { logEvent } from '../app/save/eventLog';
 import { bootsColors, type Boots } from '../engine/boots';
-import { shirtInk } from '../engine/club';
+import { shirtInk } from '../engine/club/kit';
 import { outfitFor, paintKit, paintZones, type BodyBox, type Kit, type OpaqueBox } from '../engine/kit';
 import { ru } from '../i18n/ru';
 
@@ -133,10 +134,15 @@ const ariaLabel = computed(() => {
   return props.back ? `${name}: ${props.back.name} ${props.back.number ?? ''}`.trim() : name;
 });
 
-onMounted(() => void draw());
+/** Сбой сети при загрузке основы: рисунок не появится (как раньше), но это не «необработанная ошибка» на экран сбоя. */
+function drawSafe(): void {
+  draw().catch((err: unknown) => logEvent('error', `kit draw: ${String(err).slice(0, 200)}`));
+}
+
+onMounted(drawSafe);
 watch(
   () => [props.kit, props.view, props.boots, props.back === null, props.back?.name, props.back?.number],
-  () => void draw(),
+  drawSafe,
 );
 </script>
 

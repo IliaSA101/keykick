@@ -12,12 +12,20 @@ export type TaskLevel = (typeof taskLevels)[number];
 /** Задача с ответом одного из видов (answers.ts). verified — ответ перерешан независимо и совпал. */
 export interface Task {
   id: string;
+  /** Постоянный номер задачи 1…TASK_NO_MAX: бит в `school.solved` (018-Р14). Уникален, не переиспользуется. */
+  no: number;
   text: string;
   answer: TaskAnswer;
   solution: string;
   verified: boolean;
   level: TaskLevel;
 }
+
+/**
+ * Потолок номера задачи: 6000 бит — 1000 знаков в `school.solved` (018 design §3.2).
+ * Поднимать только вместе с подъёмом формата сохранения (018-Р21): старые строки проверяются по этому числу.
+ */
+export const TASK_NO_MAX = 6000;
 
 /** Сколько вариантов у выбора: букв А–Е шесть, меньше двух — не выбор. */
 export const MAX_OPTIONS = 6;
@@ -132,6 +140,7 @@ export function parseAnswer(v: unknown, where: string): TaskAnswer {
 export function parseTasks(raw: unknown): Task[] {
   if (!Array.isArray(raw)) throw new Error('tasks: expected array');
   const ids = new Set<string>();
+  const nos = new Set<number>();
   return raw.map((item: unknown, n) => {
     const r = (item ?? {}) as Raw;
     const str = (key: string): string => {
@@ -142,12 +151,16 @@ export function parseTasks(raw: unknown): Task[] {
     const id = str('id');
     if (ids.has(id)) throw new Error(`tasks[${n}]: duplicate id ${id}`);
     ids.add(id);
-    const { verified, level } = r;
+    const { verified, level, no } = r;
+    if (!isInt(no) || no < 1 || no > TASK_NO_MAX) throw new Error(`tasks[${n}].no: expected integer 1…${TASK_NO_MAX}`);
+    if (nos.has(no)) throw new Error(`tasks[${n}]: duplicate no ${no}`);
+    nos.add(no);
     const answer = parseAnswer(r.answer, `tasks[${n}].answer`);
     if (typeof verified !== 'boolean') throw new Error(`tasks[${n}].verified: expected boolean`);
     if (!(taskLevels as readonly unknown[]).includes(level)) throw new Error(`tasks[${n}].level: expected 1, 2 or 3`);
     return {
       id,
+      no,
       text: str('text'),
       answer,
       solution: str('solution'),

@@ -105,35 +105,64 @@ export interface ImagePoint {
 /** Пальцы, по которым картинка рук ложится на клавиатуру. */
 export type FitFinger = 'lm' | 'li' | 'ri' | 'rm';
 
-/**
- * Как положить картинку рук на клавиатуру: левый верхний угол картинки (в единицах
- * клавиатуры) и единый масштаб — сколько единиц в пикселе картинки (по обеим осям).
- */
-export interface HandsFit {
+/** Левый верхний угол картинки рук для одной руки, в единицах клавиатуры. */
+export interface HandOffset {
   x: number;
   y: number;
-  scale: number;
 }
 
 /**
- * Масштаб и сдвиг картинки рук без искажения: кончики указательных и средних — как можно
- * ближе к своим клавишам основного ряда по горизонтали (наименьшие квадраты), а их средняя
- * высота — на середине основного ряда. Остальные пальцы встают, куда их нарисовали.
+ * Как положить картинку рук на клавиатуру: единый масштаб — сколько единиц в пикселе картинки
+ * (по обеим осям) — и свой сдвиг у каждой руки: руки нарисованы не зеркально, шаг кончиков
+ * у них разный.
  */
-export function fitHands(geometry: KeyboardGeometry, tips: Record<FitFinger, ImagePoint>): HandsFit {
+export interface HandsFit {
+  scale: number;
+  left: HandOffset;
+  right: HandOffset;
+}
+
+/** Все ногти руки: четыре нужных для масштаба обязательны, остальные добавляют высоту. */
+export type HandTips = Record<FitFinger, ImagePoint> &
+  Partial<Record<'lp' | 'lr' | 'rr' | 'rp', ImagePoint>>;
+
+/**
+ * Масштаб и сдвиги картинки рук без искажения. Масштаб общий: наименьшие квадраты по x для
+ * четырёх кончиков (указательные и средние), каждый — относительно середины своей руки.
+ * Сдвиг каждой руки свой: середина её двух кончиков — над серединой их клавиш основного ряда
+ * по x, а средняя высота всех её ногтей (4 у руки, если даны все 8) — на середине основного ряда:
+ * ногти лежат на ФЫВА и ОЛДЖ, а не на верхнем ряду.
+ */
+export function fitHands(geometry: KeyboardGeometry, tips: HandTips): HandsFit {
   const homes = fingerHomes(geometry);
-  const used: FitFinger[] = ['lm', 'li', 'ri', 'rm'];
-  const mean = (get: (f: FitFinger) => number): number =>
-    used.reduce((sum, f) => sum + get(f), 0) / used.length;
-  const mx = mean((f) => tips[f].x);
-  const my = mean((f) => tips[f].y);
-  const mk = mean((f) => homes[f]);
-  const cov = mean((f) => (tips[f].x - mx) * (homes[f] - mk));
-  const varX = mean((f) => (tips[f].x - mx) ** 2);
-  if (varX === 0) throw new Error('hands: fingertips must differ in x');
-  const scale = cov / varX;
   const bump = geometry.keys.find((b) => b.key.bump);
   if (!bump) throw new Error('keyboard: need two keys with a bump');
   const homeY = bump.y + bump.h / 2;
-  return { x: mk - scale * mx, y: homeY - scale * my, scale };
+  const left: FitFinger[] = ['lm', 'li'];
+  const right: FitFinger[] = ['ri', 'rm'];
+  const mean = (fs: FitFinger[], get: (f: FitFinger) => number): number =>
+    fs.reduce((sum, f) => sum + get(f), 0) / fs.length;
+  let cov = 0;
+  let varX = 0;
+  for (const fs of [left, right]) {
+    const mx = mean(fs, (f) => tips[f].x);
+    const mk = mean(fs, (f) => homes[f]);
+    for (const f of fs) {
+      cov += (tips[f].x - mx) * (homes[f] - mk);
+      varX += (tips[f].x - mx) ** 2;
+    }
+  }
+  if (varX === 0) throw new Error('hands: fingertips must differ in x');
+  const scale = cov / varX;
+  const offset = (fs: FitFinger[], all: ImagePoint[]): HandOffset => ({
+    x: mean(fs, (f) => homes[f]) - scale * mean(fs, (f) => tips[f].x),
+    y: homeY - (scale * all.reduce((sum, p) => sum + p.y, 0)) / all.length,
+  });
+  const own = (...names: (keyof HandTips)[]): ImagePoint[] =>
+    names.flatMap((n) => tips[n] ?? []);
+  return {
+    scale,
+    left: offset(left, own('lp', 'lr', 'lm', 'li')),
+    right: offset(right, own('ri', 'rm', 'rr', 'rp')),
+  };
 }

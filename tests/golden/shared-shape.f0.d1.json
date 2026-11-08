@@ -1,0 +1,12 @@
+{
+  "(root)": "object",
+  "breakSettings": "object",
+  "breakSettings.breakMinutes": "number",
+  "breakSettings.enabled": "boolean",
+  "breakSettings.playMinutes": "number",
+  "clock": "object",
+  "clock.breakDue": "boolean",
+  "clock.breakUntil": "number",
+  "clock.lastAction": "number",
+  "clock.sinceBreak": "number"
+}

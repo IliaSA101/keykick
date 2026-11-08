@@ -25,7 +25,8 @@ import {
 
 const T0 = 1_800_000_000_000;
 const DAY = '2026-11-04';
-const on: BreakSettings = defaultBreakSettings();
+/** Перерыв включён родителем: 15 минут игры, 5 минут отдыха (по умолчанию он выключен — тест ниже). */
+const on: BreakSettings = { enabled: true, playMinutes: 15, breakMinutes: 5 };
 
 /** Действия каждые step мс в течение total мс, начиная с start. */
 function play(s: SessionData, start: number, total: number, step = 10_000, day = DAY, settings = on): SessionData {
@@ -35,8 +36,11 @@ function play(s: SessionData, start: number, total: number, step = 10_000, day =
 }
 
 describe('активное время', () => {
-  it('по умолчанию: перерыв включён, 15 минут игры, 5 минут отдыха', () => {
-    expect(on).toEqual({ enabled: true, playMinutes: 15, breakMinutes: 5 });
+  // Ловит: ТЗ-10.6, 018-Р30 — перерыв снова включён по умолчанию (ребёнка прерывают без просьбы родителя).
+  it('по умолчанию перерыв выключен: 15 минут игры, 5 минут отдыха — для включения', () => {
+    expect(defaultBreakSettings()).toEqual({ enabled: false, playMinutes: 15, breakMinutes: 5 });
+    const played = play(emptySession(), T0, 20 * MINUTE_MS, 10_000, DAY, defaultBreakSettings());
+    expect(played.breakDue).toBe(false);
   });
 
   it('промежутки между действиями складываются в время дня', () => {
@@ -197,8 +201,8 @@ describe('разбор сеанса и настроек', () => {
   });
 
   it('настройки: только разрешённые значения, иначе — по умолчанию', () => {
-    for (const raw of [null, 'off', [], 3]) expect(parseBreakSettings(raw)).toEqual(on);
-    expect(parseBreakSettings({ enabled: 'нет', playMinutes: 17, breakMinutes: 0 })).toEqual(on);
+    for (const raw of [null, 'off', [], 3]) expect(parseBreakSettings(raw)).toEqual(defaultBreakSettings());
+    expect(parseBreakSettings({ enabled: 'нет', playMinutes: 17, breakMinutes: 0 })).toEqual(defaultBreakSettings());
     expect(parseBreakSettings({ enabled: false, playMinutes: 20 })).toEqual({ ...on, enabled: false, playMinutes: 20 });
   });
 });

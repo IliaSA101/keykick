@@ -4,25 +4,8 @@
  */
 import { describe, expect, it } from 'vitest';
 import { clubData, kits } from '../src/app/kits';
-import {
-  CLUB_KIT_ID,
-  KIT_CONTRAST,
-  RIVAL_KIT_ID,
-  checkClubName,
-  checkShirtName,
-  checkShirtNumber,
-  clubKit,
-  colorDistance,
-  kitDistance,
-  parseClubData,
-  pickRival,
-  kitsDiffer,
-  rivalKit,
-  sameColors,
-  shirtBack,
-  shirtInk,
-  suggestName,
-} from '../src/engine/club';
+import { checkClubName, checkShirtName, checkShirtNumber, parseClubData } from '../src/engine/club/names';
+import { CLUB_KIT_ID, KIT_CONTRAST, RIVAL_KIT_ID, clubKit, colorDistance, kitDistance, pickRival, kitsDiffer, rivalKit, sameColors, shirtBack, shirtInk } from '../src/engine/club/kit';
 import {
   GLOSS,
   NO_ZONE,
@@ -232,23 +215,6 @@ describe('свой клуб', () => {
     expect(checkClubName('Два  пробела')).toEqual({ ok: false, error: 'spaces' });
     expect(checkClubName('-.-')).toEqual({ ok: false, error: 'noLetters' });
     expect(checkClubName('11').ok).toBe(true);
-  });
-
-  it('«Придумать»: слово или «слово город», допустимое название, не то же, что в поле', () => {
-    const seen = new Set<string>();
-    for (let seed = 0; seed < 300; seed++) {
-      const name = suggestName(clubData, '', seed);
-      expect(checkClubName(name)).toEqual({ ok: true, name });
-      expect(suggestName(clubData, '', seed)).toBe(name);
-      seen.add(name);
-    }
-    expect(seen.size).toBeGreaterThan(100);
-    expect([...seen].some((n) => n.includes(' '))).toBe(true);
-    expect([...seen].some((n) => !n.includes(' '))).toBe(true);
-    const one = { ...clubData, words: ['Старт', 'Темп'], cities: ['Тула'] };
-    for (let seed = 0; seed < 50; seed++) expect(suggestName(one, ' старт ', seed)).not.toBe('Старт');
-    // Слово из того, что уже в поле, не повторяется: иначе кажется, что кнопка не сработала.
-    for (let seed = 0; seed < 50; seed++) expect(suggestName(one, 'Старт Тула', seed).split(' ')[0]).toBe('Темп');
   });
 
   it('соперник: слово и город из content; одно зерно — тот же соперник', () => {

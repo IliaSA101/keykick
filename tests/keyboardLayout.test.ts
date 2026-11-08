@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import { keymap } from '../src/app/keymap';
 import { parseKeymap } from '../src/engine/keymap';
-import { HAND_TIPS } from '../src/art/hands';
+import { HAND_TIPS, THUMB_TIPS } from '../src/art/hands';
 import { KEY_GAP, fingerHomes, fitHands, layoutKeys, type KeyBox } from '../src/engine/keyboardLayout';
 
 const geo = layoutKeys(keymap);
@@ -116,19 +116,80 @@ describe('картинка рук на клавиатуре', () => {
   const homeY = byCode('KeyF').y + byCode('KeyF').h / 2;
 
   it('кончики в шаг клавиш ложатся точно, без искажения', () => {
+    // Ловит: искажение (разный масштаб по осям) и потерю сдвига — кончики должны лечь на свои клавиши.
     // Кончики нарисованы в 50 пикселей на клавишу, со сдвигом: подгонка должна это найти.
     const at = (f: 'lm' | 'li' | 'ri' | 'rm') => ({ x: (homes[f] + 2) * 50, y: 30 });
     const fit = fitHands(geo, { lm: at('lm'), li: at('li'), ri: at('ri'), rm: at('rm') });
     expect(fit.scale).toBeCloseTo(1 / 50);
-    expect(fit.x).toBeCloseTo(-2);
-    expect(fit.y + 30 * fit.scale).toBeCloseTo(homeY);
+    for (const side of [fit.left, fit.right]) {
+      expect(side.x).toBeCloseTo(-2);
+      expect(side.y + 30 * fit.scale).toBeCloseTo(homeY);
+    }
   });
 
-  it('у нашей картинки указательные и средние — над своими клавишами', () => {
+  it('у каждой руки свой сдвиг при общем масштабе', () => {
+    // Ловит: одна подгонка на обе руки — когда руки нарисованы не зеркально, одна из них съезжает.
+    // Правая рука нарисована на 37 пикселей правее и на 11 ниже, чем «по шагу»; шаг — 50 пикселей.
+    const at = (f: 'lm' | 'li' | 'ri' | 'rm', dx: number, dy: number) => ({ x: (homes[f] + 2) * 50 + dx, y: 30 + dy });
+    const tips = { lm: at('lm', 0, 0), li: at('li', 0, 0), ri: at('ri', 37, 11), rm: at('rm', 37, 11) };
+    const fit = fitHands(geo, tips);
+    expect(fit.scale).toBeCloseTo(1 / 50);
+    for (const f of ['lm', 'li'] as const) {
+      expect(fit.left.x + tips[f].x * fit.scale).toBeCloseTo(homes[f]);
+    }
+    for (const f of ['ri', 'rm'] as const) {
+      expect(fit.right.x + tips[f].x * fit.scale).toBeCloseTo(homes[f]);
+    }
+    expect(fit.right.y - fit.left.y).toBeCloseTo(-11 * fit.scale);
+  });
+
+  it('у нашей картинки ногти указательных — на «а» и «о», большие — на пробеле', () => {
+    // Ловит: съехавшие точки ногтей или подгонку — указательные дальше 0,15 клавиши от своей буквы,
+    // большой палец мимо пробела.
     const fit = fitHands(geo, HAND_TIPS);
-    for (const f of ['lm', 'li', 'ri', 'rm'] as const) {
-      // Не дальше пятой части клавиши: палец читается над своей буквой.
-      expect(Math.abs(fit.x + HAND_TIPS[f].x * fit.scale - homes[f])).toBeLessThan(0.2);
+    const nail = (side: 'left' | 'right', p: { x: number; y: number }) => ({
+      x: fit[side].x + p.x * fit.scale,
+      y: fit[side].y + p.y * fit.scale,
+    });
+    const a = byCode('KeyF');
+    const o = byCode('KeyJ');
+    expect(Math.abs(nail('left', HAND_TIPS.li).x - center(a))).toBeLessThan(0.15);
+    expect(Math.abs(nail('right', HAND_TIPS.ri).x - center(o))).toBeLessThan(0.15);
+    // Средние — тоже над своими клавишами, не дальше той же меры.
+    expect(Math.abs(nail('left', HAND_TIPS.lm).x - homes.lm)).toBeLessThan(0.15);
+    expect(Math.abs(nail('right', HAND_TIPS.rm).x - homes.rm)).toBeLessThan(0.15);
+    const space = byCode('Space');
+    for (const side of ['left', 'right'] as const) {
+      const t = nail(side, THUMB_TIPS[side]);
+      expect(t.x).toBeGreaterThan(space.x);
+      expect(t.x).toBeLessThan(space.x + space.w);
+      expect(t.y).toBeGreaterThan(space.y);
+      expect(t.y).toBeLessThan(space.y + space.h);
+    }
+    // Левый большой левее правого.
+    expect(nail('left', THUMB_TIPS.left).x).toBeLessThan(nail('right', THUMB_TIPS.right).x);
+  });
+
+  it('все 8 ногтей лежат на своих клавишах основного ряда', () => {
+    // Ловит: подъём или общий сдвиг картинки на полряда — ногти на верхнем ряду (Й Ц У…) читаются как «средний — на У».
+    const fit = fitHands(geo, HAND_TIPS);
+    const row: [keyof typeof HAND_TIPS, string, 'left' | 'right'][] = [
+      ['lp', 'KeyA', 'left'],
+      ['lr', 'KeyS', 'left'],
+      ['lm', 'KeyD', 'left'],
+      ['li', 'KeyF', 'left'],
+      ['ri', 'KeyJ', 'right'],
+      ['rm', 'KeyK', 'right'],
+      ['rr', 'KeyL', 'right'],
+      ['rp', 'Semicolon', 'right'],
+    ];
+    for (const [finger, code, side] of row) {
+      const box = byCode(code);
+      expect(box.key.finger).toBe(finger);
+      const dx = fit[side].x + HAND_TIPS[finger].x * fit.scale - center(box);
+      const dy = fit[side].y + HAND_TIPS[finger].y * fit.scale - (box.y + box.h / 2);
+      expect(Math.abs(dx), `${finger} по x`).toBeLessThanOrEqual(0.35);
+      expect(Math.abs(dy), `${finger} по y`).toBeLessThanOrEqual(0.35);
     }
   });
 });

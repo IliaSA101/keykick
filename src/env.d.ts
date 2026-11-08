@@ -6,3 +6,8 @@ declare module '*.vue' {
   const component: DefineComponent<object, object, unknown>;
   export default component;
 }
+
+interface ImportMetaEnv {
+  /** Канал сборки: release — выпуск меток v2+ (задаёт tools/build-site.mjs); нет или иное — next. */
+  readonly VITE_KK_CHANNEL?: string;
+}

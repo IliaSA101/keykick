@@ -57,7 +57,8 @@ export interface SharedSession {
 }
 
 export function defaultBreakSettings(): BreakSettings {
-  return { enabled: true, playMinutes: 15, breakMinutes: 5 };
+  // Выключен по умолчанию (ТЗ-10.6, 018-Р30): перерыв включает родитель.
+  return { enabled: false, playMinutes: 15, breakMinutes: 5 };
 }
 
 export function emptySession(): SessionData {

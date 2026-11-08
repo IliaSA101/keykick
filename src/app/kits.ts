@@ -2,7 +2,7 @@
 // (тест падает на ошибке в JSON).
 import clubsJson from '../content/clubs.json';
 import kitsJson from '../content/kits.json';
-import { parseClubData } from '../engine/club';
+import { parseClubData } from '../engine/club/names';
 import { parseKits } from '../engine/kit';
 
 export const kits = parseKits(kitsJson);

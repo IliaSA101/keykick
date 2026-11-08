@@ -1,8 +1,9 @@
 /**
- * План тайма: атаки по лесенке потолка урока, длины строк, ловушка смены, веса букв.
+ * Общее для генератора: атака (ступень и длина строки), границы ловушки смены, веса букв.
+ * План тайма v1 (attackPlan, HALF_LINES, LINE_RANGES) убран в 016-Т6: тайм v2 строит engine/course/attack.ts.
  */
 import { findChar, type Keymap } from './keymap';
-import { lettersOf, unique, type Lesson, type Material } from './lessonModel';
+import { lettersOf, type Lesson, type Material } from './lessonModel';
 import type { TypingStats } from './typing';
 
 /** Атака тайма: ступень материала и длина строки в знаках. */
@@ -10,38 +11,9 @@ export interface Attack {
   material: Material;
   min: number;
   max: number;
-  /** Чистая строка одной буквы («а а а…»): первые атаки урока одиночных букв (04.11). */
-  letter?: string;
   /** Ловушка смены: «в в в … л л л», какая буква первая — по зерну (решающая уроков 1–2). */
   trap?: [string, string];
 }
-
-/** Атак в тайме; последняя — решающая. */
-export const HALF_LINES = 6;
-
-/**
- * Длина строки по атакам: первые короткие — новичок не теряет строку, к решающей длиннее.
- * Решение 04.11: первые атаки ~12–16 знаков, последние ~20–26.
- */
-export const LINE_RANGES: readonly (readonly [number, number])[] = [
-  [12, 16],
-  [13, 17],
-  [15, 20],
-  [16, 22],
-  [18, 24],
-  [20, 26],
-];
-export const LINE_MIN = 12;
-export const LINE_MAX = 26;
-
-/** Лесенка тайма по потолку урока: от простого к сложному, решающая — на потолке. */
-const LADDER: Readonly<Record<Material, readonly Material[]>> = {
-  letters: ['letters', 'letters', 'letters', 'letters', 'letters', 'letters'],
-  pairs: ['letters', 'letters', 'pairs', 'pairs', 'pairs', 'pairs'],
-  combos: ['letters', 'letters', 'pairs', 'combos', 'combos', 'combos'],
-  words: ['letters', 'letters', 'pairs', 'combos', 'words', 'words'],
-  phrases: ['letters', 'pairs', 'combos', 'words', 'phrases', 'phrases'],
-};
 
 // Вес буквы: основа, прибавка новым клавишам урока, прибавка за каждую ошибку (с потолком).
 const BASE_WEIGHT = 1;
@@ -54,21 +26,8 @@ const ERROR_CAP = 3;
 export const TRAP_FROM = 0.4;
 export const TRAP_TO = 0.6;
 
-/** Прибавка доли знака конца за каждую ошибку на его клавише (с потолком ERROR_CAP): до +0,3. */
-export const MARK_ERROR_SHARE = 0.1;
-
-/**
- * Прибавка доли знака конца урока («.») по прошлым ошибкам на его клавише: знака нет в весах букв,
- * а «трудные клавиши» обещают больше тренировки — растёт доля кусков и строк со знаком (009-Р21).
- */
-export function markBoost(lesson: Lesson, map: Keymap, mark: string, stats?: TypingStats): number {
-  const code = mark ? findChar(map, lesson.layout, mark)?.key.code : undefined;
-  const errors = code ? (stats?.keyErrors[code] ?? 0) : 0;
-  return MARK_ERROR_SHARE * Math.min(ERROR_CAP, errors);
-}
-
 /** Вес каждой буквы урока с учётом прошлых ошибок ребёнка. Знаков («.») в весах нет (спека 009). */
-export function letterWeights(lesson: Lesson, map: Keymap, stats?: TypingStats): Map<string, number> {
+export function letterWeights(lesson: Pick<Lesson, 'keys' | 'layout' | 'focus'>, map: Keymap, stats?: TypingStats): Map<string, number> {
   const weights = new Map<string, number>();
   for (const ch of lettersOf(lesson)) {
     const code = findChar(map, lesson.layout, ch)?.key.code;
@@ -86,28 +45,4 @@ export function letterWeights(lesson: Lesson, map: Keymap, stats?: TypingStats):
     for (const [ch, w] of focus) weights.set(ch, w * scale);
   }
   return weights;
-}
-
-/**
- * Атаки тайма: ступень по лесенке потолка урока и длина строки. Урок одиночных букв
- * (потолок letters) начинается чистыми строками каждой новой буквы по порядку («а а а…»,
- * потом «о о о…»), дальше — буквы урока вперемешку; решающая — всегда вперемешку.
- * Второй тайм — тот же план с другим зерном: чистые строки те же, смешанные — другие.
- * decisive — тайм с решающей атакой: у урока одиночных букв с двумя новыми она — ловушка смены.
- */
-export function attackPlan(lesson: Lesson, decisive = false): Attack[] {
-  const fresh = unique(lesson.newKeys);
-  const pure = lesson.material === 'letters' ? fresh.slice(0, HALF_LINES - 1) : [];
-  const [a, b] = fresh;
-  const trap: [string, string] | null =
-    decisive && lesson.material === 'letters' && fresh.length === 2 && a && b ? [a, b] : null;
-  const ladder = LADDER[lesson.material];
-  return ladder.map((material, i) => {
-    const [min, max] = LINE_RANGES[i] ?? [LINE_MIN, LINE_MAX];
-    const attack: Attack = { material, min, max };
-    const letter = pure[i];
-    if (letter) attack.letter = letter;
-    if (trap && i === ladder.length - 1) attack.trap = trap;
-    return attack;
-  });
 }

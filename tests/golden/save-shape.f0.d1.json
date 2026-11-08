@@ -1,0 +1,8 @@
+{
+  "(root)": "object",
+  "app": "string",
+  "draft": "number",
+  "format": "number",
+  "rev": "number",
+  "sections": "object"
+}
