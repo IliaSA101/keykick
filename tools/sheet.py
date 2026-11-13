@@ -142,17 +142,17 @@ def flood_cut(image: Image.Image, white: int, feather: float) -> Image.Image:
     return out
 
 
-def defringe(rgba: np.ndarray) -> np.ndarray:
-    """Убрать светлую кайму от белого фона.
+def defringe(rgba: np.ndarray, bg: float = 255.0) -> np.ndarray:
+    """Убрать светлую кайму от фона (белого; серого листа — bg=217).
 
-    При 0 < a < 255 цвет восстанавливается как C' = (C - (1 - a) * 255) / a,
-    иначе на тёмном фоне у спрайта виден белый контур. a = 255 не трогаем.
+    При 0 < a < 255 цвет восстанавливается как C' = (C - (1 - a) * bg) / a,
+    иначе на тёмном фоне у спрайта виден светлый контур. a = 255 не трогаем.
     """
     out = rgba.astype(np.float32)
     alpha = out[..., 3:4] / 255.0
     edge = (alpha > 0) & (alpha < 1)
     rgb = out[..., :3]
-    fixed = (rgb - (1.0 - alpha) * 255.0) / np.clip(alpha, 1e-4, None)
+    fixed = (rgb - (1.0 - alpha) * bg) / np.clip(alpha, 1e-4, None)
     out[..., :3] = np.where(np.repeat(edge, 3, axis=2), np.clip(fixed, 0, 255), rgb)
     # Полупрозрачную «дымку» внутри предмета делаем плотной.
     a = out[..., 3]

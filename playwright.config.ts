@@ -10,6 +10,8 @@ export default defineConfig({
   timeout: 60_000,
   workers: 1,
   retries: 0,
+  // забытый test.only молча выключил бы остальные сценарии — падаем всегда, не только в CI (web-frontend, 14.11)
+  forbidOnly: true,
   reporter: 'list',
   use: {
     channel: 'chrome',

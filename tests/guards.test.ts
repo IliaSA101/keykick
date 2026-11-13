@@ -65,6 +65,38 @@ describe('размер файлов', () => {
   });
 });
 
+describe('оснастка без временных путей (ретро 023)', () => {
+  // Ловит: скрипт сборки пишет или читает во временной папке сессии — после перезагрузки ВМ её нет
+  // (compose_gold.py писал в scratchpad, пересборка жила там же).
+  const TMP = /\/tmp\/[\w.]+-\d+\/|scratchpad\//; // папка сессии агента: /tmp/<имя>-<uid>/…
+  const files = walk(join(root, 'tools')).filter((p) => /\.(py|mjs|sh)$/.test(p));
+  it('страж видит оснастку и узнаёт временный путь', () => {
+    expect(files.length).toBeGreaterThan(5);
+    expect(TMP.test("S = '/tmp/agent-1000/x/'")).toBe(true);
+    expect(TMP.test("S = 'x/scratchpad/'")).toBe(true);
+  });
+  it('в tools/ нет путей во временную папку сессии', () => {
+    const bad = files.filter((p) => TMP.test(readFileSync(p, 'utf8'))).map(rel);
+    expect(bad).toEqual([]);
+  });
+});
+
+describe('тесты без .only и .skip (web-frontend, 14.11)', () => {
+  // Ловит: забытый `.only` молча выключает остальные тесты файла, `.skip` — тест, который «временно» не идёт никогда.
+  // Эталон числа тестов в accept ловит пропажу теста, но не `.only` в одном файле (остальные файлы идут).
+  const FOCUS = /\b(?:it|test|describe)\.(?:only|skip)\(/;
+  const files = walk(join(root, 'tests')).filter((p) => /\.(test|spec)\.ts$/.test(p) && !p.endsWith('guards.test.ts'));
+  it('страж видит тесты и узнаёт .only', () => {
+    expect(files.length).toBeGreaterThan(20);
+    expect(FOCUS.test("it.only('x', () => {})")).toBe(true);
+    expect(FOCUS.test("it('only', () => {})")).toBe(false);
+  });
+  it('в тестах нет .only и .skip', () => {
+    const bad = files.filter((p) => FOCUS.test(withoutComments(readFileSync(p, 'utf8')))).map(rel);
+    expect(bad).toEqual([]);
+  });
+});
+
 describe('тексты ru.ts', () => {
   function leaves(node: unknown, path: string): [string, unknown][] {
     if (node !== null && typeof node === 'object') {

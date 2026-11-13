@@ -72,6 +72,8 @@ const bottom = Math.max(...halves.map((h) => h.y + h.height));
 const MARK_R = 0.11;
 const LIT_R = 0.17;
 const HALO_R = 0.27;
+/** Кольцо в верхней точке пульса: HALO_R × 1,25 (так же растёт и толщина обводки — см. стили). */
+const HALO_WIDE_R = HALO_R * 1.25;
 
 const viewBox = `${-VIEW_PAD} ${-VIEW_PAD} ${geo.width + 2 * VIEW_PAD} ${bottom + VIEW_PAD}`;
 
@@ -162,13 +164,20 @@ const ariaLabel = computed(() => {
         :class="{ lit: isLit(m) }"
         :style="{ '--zone': `var(--finger-${m.finger})` }"
       >
-        <circle
-          v-if="isLit(m)"
-          class="halo"
-          :cx="m.x"
-          :cy="m.y"
-          :r="HALO_R"
-        />
+        <template v-if="isLit(m)">
+          <circle
+            class="halo"
+            :cx="m.x"
+            :cy="m.y"
+            :r="HALO_R"
+          />
+          <circle
+            class="halo halo-wide"
+            :cx="m.x"
+            :cy="m.y"
+            :r="HALO_WIDE_R"
+          />
+        </template>
         <circle
           class="dot"
           :cx="m.x"
@@ -204,19 +213,34 @@ const ariaLabel = computed(() => {
   stroke-width: 0.045;
 }
 
+/*
+ * Пульс кольца — только opacity: Chrome считает её на композиторе. Анимация transform: scale у SVG-элемента
+ * (и transform-box: fill-box) гоняла раскладку и стили каждый кадр, даже в покое. Рост кольца в 1,25 раза
+ * заменён перекрёстным затуханием двух колец: обычное гаснет, крупное проявляется; в крайних точках вид тот же
+ * (1 при радиусе 0,27 и 0,35 при 0,3375, толщина обводки 0,06 и 0,075).
+ */
 .halo {
   fill: color-mix(in srgb, var(--zone) 25%, transparent);
   stroke: var(--zone);
   stroke-width: 0.06;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: pulse 1.1s ease-in-out infinite;
+  animation: pulse-thin 1.1s ease-in-out infinite;
 }
 
-@keyframes pulse {
+.halo-wide {
+  stroke-width: 0.075;
+  opacity: 0;
+  animation-name: pulse-wide;
+}
+
+@keyframes pulse-thin {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-wide {
   50% {
     opacity: 0.35;
-    transform: scale(1.25);
   }
 }
 

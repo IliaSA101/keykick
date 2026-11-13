@@ -240,8 +240,8 @@ button.node {
 
 /* Кубок мира виден всегда, даже в тумане (ТЗ-1.3). */
 .cup .marker {
-  border-color: var(--map-flag);
-  color: var(--map-flag);
+  border-color: var(--map-cup);
+  color: var(--map-cup);
   opacity: 1;
 }
 

@@ -135,16 +135,27 @@ watch(
       rx="0.14"
     />
     <!-- Обводка поверх всех клавиш: так её не перекрывают соседи. -->
-    <rect
+    <g
       v-for="b in rings"
       :key="`ring-${b.key.code}-${b.x}`"
-      class="ring"
-      :x="b.x - 0.04"
-      :y="b.y - 0.04"
-      :width="b.w + 0.08"
-      :height="b.h + 0.08"
-      rx="0.17"
-    />
+    >
+      <rect
+        class="ring"
+        :x="b.x - 0.04"
+        :y="b.y - 0.04"
+        :width="b.w + 0.08"
+        :height="b.h + 0.08"
+        rx="0.17"
+      />
+      <rect
+        class="ring ring-wide"
+        :x="b.x - 0.04"
+        :y="b.y - 0.04"
+        :width="b.w + 0.08"
+        :height="b.h + 0.08"
+        rx="0.17"
+      />
+    </g>
     <rect
       v-if="flashId > 0 && targetBox"
       :key="flashId"
@@ -211,11 +222,22 @@ watch(
   stroke: var(--on-zone);
 }
 
+/*
+ * Пульс обводки — только opacity: Chrome считает её на композиторе. Анимация stroke-width гоняла раскладку
+ * и стили каждый кадр, даже когда ребёнок ничего не нажимает. Толщина 0,07 → 0,12 заменена перекрёстным
+ * затуханием двух рамок: тонкая гаснет, толстая проявляется; в крайних точках вид тот же (1 и 0,07 / 0,35 и 0,12).
+ */
 .ring {
   fill: none;
   stroke: var(--text);
   stroke-width: 0.07;
-  animation: pulse 1.1s ease-in-out infinite;
+  animation: pulse-thin 1.1s ease-in-out infinite;
+}
+
+.ring-wide {
+  stroke-width: 0.12;
+  opacity: 0;
+  animation-name: pulse-wide;
 }
 
 .flash {
@@ -224,10 +246,15 @@ watch(
   animation: flash 450ms ease-out forwards;
 }
 
-@keyframes pulse {
+@keyframes pulse-thin {
   50% {
-    stroke-opacity: 0.35;
-    stroke-width: 0.12;
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-wide {
+  50% {
+    opacity: 0.35;
   }
 }
 

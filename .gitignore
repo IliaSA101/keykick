@@ -4,10 +4,18 @@ dist/
 *.local
 .vite/
 
-
 # Исходники и промежуточная графика (большие генерации) — вне git.
 art-src/
 art-work/
-test-results/
-# Кадры npm run shots.
+# В рабочих копиях агентов это символьные ссылки (tools/worktree-art.sh): шаблон со слэшем их не берёт.
+/art-src
+/art-work
+# Кадры npm run shots, если путь не задан в tools/shots.local.json.
 /shots/
+test-results/
+
+# байткод Python оснастки макетов (12.11: попал в коммит kit)
+__pycache__/
+# Кадры макетов — пересобирает генератор, в git не хранятся (владелец 12.11; принятые — архивом в выпуски keykick-dev).
+docs/mockups/**/png/
+/seeloop-view/

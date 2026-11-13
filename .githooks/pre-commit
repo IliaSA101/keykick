@@ -83,4 +83,20 @@ if [ -n "$code" ]; then
   npx vue-tsc --noEmit || fail=1
 fi
 
+# 5. Дизайн-макеты (ретро 023, владелец 10.11: П4, П13).
+# Кадры макетов и холста в git не хранятся (владелец 12.11: история 9,4 ГБ, из них 8,1 ГБ — пересобираемые кадры;
+# keykick-dev пересобран без них, полная история — keykick-dev-archive). Кадры — на диске (пересобирает генератор),
+# снимки принятых макетов — архивом в выпуски (Releases) keykick-dev, версии для «было / стало» — свой холст.
+shots=$(echo "$staged" | grep -E '^docs/mockups/.*/png/|^\.[a-z]+/ops/schemes/canvas/project/shots/' || true)
+if [ -n "$shots" ]; then
+  echo "pre-commit: кадры ($(echo "$shots" | wc -l | tr -d ' ') файлов) в git не хранятся — убрать из коммита: git restore --staged <пути>"
+  echo "  принятый макет — архивом в выпуск keykick-dev (docs/mockup-guide.md)"
+  fail=1
+fi
+# Стражи макета — когда коммит трогает генераторы или макеты: сверка частей (0,04 с) и ТАБУ (≈ 4 с).
+if echo "$staged" | grep -qE '^(tools/mock-|tools/mock-map/|tools/mock-kit/|tools/mock-mk1/|docs/mockups/)'; then
+  node tools/mock-check.mjs > /dev/null || { node tools/mock-check.mjs | tail -5; fail=1; }
+  python3 tools/mock-map/qc.py taboo > /dev/null 2>&1 || { python3 tools/mock-map/qc.py taboo | tail -5; fail=1; }
+fi
+
 [ "$fail" -eq 0 ] || { echo "pre-commit: коммит остановлен"; exit 1; }

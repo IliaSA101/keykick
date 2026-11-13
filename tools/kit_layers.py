@@ -1,7 +1,7 @@
 """Разложение основы формы на слои для перекраски кодом.
 
 Основа — генерация, где зоны залиты чистыми разными цветами: корпус красный,
-рукава синие, воротник и манжеты жёлтые. Из одной картинки получаем:
+рукава синие, воротник и манжеты жёлтые (или зелёные — флаг --trim-hue 90:160). Из одной картинки получаем:
 
     zones.webp — R = корпус, G = рукава, B = окантовка (доли 0…255);
     shade.webp — R = затемнение (во сколько раз темнее светлого места зоны),
@@ -63,14 +63,20 @@ def hsv(rgb: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
 
 def zone_votes(
-    h: np.ndarray, s: np.ndarray, v: np.ndarray, inside: np.ndarray, neutral: bool = False
+    h: np.ndarray,
+    s: np.ndarray,
+    v: np.ndarray,
+    inside: np.ndarray,
+    neutral: bool = False,
+    trim: tuple[float, float] = YELLOW,
 ) -> np.ndarray:
     """Зона каждого пикселя: 0 — корпус, 1 — рукава, 2 — окантовка, NONE — без зоны.
 
     Уверенные пиксели — по оттенку; блики и спорные оттенки получают зону
-    ближайших уверенных соседей (размытое голосование).
+    ближайших уверенных соседей (размытое голосование). trim — диапазон оттенка
+    зоны окантовки: по умолчанию жёлтый, у основ «на вешалке» (--trim-hue) — зелёный.
     """
-    yellow = (h >= YELLOW[0]) & (h <= YELLOW[1])
+    yellow = (h >= trim[0]) & (h <= trim[1])
     blue = (h >= BLUE[0]) & (h <= BLUE[1])
     red = (h >= RED[0]) | (h <= RED[1])
     sure = inside & (s >= PALE) & (red | yellow | blue)
@@ -85,7 +91,7 @@ def zone_votes(
     # Спорный оттенок выбирает только из соседних по кругу: оранжевый — корпус
     # или окантовка (не рукав), фиолетовый — корпус или рукав (не окантовка).
     vivid = inside & (s >= PALE) & ~sure
-    orange = vivid & (h > RED[1]) & (h < YELLOW[0])
+    orange = vivid & (h > RED[1]) & (h < trim[0])
     purple = vivid & (h > BLUE[1]) & (h < RED[0])
     stack[..., 1] -= orange * 1000.0
     stack[..., 2] -= purple * 1000.0
@@ -143,8 +149,19 @@ def main() -> None:
     p.add_argument("--out", type=pathlib.Path, required=True, help="папка для zones.png и shade.png")
     p.add_argument("--side", type=int, default=640, help="сторона квадрата результата")
     p.add_argument("--neutral", action="store_true", help="тёмное ненасыщенное — без зоны (подошва бутс)")
+    p.add_argument(
+        "--trim-hue",
+        metavar="ОТ:ДО",
+        help="оттенок зоны окантовки в градусах вместо жёлтого 36:75; зелёная отделка — 90:160",
+    )
     p.add_argument("--pad", type=int, default=24, help="поле вокруг формы в исходных пикселях")
     args = p.parse_args()
+    trim = YELLOW
+    if args.trim_hue:
+        lo, hi = (float(x) for x in args.trim_hue.split(":"))
+        if not RED[1] < lo < hi < BLUE[0]:
+            sys.exit(f"--trim-hue {args.trim_hue}: нужен диапазон между красным и синим ({RED[1]}…{BLUE[0]})")
+        trim = (lo, hi)
 
     cut = args.out / "cut.png"
     run_rembg(args.source, cut)
@@ -161,7 +178,7 @@ def main() -> None:
     a = rgba[..., 3]
     inside = a > 0
     h, s, v = hsv(rgb)
-    zone = zone_votes(h, s, v, inside, args.neutral)
+    zone = zone_votes(h, s, v, inside, args.neutral, trim)
     dark, gloss = shading(v, s, zone, inside)
 
     def shrink(arr: np.ndarray) -> np.ndarray:

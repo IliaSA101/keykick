@@ -216,5 +216,10 @@ export function metrics(records: readonly JournalRecord[], _keys: readonly KeysL
     firstTryPass(records),
     medianCpm(records),
   ];
-  return METRIC_IDS.map((id) => all.find((r) => r.id === id)!);
+  return METRIC_IDS.map((id) => {
+    const row = all.find((r) => r.id === id);
+    // строка без расчёта — ошибка разработчика: падать громко, а не показывать родителю пустую строку
+    if (!row) throw new Error(`metrics: no row for ${id}`);
+    return row;
+  });
 }

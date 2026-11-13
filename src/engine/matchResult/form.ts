@@ -1,7 +1,7 @@
 /**
  * Матч v2 (спека 017, design §8): форма клавиш — 8 игроков-пальцев, окно последних нажатий, ранги.
  * Чистые функции: состояние приходит параметром, новое возвращается. Большие пальцы без ранга.
- * Ранг 0 — «юниор», 1…4 — «новичок / основа / сборная / звезда» (тексты — в i18n, не здесь).
+ * Ранг 0 — «юниор», 1…4 — «запас / основа / сборная / звезда» (тексты — в i18n, не здесь).
  */
 import type { Finger } from '../keymap';
 import type { FormRules, SquadPlayer } from '../match/rules';
@@ -71,7 +71,7 @@ export function rawRank(bits: readonly boolean[], rules: FormRules): number {
 }
 
 /**
- * Проверка в итоге матча (design §8): «новичок», «основа» — по `rawRank`; «сборная» и «звезда» — только после
+ * Проверка в итоге матча (design §8): «запас», «основа» — по `rawRank`; «сборная» и «звезда» — только после
  * `confirm` итогов подряд с тем же порогом на полном окне. `maxRank` только растёт.
  */
 export function settleForm(form: FormState, squad: readonly SquadPlayer[], rules: FormRules): FormState {

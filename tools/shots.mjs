@@ -1,7 +1,7 @@
 // Кадры всех экранов: `npm run shots` (спека 015, design.md §3).
 // Свой vite на порту оснастки → ссылки a[data-frame] со страницы #/dev/frames → PNG каждого кадра
 // в 4 окнах × 2 темах → лист index.html. Бюджет — 2 минуты (печатается, порогом не рвёт).
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PORTS, launchChrome, startVite } from './lib/chrome.mjs'
@@ -28,6 +28,15 @@ const errors = []
 function stamp(d = new Date()) {
   const p = (n) => String(n).padStart(2, '0')
   return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`
+}
+
+/** Хранение: остаются последние 3 прогона; удаляется только внутри папки кадров (shotsBase). */
+function prune(base, keep = 3) {
+  const runs = readdirSync(base, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && /^\d{8}-\d{4}$/.test(e.name))
+    .map((e) => e.name)
+    .sort()
+  for (const old of runs.slice(0, Math.max(0, runs.length - keep))) rmSync(join(base, old), { recursive: true, force: true })
 }
 
 /** Кадр дождался готовности: отметка роутера, шрифты, картинки, два кадра отрисовки. */
@@ -175,8 +184,12 @@ ${errors.length ? `<h2>Ошибки</h2><ul>${errors.map((e) => `<li>${e}</li>`)
 }
 
 async function main() {
-  const dir = join(ROOT, 'shots', stamp())
+  // Папка кадров: в dev — из tools/shots.local.json (кухня, в открытый main не идёт), иначе shots/ в корне.
+  const local = join(ROOT, 'tools', 'shots.local.json')
+  const shotsBase = join(ROOT, existsSync(local) ? JSON.parse(readFileSync(local, 'utf8')).dir : 'shots')
+  const dir = join(shotsBase, stamp())
   mkdirSync(dir, { recursive: true })
+  prune(shotsBase)
   const stop = await startVite(PORT)
   process.once('exit', stop)
   process.once('SIGINT', () => process.exit(130))
