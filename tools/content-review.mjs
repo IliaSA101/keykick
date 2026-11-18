@@ -10,6 +10,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readYardLessons } from './lib/yard-lessons.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel) => JSON.parse(readFileSync(join(root, rel), 'utf8'));
@@ -58,9 +59,9 @@ say();
 
 say('## Уроки (32)');
 say();
-const lessonsFile = join(root, 'src/content/lessons-yard.json');
+const lessonsFile = join(root, 'src/content/packs/ru.yard/lessons.json');
 if (existsSync(lessonsFile)) {
-  const yard = JSON.parse(readFileSync(lessonsFile, 'utf8'));
+  const yard = readYardLessons();
   const stages = new Map((yard.stages ?? []).map((s) => [s.n, s]));
   yard.lessons.forEach((l, i) => {
     const st = stages.get(l.stage);
@@ -72,7 +73,7 @@ if (existsSync(lessonsFile)) {
     say();
   });
 } else {
-  say('_Файла `src/content/lessons-yard.json` пока нет (задача 016-Т2) — после его появления пересобрать._');
+  say('_Файла `src/content/packs/ru.yard/lessons.json` пока нет — после его появления пересобрать._');
   say();
 }
 

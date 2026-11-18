@@ -3,13 +3,13 @@
  * позе печати — пальцы согнуты, ладони вниз, большие пальцы внизу у центра. Фон снят
  * tools/hands_cut.py (заливка от края, PIL). Шаг кончиков неровный, а руки нарисованы не
  * зеркально, поэтому метки пальцев ставятся по точкам, снятым с самой картинки, а каждая рука
- * ложится на клавиатуру отдельно (engine/keyboardLayout.fitHands).
+ * ложится на клавиатуру отдельно (engine/typing/keyboardLayout.fitHands).
  *
  * Все числа — в пикселях файла 1600×748. Картинка тянется в SVG целиком, важны только доли.
  * Замер: середина ногтя каждого пальца по увеличенным кадрам с наложенными кружками (017-Т3).
  */
-import type { Finger } from '../engine/keymap';
-import type { ImagePoint } from '../engine/keyboardLayout';
+import type { Finger } from '../engine/typing/keymap';
+import type { ImagePoint } from '../engine/typing/keyboardLayout';
 
 /** Размер файла, от которого считаны точки. */
 export const HANDS_SIZE = { width: 1600, height: 748 } as const;

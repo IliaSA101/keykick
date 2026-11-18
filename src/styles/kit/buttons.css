@@ -1,0 +1,205 @@
+/* ЭБ · Кнопки (главная, обычная, тихая), ярлыки-кнопки, подсказка наведения. Из docs/mockups/kit/kit.css (строки 144–337), классы те же; разметка — компоненты src/components/kit. */
+/* ---------- кнопки: главная (одна на экран), обычная, тихая; размер .md — в карточках ---------- */
+.btns {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.key-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 150px;
+  padding: 8px 22px;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 1.15;
+  color: #1b3a12;
+  background: linear-gradient(#ffffff, #e4ecd9);
+  box-shadow:
+    0 5px 0 #9fb58a,
+    0 8px 14px rgb(0 0 0 / 0.3);
+}
+.key-btn small {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.75;
+}
+.key-btn.primary {
+  font-size: 22px;
+  padding: 10px 30px;
+  color: #fff;
+  background: linear-gradient(#3a9e2e, #257d20); /* Р43а: белый текст ≥ 3:1 по всей кнопке */
+  box-shadow:
+    0 6px 0 #145212,
+    0 0 0 3px #f4c24a,
+    0 10px 18px rgb(0 0 0 / 0.35);
+  text-shadow: 0 2px 0 #145212;
+}
+.key-btn.primary small {
+  opacity: 1;
+}
+.key-btn.primary.md {
+  font-size: 19px;
+  padding: 6px 28px;
+}
+.key-btn.md:not(.primary) {
+  min-width: 0;
+  padding: 5px 16px;
+  font-size: 16px;
+}
+/* тихая кнопка не ниже 44 px (docs/ux-review.md): палец ребёнка; ряды кнопок выравнены по центру, окна считают высоту по содержимому */
+.key-btn.quiet.md {
+  padding: 3px 12px;
+  font-size: 14px;
+}
+.key-btn.quiet {
+  min-height: 44px;
+  background: rgb(255 255 255 / 0.1);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1.5px var(--border);
+  min-width: 0;
+  padding: 8px 18px;
+  font-size: 16px;
+}
+/* «Закрыть Esc»: тихая, но не «выключенная» на вид — контур светлее (--text-muted, 2 px) и клавиша Esc без приглушения (смотр ребёнка Р38, п.12) */
+.key-btn.quiet.close {
+  background: rgb(255 255 255 / 0.14);
+  box-shadow: inset 0 0 0 2px var(--text-muted);
+}
+.key-btn.quiet.close small {
+  opacity: 1;
+  color: var(--text-muted);
+}
+/* стрелка-клавиша под текстом кнопки («←», «→ Enter»): SVG 16 × 11 px — глиф стрелки в шрифте выходил ≈ 8 × 3 px (Р39, kk-control п.8) */
+.key-btn small .arr {
+  display: inline-block;
+  width: 16px;
+  height: 11px;
+  vertical-align: -1px;
+}
+.key-btn small .arr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* состояния: обычная · выбрана (.hover) · нажата (.down) · недоступна (.off) */
+/* «выбрана» — мышь над кнопкой или выбор клавишей (Tab, стрелки): одно состояние, видно сразу — светлое кольцо и подъём */
+.key-btn.hover,
+button.key-btn:hover:not(:disabled),
+button.key-btn:focus-visible {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow:
+    0 7px 0 #9fb58a,
+    0 0 0 3px var(--text),
+    0 0 16px 3px rgb(255 246 224 / 0.45),
+    0 12px 18px rgb(0 0 0 / 0.3);
+}
+.key-btn.primary.hover,
+button.key-btn.primary:hover:not(:disabled),
+button.key-btn.primary:focus-visible {
+  box-shadow:
+    0 8px 0 #145212,
+    0 0 0 3px var(--text),
+    0 0 18px 5px rgb(255 246 224 / 0.55),
+    0 12px 20px rgb(0 0 0 / 0.35);
+}
+.key-btn.quiet.hover,
+button.key-btn.quiet:hover:not(:disabled),
+button.key-btn.quiet:focus-visible {
+  transform: none;
+  background: rgb(255 255 255 / 0.2);
+  box-shadow:
+    inset 0 0 0 2px var(--text),
+    0 0 12px 2px rgb(255 246 224 / 0.35);
+}
+.key-btn.down,
+button.key-btn:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow:
+    0 1px 0 #9fb58a,
+    0 3px 6px rgb(0 0 0 / 0.3);
+}
+.key-btn.primary.down,
+button.key-btn.primary:active:not(:disabled) {
+  box-shadow:
+    0 1px 0 #145212,
+    0 0 0 3px #f4c24a;
+}
+/* ТАБУ 11.11: на синей панели кайма главной кнопки — белая (зелёное с золотом можно, но золото здесь касается синего); на зелёной сцене — золотая как была.
+   Признак .on-blue — «этот контейнер сам синий» (любой кадр на синем фоне вне панелей); .sc-main — журнал «Школы» (тёмно-синий, кнопка вне .panel; решение потока «Олимпиада» 11.11):
+   кнопка внутри него получает белую кайму так же, как внутри панели. Кадр на зелёной сцене класса не получает — кайма золотая. */
+:is(.panel, .kb-event, .kb-bub, .pop, .on-blue, .sc-main) .key-btn.primary:not(.hover):not(.down) {
+  box-shadow:
+    0 6px 0 #145212,
+    0 0 0 3px #fff,
+    0 10px 18px rgb(0 0 0 / 0.35);
+}
+:is(.panel, .kb-event, .kb-bub, .pop, .on-blue, .sc-main) .key-btn.primary.down {
+  box-shadow:
+    0 1px 0 #145212,
+    0 0 0 3px #fff;
+}
+.key-btn.quiet.down,
+button.key-btn.quiet:active:not(:disabled) {
+  box-shadow: inset 0 0 0 1.5px var(--border);
+  background: rgb(255 255 255 / 0.18);
+}
+.key-btn.off,
+button.key-btn:disabled {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
+/* плоская кнопка-ярлык («Лист лиги», выбор урока): не главное действие */
+.kb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  box-shadow: inset 0 0 0 2px rgb(119 184 244 / 0.6);
+  background: rgb(21 20 58 / 0.7);
+  white-space: nowrap;
+}
+.kb-chip.sm {
+  font-size: 12px;
+  padding: 2px 8px;
+}
+/* подсказка наведения («щелчок или Enter — уроки двора»): не кнопка — спокойная кайма --border; место задаёт лист */
+.kb-chip.tip {
+  font-size: 15px;
+  color: var(--text-muted);
+  background: rgb(21 20 58 / 0.94);
+  box-shadow: inset 0 0 0 1.5px var(--border);
+  /* строки подсказки (.ln) — колонкой по центру: «★★★ k из n» и «щелчок или Enter — …» отдельными строками (Р41 п.3) */
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  text-align: center;
+  line-height: 1.25;
+}
+.kb-chip.tip .ln {
+  display: block;
+}
+/* окно ярлыка открыто: ярлык золотом и над затемнением — видно, откуда окно */
+.kb-chip.open {
+  position: relative;
+  z-index: 12;
+  background: var(--accent);
+  color: #2a1d00;
+  box-shadow: 0 0 0 2px #fff; /* ТАБУ 14.11: белая прокладка между золотом и синей панелью */
+}
+.kb-chip.on {
+  background: var(--accent);
+  color: #2a1d00;
+  box-shadow: none; /* «выбран / сегодня» — без кольца; кольцо только у «открыт» (ТАБУ В1, владелец 14.11) */
+}
+

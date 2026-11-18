@@ -1,23 +1,24 @@
 /**
- * Транзакция разделов сохранения для приложения (спека 018 design §4.1): слой `tx.ts`, привязанный к
- * хранилищу игры и текущему игроку. Писатели (017, 021, 026) зовут `updatePlayer`; экраны читают `readSection`/`sectionRef`.
+ * Реестр разделов сборки (060 design §3) — единственное место, где перечислены подсистемы сохранения.
+ * Ядро (`src/engine/save/`) не знает ни одного раздела; подсистема добавляет сюда свой `SectionDef`.
+ * Этап Э1 (063-Р6): `club`, `course:ru`, `seen`; волна 2 (065-Т2, Т5): `wallet`, `day`, `school`, `form`, `stadium`; остальные задачи экранов добавляют свой раздел.
  */
-import { activeId, onActiveSave } from '../players/active';
-import { saveContext, saveStore } from './instance';
-import { registry } from './registry';
-import { createSectionLayer } from './tx';
+import { clubDef } from '../../engine/club/section';
+import { dayDef } from '../../engine/day/section';
+import { formDef } from '../../engine/form/section';
+import { stadiumDef } from '../../engine/home/section';
+import { walletDef, type Wallet } from '../../engine/rewards/section';
+import { schoolDef } from '../../engine/school/section';
+import { ruCourseDef } from '../../engine/course/section';
+import type { SectionDef } from '../../engine/save/section';
+import { seenDef } from '../../engine/seen/section';
 
-export type { JournalSink, PendingJournal } from './tx';
+export const SECTIONS: readonly SectionDef<unknown>[] = [clubDef, ruCourseDef, seenDef, walletDef, dayDef, schoolDef, formDef, stadiumDef] as readonly SectionDef<unknown>[];
 
-const layer = createSectionLayer({
-  store: saveStore,
-  registry,
-  ctx: saveContext,
-  currentId: activeId,
-  freeze: import.meta.env.DEV || import.meta.env.MODE === 'test',
-});
-
-// Другая вкладка записала — освежить `sectionRef` (подписка прогресса → слой; обратного импорта нет).
-onActiveSave(layer.refreshRefs);
-
-export const { updatePlayer, updateSection, readSection, sectionRef, refreshRefs, canWrite, setJournalSink, pendingJournal } = layer;
+/**
+ * Кошелёк игрока для чтения (063 С1): экран не импортирует раздел `wallet`, а берёт баланс здесь, в слое app.
+ * Запись монет — только касса (`engine/rewards/cash.ts`). Нет раздела или игрока — пустой кошелёк.
+ */
+export function walletOf(sections: Readonly<Record<string, { data: unknown } | undefined>> | undefined): Wallet {
+  return (sections?.[walletDef.name]?.data as Wallet | undefined) ?? walletDef.empty();
+}

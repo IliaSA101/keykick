@@ -1,0 +1,36 @@
+/* ЭБ · Панель игры. Из docs/mockups/kit/kit.css (строки 1788–1822), классы те же; разметка — компоненты src/components/kit. */
+/* ---------- панель игры (036-Р57): gamePanel() в tools/mock-kit/gamepanel.mjs ----------
+   Один вид боковой панели старта, игры и итога игр на интерес. Место и высоту задаёт игра (высота арены), кнопки — сразу под
+   содержимым, не у низа. Свои копии (gap, padding, высота, кнопки) в стилях игр — красное (tools/mock-check.mjs). */
+.panel.gp {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+}
+.panel.gp.gp-center {
+  align-items: center;
+  text-align: center;
+  padding: 22px 28px;
+  gap: 10px;
+}
+.w1024 .panel.gp {
+  padding: 12px 14px;
+  gap: 6px;
+}
+.gp-btns {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 6px;
+  align-self: stretch;
+}
+.gp-btns .key-btn.primary {
+  width: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+.gp-btns .key-btn.quiet {
+  align-self: center;
+}

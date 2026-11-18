@@ -1,0 +1,7 @@
+{
+  "order": ["en.yard.fj", "en.yard.dk"],
+  "lessons": {
+    "en.yard.fj": { "stage": 1, "material": "letters", "trap": true, "attacks": [16, 18, 20, 22], "rows": 1, "g": 1, "c": 5, "warmup": 124, "keys": "fj" },
+    "en.yard.dk": { "stage": 2, "material": "letters", "trap": false, "attacks": [16, 18, 20, 22], "rows": 1, "g": 1, "c": 5, "warmup": 124, "keys": "fjdk" }
+  }
+}

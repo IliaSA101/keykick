@@ -1,0 +1,85 @@
+/* ЭБ · Тренер: портрет в углу и реплика. Из docs/mockups/kit/kit.css (строки 787–870), классы те же; разметка — компоненты src/components/kit. */
+/* ---------- тренер: портрет в углу, реплика по поводу (вариант А, владелец 09.11) ---------- */
+.kb-coach {
+  position: absolute;
+  left: 12px;
+  bottom: 34px;
+  z-index: 5;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.kb-coach .ava {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  background: #fff; /* 050-Р53: лицо на белом круге — у «Ветерана» горчичный шарф, на синем это ТАБУ */
+  box-shadow:
+    0 0 0 2.5px #fff, /* ТАБУ 11.11: кайма портрета на синем — белая */
+    0 6px 14px rgb(0 0 0 / 0.45);
+}
+.kb-coach.hover .ava {
+  box-shadow:
+    0 0 0 3px var(--text),
+    0 0 14px 4px rgb(255 246 224 / 0.5);
+}
+.kb-bub {
+  position: relative;
+  box-sizing: border-box;
+  padding: 7px 12px 8px;
+  border-radius: 14px 14px 14px 4px;
+  background: linear-gradient(160deg, rgb(58 63 134 / 0.96), rgb(31 33 82 / 0.96));
+  box-shadow:
+    inset 0 0 0 1.5px var(--border),
+    0 10px 22px rgb(0 0 0 / 0.4);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.3;
+}
+.kb-bub p {
+  margin: 0;
+  text-wrap: pretty; /* без висячего слова в последней строке реплики (слово владельца 11.11; 055 круг 12) */
+}
+.kb-bub .nm {
+  display: block;
+  /* строка имени — 22 px и справа свободно под «Esc» и «✕» (по 24 px): текст реплики идёт на всю ширину пузыря */
+  padding-right: 80px;
+  line-height: 22px;
+  font-size: 13px;
+  color: #fff;
+  font-weight: 800;
+}
+.kb-bub .x {
+  position: absolute;
+  right: 7px;
+  top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+/* «Esc» и «✕» — цель не меньше 24 × 24 px (смотр ребёнка Р38, п.9) */
+.kb-bub .x kbd {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  font-size: 13px;
+}
+.kb-bub .x i {
+  font-style: normal;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.12);
+}
+

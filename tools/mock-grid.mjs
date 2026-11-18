@@ -16,7 +16,7 @@ import { launchChrome } from './lib/chrome.mjs'
 
 const ROOT = 'docs/mockups'
 // те же листы, что в mock-check.mjs, плюс игры
-const SHEETS = ['kit', 'match-b', 'map-yard', 'champ', 'collection', 'school', 'games', 'story', 'path'].filter((d) => existsSync(`${ROOT}/${d}`))
+const SHEETS = ['kit', 'match-b', 'map-yard', 'champ', 'collection', 'school', 'games', 'story', 'path', 'city'].filter((d) => existsSync(`${ROOT}/${d}`))
 const SIZES = { 1024: 640, 1280: 800, 1920: 1080, 2560: 1440 }
 const TOL = 2
 const PARALLEL = 4

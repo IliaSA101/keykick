@@ -1,8 +1,0 @@
-{
-  "(root)": "object",
-  "coins": "number",
-  "earned": "number",
-  "pressRest": "number",
-  "spent": "number",
-  "stakeRest": "number"
-}

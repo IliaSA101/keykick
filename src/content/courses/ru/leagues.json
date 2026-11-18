@@ -1,0 +1,8 @@
+[
+  { "id": "yard", "lessons": 32, "layer": "home", "cup": "cup-yard", "status": "ready", "pack": "ru.yard" },
+  { "id": "district", "lessons": 36, "layer": "top", "cup": "cup-district", "status": "building", "pack": null },
+  { "id": "city", "lessons": 30, "layer": "bottom", "cup": "cup-city", "status": "building", "pack": null },
+  { "id": "country", "lessons": 32, "layer": "shift", "cup": "cup-country", "status": "building", "pack": null },
+  { "id": "europe", "lessons": 40, "layer": "digits", "cup": "cup-europe", "status": "building", "pack": null },
+  { "id": "world", "lessons": 30, "layer": "text", "cup": "cup-world", "status": "building", "pack": null }
+]

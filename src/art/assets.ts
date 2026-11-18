@@ -1,6 +1,6 @@
 /**
  * Готовая графика из public/art: ключ → путь от корня сайта.
- * Единственный источник путей к картинкам: тест tests/art.test.ts сверяет,
+ * Единственный источник путей к картинкам: тест tests/art/art.test.ts сверяет,
  * что каждый файл отсюда лежит на диске. Исходники генераций — в art-src (вне git).
  */
 export const artFiles = {
@@ -11,8 +11,21 @@ export const artFiles = {
   // Фон внутренних экранов (клуб, шкафчик, пак, пенальти): раздевалка вечером, центр свободен.
   lockerBg: 'art/locker-bg.webp',
   ball: 'art/ball.webp',
+  // Лицо тренера «молодой» для круга 48 px (050-Р53), 160×160 из art-work/coach/young-face.png: реплика тренера, строка итога.
+  coachFace: 'art/coach/young-face.webp',
+  // Портреты тренеров на белом для выбора при первом запуске (лист Э2К.34, 020-Т1), 480×640 из art-src/coach/<id>-1.png.
+  coachPickYoung: 'art/coach/young-pick.webp',
+  coachPickVeteran: 'art/coach/veteran-pick.webp',
+  coachPickPonytail: 'art/coach/ponytail-pick.webp',
+  coachPickBigbeard: 'art/coach/bigbeard-pick.webp',
   // Руки в позе печати над клавиатурой, 1600×748, прозрачный фон; точки кончиков пальцев — в art/hands.ts.
   hands: 'art/hands.webp',
+  // Руки «как в кадре матча» (065-Р73, Э1.03): согнутые пальцы, две картинки 900×900; подгонка — components/keyboard/typingHands.ts.
+  // Экран матча (065 Т9, Э1.03): фон-стадион 2752×1536 (макет Б, bg-b-7) и перчатка вратаря для «Вратарь отбил!».
+  matchBgB: 'art/match/bg-b.webp',
+  savedGlove: 'art/match/saved-glove.webp',
+  handsTypingL:'art/hands-typing/hands-l.webp',
+  handsTypingR: 'art/hands-typing/hands-r.webp',
   // Значки игровых предметов, 256×256, прозрачный фон (docs/art-pipeline.md).
   iconCoin: 'art/icons/coin.webp',
   iconStar: 'art/icons/star.webp',

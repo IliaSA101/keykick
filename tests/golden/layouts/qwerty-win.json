@@ -1,0 +1,70 @@
+{
+  "about": "Голден раскладки qwerty-win: снят 18.11 с src/content/keyboard.json перед его удалением (060-Т8). Ряды по порядку; ch — [без Shift, с Shift]; у служебных клавиш — label. Не править руками: поменялась раскладка — это решение, не обновление голдена.",
+  "id": "qwerty-win",
+  "rows": [
+  [
+    {"code":"Backquote","row":0,"finger":"lp","ch":["`","~"]},
+    {"code":"Digit1","row":0,"finger":"lp","ch":["1","!"]},
+    {"code":"Digit2","row":0,"finger":"lr","ch":["2","@"]},
+    {"code":"Digit3","row":0,"finger":"lm","ch":["3","#"]},
+    {"code":"Digit4","row":0,"finger":"li","ch":["4","$"]},
+    {"code":"Digit5","row":0,"finger":"li","ch":["5","%"]},
+    {"code":"Digit6","row":0,"finger":"ri","ch":["6","^"]},
+    {"code":"Digit7","row":0,"finger":"ri","ch":["7","&"]},
+    {"code":"Digit8","row":0,"finger":"rm","ch":["8","*"]},
+    {"code":"Digit9","row":0,"finger":"rr","ch":["9","("]},
+    {"code":"Digit0","row":0,"finger":"rp","ch":["0",")"]},
+    {"code":"Minus","row":0,"finger":"rp","ch":["-","_"]},
+    {"code":"Equal","row":0,"finger":"rp","ch":["=","+"]},
+    {"code":"Backspace","row":0,"finger":"rp","width":2,"label":"⌫"}
+  ],
+  [
+    {"code":"Tab","row":1,"finger":"lp","width":1.5,"label":"Tab"},
+    {"code":"KeyQ","row":1,"finger":"lp","ch":["q","Q"]},
+    {"code":"KeyW","row":1,"finger":"lr","ch":["w","W"]},
+    {"code":"KeyE","row":1,"finger":"lm","ch":["e","E"]},
+    {"code":"KeyR","row":1,"finger":"li","ch":["r","R"]},
+    {"code":"KeyT","row":1,"finger":"li","ch":["t","T"]},
+    {"code":"KeyY","row":1,"finger":"ri","ch":["y","Y"]},
+    {"code":"KeyU","row":1,"finger":"ri","ch":["u","U"]},
+    {"code":"KeyI","row":1,"finger":"rm","ch":["i","I"]},
+    {"code":"KeyO","row":1,"finger":"rr","ch":["o","O"]},
+    {"code":"KeyP","row":1,"finger":"rp","ch":["p","P"]},
+    {"code":"BracketLeft","row":1,"finger":"rp","ch":["[","{"]},
+    {"code":"BracketRight","row":1,"finger":"rp","ch":["]","}"]},
+    {"code":"Backslash","row":1,"finger":"rp","ch":["\\","|"],"width":1.5}
+  ],
+  [
+    {"code":"CapsLock","row":2,"finger":"lp","width":1.75,"label":"Caps"},
+    {"code":"KeyA","row":2,"finger":"lp","ch":["a","A"]},
+    {"code":"KeyS","row":2,"finger":"lr","ch":["s","S"]},
+    {"code":"KeyD","row":2,"finger":"lm","ch":["d","D"]},
+    {"code":"KeyF","row":2,"finger":"li","ch":["f","F"],"bump":true},
+    {"code":"KeyG","row":2,"finger":"li","ch":["g","G"]},
+    {"code":"KeyH","row":2,"finger":"ri","ch":["h","H"]},
+    {"code":"KeyJ","row":2,"finger":"ri","ch":["j","J"],"bump":true},
+    {"code":"KeyK","row":2,"finger":"rm","ch":["k","K"]},
+    {"code":"KeyL","row":2,"finger":"rr","ch":["l","L"]},
+    {"code":"Semicolon","row":2,"finger":"rp","ch":[";",":"]},
+    {"code":"Quote","row":2,"finger":"rp","ch":["'","\""]},
+    {"code":"Enter","row":2,"finger":"rp","width":2.25,"label":"Enter"}
+  ],
+  [
+    {"code":"ShiftLeft","row":3,"finger":"lp","width":2.25,"label":"Shift"},
+    {"code":"KeyZ","row":3,"finger":"lp","ch":["z","Z"]},
+    {"code":"KeyX","row":3,"finger":"lr","ch":["x","X"]},
+    {"code":"KeyC","row":3,"finger":"lm","ch":["c","C"]},
+    {"code":"KeyV","row":3,"finger":"li","ch":["v","V"]},
+    {"code":"KeyB","row":3,"finger":"li","ch":["b","B"]},
+    {"code":"KeyN","row":3,"finger":"ri","ch":["n","N"]},
+    {"code":"KeyM","row":3,"finger":"ri","ch":["m","M"]},
+    {"code":"Comma","row":3,"finger":"rm","ch":[",","<"]},
+    {"code":"Period","row":3,"finger":"rr","ch":[".",">"]},
+    {"code":"Slash","row":3,"finger":"rp","ch":["/","?"]},
+    {"code":"ShiftRight","row":3,"finger":"rp","width":2.75,"label":"Shift"}
+  ],
+  [
+    {"code":"Space","row":4,"finger":"th","ch":[" "," "],"width":6.25}
+  ]
+  ]
+}

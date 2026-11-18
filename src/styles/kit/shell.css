@@ -1,0 +1,53 @@
+/* ЭБ · Оболочка: страница под сцену, строка низа, кнопки-ярлыки вместо `a`/`span` макета. Строка низа — из docs/mockups/map-yard/map.css (302, 462, 511, 637). */
+html {
+  scrollbar-gutter: auto; /* в tokens.css место под полосу прокрутки — сцене не нужно */
+}
+html,
+body {
+  margin: 0;
+  background: #000;
+  overflow: hidden;
+}
+.cnote {
+  position: absolute;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+.cnote.light {
+  color: #e8ecff;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.8);
+}
+.cnote.who {
+  left: 12px;
+  bottom: 8px;
+  z-index: 6;
+  max-width: 310px;
+  font-size: 12px; /* в кадре Э2.01 подвал — 12 px (map.css: .cnote.who) */
+  white-space: nowrap;
+}
+.cnote.who.wide {
+  max-width: none; /* широкая сцена: одна строка (065-Р160) */
+}
+.cnote.who a {
+  color: inherit;
+  text-decoration: underline;
+}
+.cnote.who .pl {
+  display: inline-block;
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+/* ярлык-кнопка вместо `a` макета */
+button.kb-chip {
+  border: 0;
+  font-family: inherit;
+  line-height: inherit;
+  cursor: pointer;
+}
+.kb-top nav a[href] {
+  cursor: pointer;
+  text-decoration: none;
+}

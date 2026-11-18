@@ -1,0 +1,206 @@
+/* ЭБ · Панели, подсказки у предмета, карточка выбора из списка, модалка. Из docs/mockups/kit/kit.css (строки 338–542), классы те же; разметка — компоненты src/components/kit. */
+/* ---------- панели и модалки ---------- */
+/* ТАБУ 11.11 (владелец: «на синем белый и любой, кроме жёлтого»): кайма синих плашек — светло-серебряная, не золотая */
+:root {
+  --rim-silver: rgb(226 232 242 / 0.7);
+}
+/* .panel — со светлой каймой: модалки и карточки матча; .panel.soft — спокойная кайма: карточки на экране */
+.panel {
+  box-sizing: border-box;
+  padding: 12px 18px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgb(58 63 134 / 0.96), rgb(31 33 82 / 0.96));
+  color: var(--text);
+  box-shadow:
+    0 0 0 2px var(--rim-silver),
+    0 12px 28px rgb(0 0 0 / 0.4);
+}
+.panel.soft {
+  box-shadow:
+    inset 0 0 0 1.5px var(--border),
+    0 10px 22px rgb(0 0 0 / 0.35);
+}
+/* подсказка у предмета на экране («что построят», «Стенгазета»): .panel.soft.pop.tail — сплошная заливка (подписи под ней не
+   просвечивают, kk-art Р34), над ярлыками и табличками (z-index 9), хвост-стрелка вниз. Внутри: .lk — лента, .peek — кусок
+   картинки с белой рамкой (золото на синей карточке — ТАБУ), .nm — название, .where — пояснение, .arch — мелкая строка.
+   Выбор из списка (карточка уроков двора на карте) — та же подсказка с золотой каймой: .panel.pop.tail без .soft (023-ретро Р2). */
+.pop {
+  position: absolute;
+  z-index: 9;
+  padding: 10px 12px 12px;
+  background: linear-gradient(160deg, rgb(58 63 134), rgb(31 33 82));
+}
+.pop.tail::after {
+  content: '';
+  position: absolute;
+  left: var(--tail-x, 50%);
+  bottom: -10px;
+  margin-left: -10px;
+  border: 10px solid transparent;
+  border-bottom: 0;
+  border-top-color: rgb(31 33 82);
+}
+.pop .peek {
+  margin: 6px 0 8px;
+  border-radius: 8px;
+  background-repeat: no-repeat;
+  box-shadow: 0 0 0 1.5px rgb(232 236 228 / 0.8);
+}
+.pop .nm {
+  display: block;
+  font-size: 18px;
+}
+.pop .where {
+  margin: 2px 0 0;
+  font-size: 13px;
+}
+.pop .arch {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+/* карточка выбора из списка (уроки двора на карте): .panel.pop.tail.pickcard; строка .lrow — две колонки (название | звёзды), чип и
+   «▶ играть» — второй строкой .act; .sel — выбранная стрелками (белая рамка и подложка, как «выбрана» у кнопок), Enter и щелчок играют её */
+.pickcard .lrow {
+  display: grid;
+  grid-template-columns: 1fr 64px;
+  column-gap: 6px;
+  row-gap: 3px;
+  align-items: center;
+  padding: 4px 6px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 8px;
+}
+.pickcard .lrow .ln {
+  font-size: 13px;
+}
+.pickcard .lrow .ln-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+/* подпись режима («режим: за звёздами»): не кнопка — ни рамки, ни заливки (Р38) */
+.pickcard .lrow .mode {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+/* значок «за звёздами» — в конце первой строки названия, а не перед «Урок N»: названия строк стоят в одну линию (Р39, kk-art) */
+.pickcard .lrow .ring-ic {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-left: 4px;
+  box-sizing: border-box;
+  border: 2px solid #77b8f4;
+  border-radius: 50%;
+  vertical-align: 0;
+}
+.pickcard .lrow b {
+  color: #fff;
+  font-weight: 800;
+  text-align: right;
+  white-space: nowrap;
+}
+.pickcard .lrow .act {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.pickcard .lrow.sel {
+  background: rgb(255 255 255 / 0.08);
+  border-bottom-color: transparent;
+  box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.85);
+}
+.pickcard .lrow .play {
+  margin-left: auto;
+  padding-bottom: 5px; /* уступ кнопки (box-shadow 5 px) не режет рамку выбранной строки */
+}
+/* шапка карточки: название двора слева, «Закрыть Esc» справа (правило ЭБ) */
+.pickcard .ph {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.pickcard .hint {
+  margin: 6px 0 0;
+  font-size: 13px; /* Р38 (смотр ребёнка п.6): подсказка клавиш — не меньше 13 px */
+  color: var(--text-muted);
+}
+.card {
+  position: absolute;
+}
+.card h2 {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.2;
+  text-shadow: 0 2px 10px rgb(0 0 0 / 0.6);
+}
+.card p {
+  margin: 0;
+}
+/* модалка: заголовок, пояснение, кнопки, мелкая строка; по центру сцены.
+   Фон непрозрачный (11.11): у общей .panel он 0,96 — сквозь модалку на кадре результата читался лист; карточки на экране остаются как были */
+.panel.kb-modal {
+  background: linear-gradient(160deg, rgb(58 63 134), rgb(31 33 82));
+}
+.kb-modal {
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px 18px;
+  text-align: center;
+}
+.panel.soft.graphite.kb-modal {
+  background: rgb(36 37 43); /* графитовая модалка — тоже без просвета */
+  backdrop-filter: none;
+}
+.kb-modal h2 {
+  font-size: 30px;
+}
+.kb-modal .lead {
+  font-size: 17px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.kb-modal.left {
+  align-items: stretch;
+  text-align: left;
+}
+/* заголовок окна с кнопкой «Закрыть Esc» справа вверху (справка) */
+.kb-modal .mhead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+}
+.kb-modal .mhead h2 {
+  white-space: nowrap;
+}
+.kb-modal .mhead .key-btn {
+  flex: none;
+  margin-right: -8px; /* кнопка ближе к краю: заголовок «Как держать руки» не переносится на 440 px */
+}
+/* слои: сцена (узлы карты, табло — до 9) → затемнение 10 → окно над ним 11 → шапка 20 (видна и при окне) */
+.dim {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: rgb(10 9 32 / 0.68);
+}
+.dim ~ .card {
+  z-index: 11;
+}
+/* абзац-пояснение под кнопками, в карточке: 15 px, приглушённый (раньше .tip — задевал и подсказку наведения .kb-chip.tip) */
+.note {
+  font-size: 15px;
+  color: var(--text-muted);
+}
+.note b {
+  color: #fff;
+  font-weight: 800;
+}
+

@@ -1,0 +1,360 @@
+{
+ "id": "map.end",
+ "codes": {
+  "1024": "Э2.33",
+  "1920": "Э2.12"
+ },
+ "screen": "map",
+ "route": "/map",
+ "state": "Карта · конец Двора, Район открыт",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 356834,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.final",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-10-30",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-10-30",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-10-31",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-10-31",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-01",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-02",
+     "fails": 0
+    },
+    "ru.yard.yd-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-02",
+     "fails": 0
+    },
+    "ru.yard.six-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-03",
+     "fails": 0
+    },
+    "ru.yard.six-keys-review": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-03",
+     "fails": 0
+    },
+    "ru.yard.fzh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-04",
+     "fails": 0
+    },
+    "ru.yard.fzh-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-05",
+     "fails": 0
+    },
+    "ru.yard.fzh-again": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-05",
+     "fails": 0
+    },
+    "ru.yard.eight-keys-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-06",
+     "fails": 0
+    },
+    "ru.yard.test-eight": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-06",
+     "fails": 0
+    },
+    "ru.yard.pr": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-07",
+     "fails": 0
+    },
+    "ru.yard.pr-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-08",
+     "fails": 0
+    },
+    "ru.yard.longer-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-08",
+     "fails": 0
+    },
+    "ru.yard.row-no-eh": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-09",
+     "fails": 0
+    },
+    "ru.yard.eh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.eh-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.test-row": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.short-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.long-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.mixed-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.return-match": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.rematch": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.first-phrases": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.phrases": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.longer-phrases": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.fingers-not-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.final-first": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.final": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 500,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 66,
+   "days": 21,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 33200,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "Саша",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  }
+ },
+ "home": {
+  "cur": 33,
+  "day": 21,
+  "matchesToday": 1,
+  "played": 66,
+  "stars": {
+   "1": 3,
+   "2": 3,
+   "3": 3,
+   "4": 3,
+   "5": 3,
+   "6": 1,
+   "7": 2,
+   "8": 1,
+   "9": 0,
+   "10": 1,
+   "11": 2,
+   "12": 1,
+   "13": 0,
+   "14": 1,
+   "15": 2,
+   "16": 1,
+   "17": 1,
+   "18": 0,
+   "19": 1,
+   "20": 2,
+   "21": 1,
+   "22": 0,
+   "23": 2,
+   "24": 1,
+   "25": 3,
+   "26": 3,
+   "27": 1,
+   "28": 2,
+   "29": 1,
+   "30": 0,
+   "31": 1,
+   "32": 0
+  },
+  "best": 0,
+  "coins": 500,
+  "fans": 33200,
+  "bought": [
+   "gate-sticker",
+   "center-circle",
+   "seats-club",
+   "boots-yard",
+   "net-flags",
+   "graffiti",
+   "drum",
+   "goal-anim",
+   "banner",
+   "garland",
+   "boots-box"
+  ],
+  "friendly": false,
+  "round": null,
+  "end": true,
+  "region": true,
+  "pause5": false,
+  "extras": {
+   "cup": {
+    "key": "Кубок наш",
+    "params": {
+     "sub": "сыграть снова"
+    }
+   },
+   "events": {
+    "locker": {
+     "key": "чемпионская форма"
+    }
+   },
+   "papers": 8,
+   "paperDay": 21,
+   "emblemN": 10,
+   "tourWaits": true,
+   "silver": false
+  }
+ }
+}

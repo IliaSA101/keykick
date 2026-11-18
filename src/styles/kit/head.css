@@ -1,0 +1,95 @@
+/* ЭБ · Строка экрана под шапкой: название · город, звёзды, монеты, болельщики. Из docs/mockups/kit/kit.css (строки 660–753), классы те же; разметка — компоненты src/components/kit. */
+/* ---------- строка экрана под шапкой: название · город, звёзды, монеты, ярлыки ---------- */
+.kb-head {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 46px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.kb-head h1 {
+  margin: 0;
+  font-size: 22px;
+  /* 023-Р32, Б6: имя клуба и город — одна строка, длинный хвост — многоточием (полное имя — в окне «Клуб») */
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.kb-head h1 span {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.kb-stats {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  margin-left: 12px;
+  font-size: 17px;
+}
+.kb-stats .st {
+  /* ТАБУ 11.11: ★-счёт — на светлой плашке (как .award-plate): золото не лежит на синем фоне экрана. Размеры капсулы — как у .co.shop */
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 14px;
+  background: var(--award-plate);
+  box-shadow: inset 0 0 0 1.5px var(--award-plate-edge);
+  color: #1b1a3a;
+}
+.kb-stats .st i {
+  font-style: normal;
+  color: #c98a00;
+}
+.kb-stats .co {
+  color: #ffd76a;
+  margin-right: 6px;
+}
+/* монеты — вход в лавку (023-Р32, 33): мечта словами и полоса копилки; ярлык той же кромки, что «Лист лиги» */
+.kb-stats .co.shop {
+  /* ТАБУ 11.11 (050 №14): монеты — на светлой плашке, как ★-счёт: золото не рядом с синей каймой */
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 0;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #1b1a3a;
+  background: var(--award-plate);
+  box-shadow: inset 0 0 0 1.5px var(--award-plate-edge);
+}
+.kb-stats .co.shop i {
+  font-style: normal;
+  color: #c98a00;
+}
+.kb-stats .co small {
+  color: #1b1a3a;
+  font-size: 12px;
+  font-weight: 700;
+}
+.kb-stats .co .bar {
+  display: block;
+  width: 44px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgb(27 26 58 / 0.15);
+  overflow: hidden;
+}
+.kb-stats .co .bar u {
+  display: block;
+  height: 100%;
+  background: var(--zone-middle); /* ТАБУ 11.11: полоса на синей подложке — зелёная, не золотая */
+}
+/* болельщики — в шапке Дома с 1-го дня (023-Р11(3)) */
+.kb-stats .fa {
+  color: #a9d4ff;
+}
+

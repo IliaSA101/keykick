@@ -1,0 +1,75 @@
+{
+ "id": "match.break-2",
+ "codes": {
+  "1024": "Э1.29"
+ },
+ "screen": "match",
+ "route": "/match",
+ "state": "Перерыв · 1024",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 295444,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.vl",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 20,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 4,
+   "days": 9,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 1000,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "Саша",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  }
+ },
+ "match": {
+  "lesson": 3,
+  "phase": "break-2",
+  "model": "образец: счёт и ход атаки — по кадру, Т10 и позже дописывают"
+ }
+}

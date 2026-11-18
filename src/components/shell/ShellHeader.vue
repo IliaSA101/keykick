@@ -1,0 +1,45 @@
+<script setup lang="ts">
+/**
+ * Шапка — `topbar` из kit.mjs, одна на всю игру: логотип, пять пунктов меню (063-Р17), справа звук.
+ * page — id активного пункта (`home`, `map`…; другой — никакого); match — состояние «матч»: меню приглушено и не нажимается,
+ * справа «Пауза Esc»; pause=false — без паузы (матч окончен, окно поверх держит Esc само, запрос Сюжета 050 №21).
+ */
+import { artUrl } from '../../art/assets';
+import { ru } from '../../i18n/ru';
+import PauseButton from './PauseButton.vue';
+import SoundButton from './SoundButton.vue';
+
+withDefaults(defineProps<{ page?: string; match?: boolean; pause?: boolean }>(), { page: '', match: false, pause: true });
+defineEmits<{ pause: [] }>();
+
+const items = Object.entries(ru.frame.menu);
+</script>
+
+<template>
+  <header
+    class="kb-top"
+    :class="{ match }"
+  >
+    <img
+      class="logo"
+      :src="artUrl('logo')"
+      :alt="ru.frame.logoAlt"
+    >
+    <nav :aria-label="ru.frame.menuLabel">
+      <a
+        v-for="[id, title] in items"
+        :key="id"
+        :href="match ? undefined : `#/${id}`"
+        :class="{ on: !match && id === page }"
+        :aria-current="!match && id === page ? 'page' : undefined"
+      >{{ title }}</a>
+    </nav>
+    <div class="kb-tools">
+      <PauseButton
+        v-if="match && pause"
+        @pause="$emit('pause')"
+      />
+      <SoundButton />
+    </div>
+  </header>
+</template>

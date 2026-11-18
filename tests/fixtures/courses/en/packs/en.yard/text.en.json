@@ -1,0 +1,7 @@
+{
+  "lessons": {
+    "en.yard.fj": { "name": "F and J", "tip": ["Keep your index fingers on the bumps of F and J."] },
+    "en.yard.dk": { "name": "D and K", "tip": ["Middle fingers go on D and K; the index fingers stay on the bumps."] }
+  },
+  "stages": { "1": "F and J", "2": "D and K" }
+}

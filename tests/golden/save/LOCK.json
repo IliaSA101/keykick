@@ -1,0 +1,7 @@
+{
+  "about": "Замок голденов выпущенных форматов: sha-256 байтов файлов рядом. Не править руками: новый голден — `node tools/golden-save.mjs --lock`; выпущенный не меняется и не удаляется (docs/testing.md, голдены).",
+  "files": {
+    "fmt1.club.json": "415cb76c886eef1e66d2875f16075665a76c9e5622b9cae5862ba74b38f0535f",
+    "fmt1.player.json": "6aca96f068b8ac93f425433b79e267d0d0aef5dba26396d7a140cde498bec231"
+  }
+}

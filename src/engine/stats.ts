@@ -1,7 +1,7 @@
 /**
  * Статистика для экрана ребёнка: только чтение сохранения, без часов и случайности.
  */
-import type { Keymap, Layout } from './keymap';
+import type { Keymap, Layout } from './typing/keymap';
 
 export interface WeakKey {
   code: string;
@@ -26,7 +26,7 @@ export function weakKeys(
     .slice(0, limit)
     .map(([code, errors]) => {
       const key = map.byCode.get(code);
-      const ch = key?.chars?.[layout][0];
+      const ch = key?.chars?.[layout]?.[0];
       return { code, errors, label: ch ? ch.toUpperCase() : (key?.label ?? code) };
     });
 }

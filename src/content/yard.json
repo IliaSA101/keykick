@@ -1,0 +1,40 @@
+{
+  "$comment": "Двор: числа и имена для engine/home (065-Т5, 065-Р11). Правда макета — tools/mock-map/yard.mjs, parts.mjs, home-rules.mjs; равенство держит tests/home/rules.test.ts. Id вещей навсегда (059).",
+  "lessons": 32,
+  "stageOfLesson": [1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 9, 9, 9, 9, 10, 10],
+  "streets": ["Садовой", "Водопроводной", "Строителей", "Парковой", "Полевой", "Заречной", "Фонтанной", "Школьной", "Сосновой", "Яблоневой"],
+  "rounds": [9, 14, 18, 21, 24, 28, 32],
+  "homeRounds": [9, 18, 24, 32],
+  "control": [14, 21],
+  "catalog": [
+    { "id": "gate-sticker", "name": "наклейка на ворота", "short": "наклейка", "price": 30, "from": 2 },
+    { "id": "center-circle", "name": "центральный круг", "short": "круг", "price": 40, "from": 5 },
+    { "id": "seats-club", "name": "сиденья в цвет клуба", "short": "сиденья", "price": 40, "from": 9 },
+    { "id": "boots-yard", "name": "бутсы «дворовые»", "short": "бутсы «дворовые»", "price": 120, "from": 9 },
+    { "id": "net-flags", "name": "флажки на сетке", "short": "флажки", "price": 50, "from": 14 },
+    { "id": "graffiti", "name": "граффити", "short": "граффити", "price": 220, "from": 14 },
+    { "id": "drum", "name": "барабан", "short": "барабан", "price": 60, "from": 18 },
+    { "id": "goal-anim", "name": "анимация гола на табло", "short": "гол на табло", "price": 100, "from": 21 },
+    { "id": "banner", "name": "растяжка клуба", "short": "растяжка", "price": 250, "from": 24 },
+    { "id": "garland", "name": "гирлянда", "short": "гирлянда", "price": 50, "from": 26 },
+    { "id": "boots-box", "name": "бутсы «коробка»", "short": "бутсы «коробка»", "price": 200, "from": 26 }
+  ],
+  "dream": { "above": 100 },
+  "steps": [
+    { "after": 2, "id": "gate" },
+    { "after": 5, "id": "marking" },
+    { "after": 9, "id": "benches" },
+    { "after": 14, "id": "net" },
+    { "after": 18, "id": "stand" },
+    { "after": 21, "id": "scoreboard" },
+    { "after": 24, "id": "floodlight" },
+    { "after": 26, "id": "mast-flags" },
+    { "after": 30, "id": "paper-stand" }
+  ],
+  "stepsTotal": 10,
+  "gold": { "fromStars": 15, "maxStars": 96 },
+  "seats": { "stand": 40, "sector": 15, "figure": 400, "sectorFromStars": 45, "sectorAfterLesson": 18, "tabloFrom": 22 },
+  "locks": { "school": { "day": 2, "matches": 4 }, "base": { "day": 3, "matches": 8 }, "newMarkDay": { "school": 2, "base": 3 } },
+  "papers": { "firstCur": 6 },
+  "pause": { "days": 5 }
+}

@@ -1,0 +1,44 @@
+/*
+ * Живые части: в макете кнопки и ярлыки были span и a, в игре — настоящие button и a (клавиатура, фокус, disabled).
+ * Вид — классы ЭБ из соседних файлов; здесь только то, что делает тег кнопкой: без рамки браузера, шрифт, рука.
+ */
+button.key-btn,
+button.kb-chip {
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+/* у звука и паузы рамка своя (.kb-snd, .kb-pause) — не сбрасываем */
+button.kb-snd,
+button.kb-pause {
+  font-family: inherit;
+  cursor: pointer;
+}
+button.key-btn:disabled {
+  cursor: default;
+}
+/* «выбрана» (мышь или Tab) — это и есть видимый фокус кнопки: белое кольцо вместо золотого контура */
+button.key-btn:focus-visible {
+  outline: none;
+}
+button.kb-chip:focus-visible,
+.kb-top nav a:focus-visible {
+  outline: 3px solid var(--text);
+  outline-offset: 2px;
+}
+button.kb-chip {
+  color: var(--text);
+}
+button.kb-chip.on,
+button.kb-chip.open {
+  color: #2a1d00;
+}
+.kb-top nav a {
+  cursor: pointer;
+  text-decoration: none;
+}
+/* кнопки шапки (звук, пауза) — те же, что span в макете, но не кнопкой по умолчанию */
+button.kb-snd,
+button.kb-pause {
+  color: var(--text);
+}

@@ -1,305 +1,343 @@
 /**
- * Слой сохранения игроков поверх хранилища (спека 014-Т3, design §0, §2, §4, §5).
- * Хранилище и часы приходят снаружи — иначе не проверить две «вкладки» и квоту.
- * Два режима:
- *  - `v1` (префикс `keykick.` — чужие ключи линии v1 на том же origin) — только чтение: `readOnly` с первой секунды,
- *    ничего не читается из чужого формата и не пишется (018-Т6б, К10);
- *  - `envelope` — конверт с `rev`, снимки, карантин, `pre.*`, освобождение места, `newer` без записи (`load.ts`).
- * Все изменения идут через `update(id, fn)`: чужой `rev` или пропавший ключ — применить ход к лежащему (Б2).
+ * Хранилище сохранения (060 design §3, 059 С-18, С-19): устройство, игроки, кольцо копий, карантин, корзина.
+ * Всё, что может отказать, возвращает результат, а не бросает. Чужие ключи (другой префикс, другие сайты) не читаются
+ * и не стираются: `keys()` всегда спрашивается с префиксом сборки. Часы не нужны; хранилище и замки внедряются.
+ * - сырое не теряется: `broken` — в карантин, `newer` — только чтение; основной ключ остаётся как был; перед первой
+ *   записью после миграции сырое — в c1 (загрузка не смогла — `savePlayer` пробует снова и без копии не пишет: `quota`);
+ * - две вкладки: замок (`hold`) и всегда — сверка `rev` на диске перед записью;
+ * - список игроков в `device` ведёт вызывающий: `withoutPlayer`/`withPlayer` (`engine/save/device.ts`) + `saveDevice`;
+ * - кольцо копий — `copies.ts`, карантин — `quarantine.ts`, типы — `types.ts` (063-Р4).
  */
-import {
-  classify,
-  emptyEnvelope,
-  nextEnvelope,
-  parseSections,
-  type SaveEnvelope,
-} from '../../engine/save/format';
-import { copyThenWrite, deleteName, planSingle, resetName, withPlayerName } from '../../engine/save/copies';
-import { createLoader } from './load';
-import { createSpace } from './space';
-import type { Deps, Known, Sections, StoreEvent, StoreOptions, StoreStatus } from './types';
+import { DEVICE_FMT, DEVICE_KIND, deviceProblems, type Device } from '../../engine/save/device';
+import { ENVELOPE_FMT, envelopeProblems, serializePlayer, validPid } from '../../engine/save/envelope';
+import { openPlayer, type Opened } from '../../engine/save/open';
+import { isInt } from '../../engine/save/section';
+import { COPIES_LIMIT, createCopies } from './copies';
+import { holdLock } from './locks';
+import { QUARANTINE_MAX, createQuarantine } from './quarantine';
+import { SECTIONS } from './sections';
+import type { DeviceLoaded, Saved, Store, StoreOptions } from './types';
 
-/** Ключи линии v1 — префикс `keykick.`: конверта и новых ключей там нет (В9); v2 их только не трогает. */
-export function isV1Prefix(prefix: string): boolean {
-  return prefix === 'keykick.';
-}
+export type { BinErr, DeviceLoaded, PlayerLoaded, SaveErr, Saved, Store, StoreOptions } from './types';
 
-export function createSaveStore(opts: StoreOptions) {
-  const { prefix, channel, storage: io, ctx, sections: registry } = opts;
-  const v1 = isV1Prefix(prefix);
-  const mainKey = (id: string): string => `${prefix}save.${id}`;
-  const known = new Map<string, Known>();
-  const blocked = new Set<string>();
-  const events: StoreEvent[] = [];
-  // Чужие ключи v1 на том же origin (`keykick.`) не читаем и не пишем: слой только для чтения.
-  const status: StoreStatus = { readOnly: v1, storageFull: false, migrateFailed: false, found: {} };
-  let hasPlayer: (id: string) => boolean = opts.hasPlayer ? (id) => opts.hasPlayer?.(id) ?? true : () => true;
-  let follower: { id: string; cb: (s: Sections) => void } | null = null;
+// Тип и константы устройства живут в движке (их берёт и снимок клуба); здесь — для прежних импортов.
+export { DEVICE_FMT, DEVICE_KIND, type Device };
+// Здесь, а не в движке: тест подменяет `DEVICE_FMT` и ждёт, что новая запись несёт подменённое.
+export const newDevice = (): Device => ({
+  kind: DEVICE_KIND,
+  fmt: DEVICE_FMT,
+  rev: 0,
+  players: [],
+  uiLang: 'ru',
+  sound: {},
+  parent: { gate: 'none' },
+});
+export { COPIES_LIMIT, QUARANTINE_MAX };
 
-  /** Игроки, чей `create` в этом слое не записался (место): их ключа нет не потому, что его удалили. */
-  const unwritten = new Set<string>();
-  /** Причины, уже попавшие в журнал: повтор той же причины на каждом ходу журнал не раздувает. */
-  const seen = new Set<string>();
-  const log = (text: string): void => {
-    if (seen.has(text)) return;
-    seen.add(text);
-    events.push({ t: opts.now(), kind: 'storage', text });
-  };
-  /** Запись удалась — место есть; следующая нехватка места снова попадёт в журнал. */
-  const spaceOk = (): void => {
-    status.storageFull = false;
-    seen.clear();
-  };
-  const emptySave = (): Sections => Object.fromEntries(registry.map((d) => [d.name, d.empty(ctx)]));
-  const parseAll = (raw: Sections): Sections => parseSections(raw, ctx, registry);
-  const { names, readOf, writeFree, trimCeiling, copyIoFor } = createSpace({
-    prefix,
-    channel,
-    io,
-    today: () => opts.today(),
-    now: () => opts.now(),
-    onFull: () => {
-      status.storageFull = true;
-      log('storage-full');
-    },
-  });
+const isObject = (x: unknown): x is Record<string, unknown> => x !== null && typeof x === 'object' && !Array.isArray(x);
 
-  /** Копия раньше основного ключа (Б1); true — основной ключ записан. */
-  function copyThenMain(copyName: string, copyText: string, key: string, mainText: string): boolean {
-    const res = copyThenWrite(copyIoFor(prefix + copyName), prefix + copyName, copyText, key, mainText);
-    trimCeiling();
-    if (res === 'ok') {
-      spaceOk();
-      return true;
+type Disk =
+  { kind: 'rev'; rev: number } | { kind: 'absent' } | { kind: 'newer' } | { kind: 'unreadable' } | { kind: 'denied' };
+
+export function createStore(opts: StoreOptions): Store {
+  const { prefix: p, local: kv, session } = opts;
+  if (p === '') throw new Error('createStore: empty prefix');
+  const defs = opts.defs ?? SECTIONS;
+
+  const deviceKey = `${p}device`;
+  const playerKey = (pid: string) => `${p}player.${pid}`;
+  const trashKey = (pid: string) => `${p}trash.${pid}`;
+  const copies = createCopies(kv, p);
+  const quar = createQuarantine(kv, p, copies);
+
+  /** Игрок только для чтения: новее программы или битый. */
+  const readOnly = new Set<string>();
+  /** Игрока держит другая вкладка; отдельно от `readOnly`, чтобы загрузка одного не снимала другое. */
+  const busy = new Set<string>();
+  /** Загружен после миграции, а сырое в c1 не сохранилось: первая запись сначала повторит копию. */
+  const unbacked = new Set<string>();
+  let deviceNewer = false;
+  /** Битый device, сырое которого лежит в карантине: поверх него `saveDevice(…, null)` разрешён, пока на диске то же. */
+  let deviceBroken: string | undefined;
+  /** Битый игрок, сырое которого лежит в карантине: поверх него `savePlayer(…, null)` разрешён, пока на диске то же (загрузка файла клуба, 063-Р53). */
+  const brokenRaw = new Map<string, string>();
+
+  const writeRelieved: typeof copies.writeRelieved = (k, v, pid) => copies.writeRelieved(k, v, pid);
+
+  /** `maxFmt` — потолок формата для ключа: у устройства и у игрока он свой. */
+  function readDisk(key: string, maxFmt: number): Disk {
+    const got = kv.read(key);
+    if (!got.ok) return got.err === 'absent' ? { kind: 'absent' } : { kind: 'denied' };
+    try {
+      const parsed: unknown = JSON.parse(got.value);
+      if (!isObject(parsed) || !isInt(parsed.rev) || parsed.rev < 0) return { kind: 'unreadable' };
+      if (isInt(parsed.fmt) && parsed.fmt > maxFmt) return { kind: 'newer' };
+      return { kind: 'rev', rev: parsed.rev };
+    } catch {
+      return { kind: 'unreadable' };
     }
-    log(`copy-${res}`);
-    return false;
   }
 
-  const deps: Deps = { opts, io, mainKey, known, blocked, status, log, emptySave, parseAll, names, readOf, writeFree, copyThenMain };
-  const { readEnvelope, cleanText } = createLoader(deps);
-
-  // ───────────── публичный слой ─────────────
-
-  /** Разбор без записи: карточки игроков и родитель. Битое, чужое, нет — чистое. */
-  function peek(id: string): Sections {
-    const r = io.read(mainKey(id));
-    if (!r.ok) return emptySave();
-    if (v1) return emptySave();
-    const d = classify(r.text);
-    if (d.kind === 'ok' || d.kind === 'migrate') return parseAll(d.envelope.sections);
-    return emptySave();
+  /** Запись с проверкой `rev` на диске: ровно то, что ждали, иначе `conflict`. */
+  function guardedWrite(
+    key: string,
+    raw: string,
+    newRev: number,
+    expectRev: number | null,
+    pid: string | null,
+    maxFmt: number,
+    /** Последний шаг перед записью, когда сверка прошла; `false` — писать нельзя (`quota`). */
+    before?: () => boolean,
+  ): Saved {
+    if (expectRev !== null && newRev <= expectRev) return { ok: false, err: 'invalid', why: ['rev'] };
+    const disk = readDisk(key, maxFmt);
+    if (disk.kind === 'denied') return { ok: false, err: 'denied' };
+    if (disk.kind === 'newer') return { ok: false, err: 'readonly' };
+    if (disk.kind === 'unreadable') return { ok: false, err: 'conflict' };
+    if (disk.kind === 'absent' ? expectRev !== null : disk.rev !== expectRev) return { ok: false, err: 'conflict' };
+    if (before && !before()) return { ok: false, err: 'quota' };
+    const done = writeRelieved(key, raw, pid);
+    return done.ok ? done : { ok: false, err: done.err === 'quota' ? 'quota' : 'denied' };
   }
-
-  /** Загрузить игрока в память (первая загрузка за день — снимок, битое — карантин). */
-  function load(id: string): Sections {
-    if (v1) {
-      const empty = emptySave();
-      known.set(id, { rev: 0, save: empty });
-      return empty;
-    }
-    const st = readEnvelope(id, true);
-    const mem = st.kind === 'ok' || st.kind === 'held' ? st.save : emptySave();
-    known.set(id, { rev: st.kind === 'ok' ? st.rev : 0, save: mem });
-    return mem;
-  }
-
-  /**
-   * Применить ход. Результат — новое сохранение (в памяти и, если можно, в хранилище); null — игрок удалён
-   * в другой вкладке (в списке нет; ключ при этом может лежать или пропасть): не писать. Нечитаемое и полное хранилище — ход только в памяти;
-   * `newer` — ход не применяется вовсе (память прежняя, `fn` не вызывается).
-   */
-  function update(id: string, fn: (s: Sections) => Sections): Sections | null {
-    // Игрока нет в списке — его удалили в другой вкладке: не пишем ничего (ни ход, ни снимок, ни карантин), даже если ключ
-    // ещё лежит (удаление не доделано: копия «до» не легла) или уже пропал (014-Р18). Игрок, чей `create` не записался,
-    // ключа и не имел: «нет в списке» для него не значит «удалён».
-    if (!unwritten.has(id) && !hasPlayer(id)) return null;
-    // `newer` у любого игрока — слой только читает: проверка раньше `load`, который иначе писал бы копии (E).
-    const before = known.get(id);
-    if (status.readOnly) return before?.save ?? load(id);
-    const mem = before ?? { rev: 0, save: load(id) };
-    if (status.readOnly) return mem.save;
-    const st = readEnvelope(id, false);
-    if (st.kind === 'newer') return mem.save;
-    if (st.kind === 'blocked' || st.kind === 'held') {
-      // Хранилище не читается или копия «до» не легла: ключ не пишем, ход живёт в памяти (A).
-      const kept = fn(mem.save);
-      known.set(id, { rev: mem.rev, save: kept });
-      return kept;
-    }
-    // Память новее лежащего, если ключ не менялся (`rev` тот же) или этот вызов только что записал копию и ключ
-    // (ходы, пока ключ держали). Иначе лежит чужая запись — её не затираем (метки «держим» нет: она устаревала).
-    const base = st.rev === mem.rev || st.wrote ? mem.save : st.save;
-    const next = fn(base);
-    if (next === base) {
-      known.set(id, { rev: st.rev, save: base });
-      return base;
-    }
-    const env: SaveEnvelope = nextEnvelope({ rev: st.rev }, { ...st.sections, ...next }, opts.app);
-    if (writeFree(mainKey(id), JSON.stringify(env))) {
-      spaceOk();
-      unwritten.delete(id);
-      known.set(id, { rev: env.rev, save: next });
-    } else {
-      known.set(id, { rev: st.rev, save: next });
-    }
-    return next;
-  }
-
-  /** Новый игрок: чистое сохранение (до записи в список — ключ с тем же id от удалённого не воскреснет). */
-  function create(id: string): Sections {
-    const save = emptySave();
-    if (status.readOnly) return save;
-    const prev = readOf(mainKey(id));
-    const d = classify(prev);
-    const rev = d.kind === 'ok' || d.kind === 'migrate' ? d.envelope.rev + 1 : 1;
-    const env = { ...emptyEnvelope(opts.app, registry, ctx), sections: save, rev };
-    const ok = writeFree(mainKey(id), JSON.stringify(env));
-    known.set(id, { rev: ok ? rev : 0, save });
-    if (ok) unwritten.delete(id);
-    else unwritten.add(id);
-    return save;
-  }
-
-  /**
-   * Сброс прогресса: копия `pre.<id>.reset.<ms>`, затем чистый конверт с `rev + 1` (а не удаление ключа — открытая
-   * игра продолжит от чистого).
-   * null — отказ: сохранение новее программы, хранилище не читается или копия «до» не легла; память и ключ прежние (B).
-   */
-  function reset(id: string): Sections | null {
-    if (status.readOnly) return null;
-    const save = emptySave();
-    const r = io.read(mainKey(id));
-    if (!r.ok) return null;
-    const prevText = r.text;
-    const d = classify(prevText);
-    const rev = (d.kind === 'ok' || d.kind === 'migrate' ? d.envelope.rev : (known.get(id)?.rev ?? 0)) + 1;
-    if (prevText !== null) {
-      const name = resetName(id, opts.now());
-      if (!copyThenMain(name, prevText, mainKey(id), cleanText(rev))) return null;
-      for (const old of planSingle(names(), id, 'reset', name)) io.remove(prefix + old);
-      known.set(id, { rev, save });
-      return save;
-    }
-    // Ключа нет — терять нечего: чистое в память, в хранилище, если место есть.
-    known.set(id, { rev: writeFree(mainKey(id), cleanText(rev)) ? rev : (known.get(id)?.rev ?? 0), save });
-    return save;
-  }
-
-  /**
-   * Загрузка файла (014-Т4): разделы игрока из файла вместо лежащих. Копия «до» (`copyName`, лежащий текст читается
-   * здесь же) — раньше основного ключа и с перечиткой (Б1); освобождение места копии `import` моложе суток
-   * не удаляет (Р11). `copyName` null — копия не нужна (моложе суток уже есть). `rev + 1` от лежащего.
-   * `ok` — основной ключ записан, память обновлена; иначе основной ключ не изменился: `readonly` (v1, `newer`/
-   * `readOnly`), `unreadable` (хранилище не читается), `no-space` (копия или ключ не легли).
-   */
-  function restore(id: string, imported: Sections, copyName: string | null): 'ok' | 'readonly' | 'unreadable' | 'no-space' {
-    if (status.readOnly) return 'readonly';
-    const r = io.read(mainKey(id));
-    if (!r.ok) return 'unreadable';
-    const d = classify(r.text);
-    if (d.kind === 'newer') {
-      status.readOnly = true;
-      log(`newer ${id}`);
-      return 'readonly';
-    }
-    const rev = (d.kind === 'ok' || d.kind === 'migrate' ? d.envelope.rev : (known.get(id)?.rev ?? 0)) + 1;
-    const text = JSON.stringify(nextEnvelope({ rev: rev - 1 }, imported, opts.app));
-    if (copyName !== null && r.text !== null) {
-      if (!copyThenMain(copyName, r.text, mainKey(id), text)) return 'no-space';
-      for (const old of planSingle(names(), id, 'import', copyName)) io.remove(prefix + old);
-    } else if (!writeFree(mainKey(id), text)) {
-      return 'no-space';
-    } else {
-      spaceOk();
-    }
-    unwritten.delete(id);
-    known.set(id, { rev, save: parseAll(imported) });
-    return 'ok';
-  }
-
-  /**
-   * Удаление игрока: копия `pre.<id>.delete.<ms>` (с именем игрока, если оно передано — 014-Р18), затем ключ.
-   * Копия не влезла — ключ остаётся.
-   */
-  function remove(id: string, playerName?: string): boolean {
-    known.delete(id);
-    unwritten.delete(id);
-    if (status.readOnly) return false;
-    const prevText = readOf(mainKey(id));
-    if (prevText === null) return true;
-    const name = deleteName(id, opts.now());
-    const copyText = playerName === undefined ? prevText : withPlayerName(prevText, playerName);
-    const res = copyThenWrite(copyIoFor(prefix + name), prefix + name, copyText, mainKey(id), prevText);
-    trimCeiling();
-    if (res !== 'ok') return false;
-    for (const old of planSingle(names(), id, 'delete', name)) io.remove(prefix + old);
-    return io.remove(mainKey(id));
-  }
-
-  /** Проверка заголовков сохранений до `planStart`: новее программы — только чтение, список и общая часть не пишутся (В6). */
-  function scanNewer(ids: readonly string[]): boolean {
-    for (const id of ids) {
-      const text = readOf(mainKey(id));
-      if (classify(text).kind === 'newer') {
-        status.readOnly = true;
-        log(`newer ${id}`);
-      }
-    }
-    return status.readOnly;
-  }
-
-  /** Следить за ключом игрока: другая вкладка записала — перечитать в память и сообщить. null — не следить. */
-  function follow(id: string | null, cb: (s: Sections) => void = () => undefined): void {
-    follower = id === null ? null : { id, cb };
-  }
-
-  function refresh(id: string): void {
-    const mem = known.get(id);
-    if (!mem || status.readOnly) return;
-    const r = io.read(mainKey(id));
-    if (!r.ok || r.text === null) return;
-    const d = classify(r.text);
-    if (d.kind === 'newer') {
-      status.readOnly = true;
-      log(`newer ${id}`);
-      return;
-    }
-    if (d.kind !== 'ok') return;
-    if (d.envelope.rev === mem.rev) return;
-    const save = parseAll(d.envelope.sections);
-    known.set(id, { rev: d.envelope.rev, save });
-    if (follower?.id === id) follower.cb(save);
-  }
-
-  io.onChange?.((key) => {
-    if (follower === null) return;
-    if (key === null || key === mainKey(follower.id)) refresh(follower.id);
-  });
 
   return {
-    mode: v1 ? ('v1' as const) : ('envelope' as const),
-    peek,
-    load,
-    update,
-    create,
-    reset,
-    restore,
-    remove,
-    scanNewer,
-    follow,
-    /** Сохранение игрока, как его помнит слой (после reset — чистое, даже если ключ не обновился). */
-    memory: (id: string): Sections | undefined => known.get(id)?.save,
-    setHasPlayer: (fn: (id: string) => boolean): void => void (hasPlayer = fn),
-    status: (): Readonly<StoreStatus> => status,
-    events: (): readonly StoreEvent[] => events,
-    /** Все ключи под префиксом: имя без префикса → текст (для файла и проверок). */
-    dumpStorage: (): Record<string, string> =>
-      Object.fromEntries(io.keys(prefix).map((k) => [k.slice(prefix.length), readOf(k) ?? ''])),
-    /** Сохранения в памяти: игрок → данные (файл при `storageFull`). */
-    memorySaves: (): Record<string, { rev: number; save: Sections }> =>
-      Object.fromEntries([...known.entries()].map(([id, k]) => [id, { rev: k.rev, save: k.save }])),
+    loadDevice() {
+      const brokenDevice = (raw: string): DeviceLoaded => {
+        deviceNewer = false;
+        const quarantined = quar.put('device', raw, null);
+        deviceBroken = quarantined ? raw : undefined;
+        return { kind: 'broken', raw, quarantined };
+      };
+      const got = kv.read(deviceKey);
+      if (!got.ok) return { kind: got.err === 'absent' ? 'absent' : 'denied' };
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(got.value);
+      } catch {
+        return brokenDevice(got.value);
+      }
+      if (!isObject(parsed) || parsed.kind !== DEVICE_KIND || !isInt(parsed.fmt) || parsed.fmt < 1) {
+        return brokenDevice(got.value);
+      }
+      if (parsed.fmt > DEVICE_FMT) {
+        deviceNewer = true;
+        return { kind: 'newer', raw: got.value };
+      }
+      if (deviceProblems(parsed)) return brokenDevice(got.value);
+      deviceNewer = false;
+      deviceBroken = undefined;
+      return { kind: 'ok', device: parsed as unknown as Device };
+    },
+
+    saveDevice(device, expectRev) {
+      if (deviceNewer) return { ok: false, err: 'readonly' };
+      let raw: string;
+      try {
+        if (device.kind !== DEVICE_KIND || device.fmt !== DEVICE_FMT || deviceProblems({ ...device })) {
+          return { ok: false, err: 'invalid', why: ['device'] };
+        }
+        raw = JSON.stringify(device);
+      } catch {
+        return { ok: false, err: 'invalid', why: ['device'] };
+      }
+      // Выход из тупика: битый device уже в карантине и на диске всё ещё он — новый пишется поверх.
+      if (deviceBroken !== undefined && expectRev === null) {
+        const disk = kv.read(deviceKey);
+        if (disk.ok && disk.value === deviceBroken) {
+          const done = writeRelieved(deviceKey, raw, null);
+          if (done.ok) deviceBroken = undefined;
+          return done.ok ? done : { ok: false, err: done.err === 'quota' ? 'quota' : 'denied' };
+        }
+      }
+      return guardedWrite(deviceKey, raw, device.rev, expectRev, null, DEVICE_FMT);
+    },
+
+    loadPlayer(pid) {
+      if (!validPid(pid)) return { kind: 'absent' };
+      const got = kv.read(playerKey(pid));
+      if (!got.ok) return { kind: got.err === 'absent' ? 'absent' : 'denied' };
+      const read = openPlayer(got.value, defs);
+      // Конверт с чужим pid под этим ключом: первая запись бросила бы (`savePlayer`), поэтому — битый, сырое в карантин.
+      const opened: Opened =
+        read.kind === 'ok' && read.env.pid !== pid ? { kind: 'broken', raw: got.value, why: ['pid'] } : read;
+      if (opened.kind === 'newer') {
+        readOnly.add(pid);
+        unbacked.delete(pid);
+        brokenRaw.delete(pid);
+        return opened.section === undefined
+          ? { kind: 'newer', raw: opened.raw }
+          : { kind: 'newer', raw: opened.raw, section: opened.section };
+      }
+      if (opened.kind === 'broken') {
+        readOnly.add(pid);
+        unbacked.delete(pid);
+        const quarantined = quar.put(pid, opened.raw, pid);
+        if (quarantined) brokenRaw.set(pid, opened.raw);
+        else brokenRaw.delete(pid);
+        return opened.sections === undefined
+          ? { kind: 'broken', raw: opened.raw, why: opened.why, quarantined }
+          : {
+              kind: 'broken',
+              raw: opened.raw,
+              why: opened.why,
+              sections: opened.sections,
+              quarantined,
+            };
+      }
+      readOnly.delete(pid);
+      brokenRaw.delete(pid);
+      const backup = opened.changed ? copies.put(pid, got.value).ok : true;
+      if (backup) unbacked.delete(pid);
+      else unbacked.add(pid);
+      return { kind: 'ok', env: opened.env, changed: opened.changed, backup };
+    },
+
+    savePlayer(pid, env, expectRev) {
+      if (!validPid(pid)) return { ok: false, err: 'denied' };
+      if (env.pid !== pid) throw new Error(`savePlayer: envelope of ${env.pid} written under ${pid}`);
+      const overBroken = readOnly.has(pid) && expectRev === null && brokenRaw.has(pid);
+      if ((readOnly.has(pid) && !overBroken) || busy.has(pid)) return { ok: false, err: 'readonly' };
+      const why = envelopeProblems(env, defs);
+      if (why.length > 0) return { ok: false, err: 'invalid', why };
+      let raw: string;
+      try {
+        raw = serializePlayer(env);
+      } catch {
+        return { ok: false, err: 'invalid', why: ['serialize'] };
+      }
+      // Выход из тупика (как у устройства): битое уже в карантине и на диске всё ещё оно — новый конверт пишется поверх.
+      if (overBroken) {
+        const disk = kv.read(playerKey(pid));
+        if (!disk.ok || disk.value !== brokenRaw.get(pid)) return { ok: false, err: 'conflict' };
+        const done = writeRelieved(playerKey(pid), raw, pid);
+        if (done.ok) {
+          brokenRaw.delete(pid);
+          readOnly.delete(pid);
+        }
+        return done.ok ? done : { ok: false, err: done.err === 'quota' ? 'quota' : 'denied' };
+      }
+      // Загрузка не смогла сохранить сырое до миграции: без копии первая запись не идёт (исходного нет ни в одном ключе).
+      const ensureBackup = unbacked.has(pid)
+        ? () => {
+            const disk = kv.read(playerKey(pid));
+            return !disk.ok || copies.put(pid, disk.value).ok;
+          }
+        : undefined;
+      const saved = guardedWrite(playerKey(pid), raw, env.rev, expectRev, pid, ENVELOPE_FMT, ensureBackup);
+      if (saved.ok) unbacked.delete(pid);
+      return saved;
+    },
+
+    putCopy(pid, env) {
+      if (!validPid(pid) || env.pid !== pid) return { ok: false, err: 'invalid' };
+      let raw: string;
+      try {
+        raw = serializePlayer(env);
+      } catch {
+        return { ok: false, err: 'invalid' };
+      }
+      return copies.put(pid, raw);
+    },
+
+    quarantined(owner) {
+      return quar.list(owner);
+    },
+
+    async hold(pid) {
+      const hold = await holdLock(playerKey(pid), opts.locks);
+      if (hold.kind === 'busy') busy.add(pid);
+      else busy.delete(pid);
+      return hold;
+    },
+
+    trash(pid) {
+      if (!validPid(pid)) return { ok: false, err: 'absent' };
+      if (busy.has(pid)) return { ok: false, err: 'busy' };
+      const got = kv.read(playerKey(pid));
+      if (!got.ok) return got;
+      if (kv.read(trashKey(pid)).ok) return { ok: false, err: 'exists' };
+      const put = writeRelieved(trashKey(pid), got.value, pid);
+      if (!put.ok) return put;
+      if (!kv.remove(playerKey(pid)).ok) {
+        kv.remove(trashKey(pid));
+        return { ok: false, err: 'denied' };
+      }
+      readOnly.delete(pid);
+      unbacked.delete(pid);
+      return { ok: true };
+    },
+
+    restore(pid) {
+      if (!validPid(pid)) return { ok: false, err: 'absent' };
+      const got = kv.read(trashKey(pid));
+      if (!got.ok) return got;
+      if (kv.read(playerKey(pid)).ok) return { ok: false, err: 'exists' };
+      const put = writeRelieved(playerKey(pid), got.value, pid);
+      if (!put.ok) return put;
+      // Ключ корзины не стёрся — игрок был бы и там, и тут: возврат отменяется, только что записанный файл убирается.
+      if (!kv.remove(trashKey(pid)).ok) {
+        kv.remove(playerKey(pid));
+        return { ok: false, err: 'denied' };
+      }
+      return { ok: true };
+    },
+
+    trashToCopy(pid) {
+      if (!validPid(pid)) return { ok: false, err: 'absent' };
+      const got = kv.read(trashKey(pid));
+      if (!got.ok) return got;
+      const put = copies.put(pid, got.value);
+      if (!put.ok) return put;
+      kv.remove(trashKey(pid));
+      return { ok: true };
+    },
+
+    emptyTrash() {
+      const listed = kv.keys(`${p}trash.`);
+      if (!listed.ok) return listed;
+      let removed = 0;
+      let denied = false;
+      for (const key of listed.value) {
+        const pid = key.slice(`${p}trash.`.length);
+        if (!kv.remove(key).ok) {
+          denied = true;
+          continue;
+        }
+        removed++;
+        if (kv.read(playerKey(pid)).ok) continue; // игрок снова на месте — его хвосты не наши
+        copies.drop(pid);
+        quar.drop(pid);
+      }
+      return denied ? { ok: false, err: 'denied' } : { ok: true, value: removed };
+    },
+
+    trashed() {
+      const listed = kv.keys(`${p}trash.`);
+      if (!listed.ok) return listed;
+      return {
+        ok: true,
+        value: listed.value.map((k) => k.slice(`${p}trash.`.length)),
+      };
+    },
+
+    playerPids() {
+      const listed = kv.keys(`${p}player.`);
+      if (!listed.ok) return listed;
+      // Копии (`player.<pid>.c1`) и всё с точкой в pid — не файлы игроков.
+      return { ok: true, value: listed.value.map((k) => k.slice(`${p}player.`.length)).filter(validPid) };
+    },
+
+    peekTrash(pid) {
+      return validPid(pid) ? kv.read(trashKey(pid)) : { ok: false, err: 'absent' };
+    },
+
+    tabPid() {
+      const got = session?.read(`${p}tab`);
+      return got?.ok ? got.value : undefined;
+    },
+
+    setTabPid(pid) {
+      return session ? session.write(`${p}tab`, pid) : { ok: false, err: 'denied' };
+    },
   };
 }
-
-export type SaveStore = ReturnType<typeof createSaveStore>;

@@ -1,0 +1,10 @@
+{
+  "order": ["x.closed.one"],
+  "rowWidth": 20,
+  "stages": [{ "n": 1, "newKeys": "ab" }],
+  "ladders": {},
+  "lengthBands": [{ "stages": [1, 1], "min": 1, "max": 2 }],
+  "lessons": {
+    "x.closed.one": { "stage": 1, "material": "ab", "attacks": [5], "rows": 1, "g": 1, "c": 1, "warmup": 0 }
+  }
+}

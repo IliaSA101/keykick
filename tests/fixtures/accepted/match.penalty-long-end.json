@@ -1,0 +1,195 @@
+{
+ "id": "match.penalty-long-end",
+ "codes": {
+  "1920": "Э1.21"
+ },
+ "screen": "match",
+ "route": "/match",
+ "state": "Пенальти: прокручено до соединялки (как в МЭШ)",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 421342,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.longer-words",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.yd-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.six-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.six-keys-review": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.fzh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.fzh-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.fzh-again": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.eight-keys-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.test-eight": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.pr": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.pr-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 18,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 31,
+   "days": 9,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 10360,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "Саша",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  }
+ },
+ "match": {
+  "seed": 421342,
+  "lesson": 3,
+  "started": true,
+  "spec": {
+   "outcomes": "kkggcsg",
+   "penalty": "ask"
+  },
+  "show": {
+   "street": "Водопроводной",
+   "task": {
+    "id": "t-frame-long",
+    "no": 6000,
+    "level": 2,
+    "verified": true,
+    "solution": "Перебор.",
+    "text": "Во дворе на Лесной прошёл турнир шести команд: «Прогресс», «Двор на Лесной», «Ракета», «Звезда», «Молния» и «Сокол». Каждая команда сыграла с каждой по одному разу. За победу давали 3 очка, за ничью — 1, за поражение — 0. Одинаковых очков в конце ни у кого не оказалось, поэтому места распределились без дележа.\n\nЧерез неделю таблицу потеряли. Тренеры и капитаны стали вспоминать, кто где стоял, но каждый помнил только что-то одно:\n1. Тренер «Ракеты»: «Мы оказались выше «Сокола», но ниже «Звезды».\n2. Тренер «Звезды»: «В таблице мы с «Ракетой» стояли рядом».\n3. Капитан «Молнии»: «Между нами и «Прогрессом» в таблице была ровно одна команда».\n4. Вратарь «Двора на Лесной»: «Мы обогнали «Молнию».\n5. Капитан «Прогресса»: «А мы обогнали «Звезду».\n\nБольше никто ничего не помнил, но этого хватило, чтобы восстановить таблицу целиком.\n\nКакая команда заняла третье место? Ответь одним словом.",
+    "answer": {
+     "kind": "text",
+     "accepted": [
+      "Молния"
+     ]
+    }
+   },
+   "scrollEnd": true
+  }
+ }
+}

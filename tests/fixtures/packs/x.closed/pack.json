@@ -1,0 +1,9 @@
+{
+  "id": "x.closed",
+  "course": "x",
+  "league": "closed",
+  "access": "closed",
+  "rev": 3,
+  "shellApi": 1,
+  "files": { "lessons": "lessons.json", "text": { "en": "text.en.json" } }
+}

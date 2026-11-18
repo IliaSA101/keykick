@@ -1,0 +1,227 @@
+/* ЭБ · Лист задачи: номера, вопрос, варианты, эталон. Из docs/mockups/kit/kit.css (строки 1373–1600), классы те же; разметка — компоненты src/components/kit. */
+/* ---------- Лист задачи (Э1, Э3) ----------
+   Строгий белый лист олимпиады (ретро 025): разметка — tools/mock-kit/paper.mjs, цвета — --paper-* из tokens.css.
+   Э1 (пенальти) и «Школа» (Э3) берут одно и то же; правка вида листа — только здесь. */
+.sheet {
+  position: absolute;
+  box-sizing: border-box;
+  background: var(--paper);
+  color: var(--paper-text);
+  border: 1px solid var(--paper-border);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.5);
+  padding: 14px 24px 16px;
+  font-size: 16px;
+  line-height: 1.45;
+}
+.sheet .zad {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+/* полоса номеров: ярлычки заданий над шапкой листа; cur — открыто, ok — решено */
+.sheet .nums {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+/* ячейка номера — общая у обеих полос (.nums и .nums.lg): коробка, сетка, скругление, фон, тень */
+.sheet .nums span,
+.nums.lg span {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  border-radius: 6px 6px 3px 3px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.18);
+}
+.sheet .nums span {
+  width: 34px;
+  height: 30px;
+  border-bottom: 4px solid var(--paper-border);
+  font-size: 14px;
+}
+.sheet .nums span.ok {
+  border-bottom-color: #3cb85c;
+}
+.sheet .nums span.cur {
+  /* 025-Р27 (11.11): текущий номер — --paper-focus, как у .nums.lg (было фиолетовое #7d3cd0 только у Э1) */
+  border: 3px solid var(--paper-focus);
+  border-bottom-width: 3px;
+}
+
+/* полоса номеров тура «Школы» (Э3, 025-Р21): .nums.lg — ячейка 48, ok — галочка, bad — крестик, текущая — --paper-focus; .mini — итог; .col — столбцом.
+   Умолчание (Э1) не меняется. */
+.nums.lg {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.nums.lg.col {
+  flex-direction: column;
+  gap: 6px;
+}
+.nums.lg span {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-bottom: 6px solid var(--paper-border);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--paper-text);
+}
+.nums.lg span i {
+  position: absolute;
+  right: 3px;
+  top: 1px;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 800;
+}
+.nums.lg span.ok {
+  border-bottom-color: var(--paper-correct);
+  background: #eef7ef;
+}
+.nums.lg span.ok i {
+  color: var(--paper-correct);
+}
+.nums.lg span.bad {
+  border-bottom-color: var(--paper-wrong);
+  background: #fdeeed;
+}
+.nums.lg span.bad i {
+  color: var(--paper-wrong);
+}
+.nums.lg span.cur {
+  border: 3px solid var(--paper-focus);
+  border-bottom-width: 6px;
+}
+.nums.lg.mini {
+  gap: 4px;
+}
+.nums.lg.mini span {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+  box-shadow: none;
+  border: 1px solid var(--paper-border);
+  border-bottom-width: 4px;
+}
+
+/* вопрос, варианты и поле ответа: .kind — тип ответа, .q — вопрос, .opt — вариант (sel — выбран), .ans — «Ответить» и вторичное действие */
+.sheet .kind {
+  /* 025-Р27 (11.11): было #9a9aa6 — 2,78 : 1 к белому листу (#fff); стало #6b6b78 — 5,25 : 1 (WCAG AA, ≥ 4,5 : 1) */
+  color: #6b6b78;
+  font-size: 15px;
+}
+.sheet .q {
+  font-size: 18px;
+  margin: 6px 0 10px;
+}
+.opts {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.opt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0 8px;
+  border: 1.5px solid var(--paper-border);
+  border-radius: 8px;
+  background: #fff;
+}
+.opt.sel {
+  border-color: var(--paper-focus);
+  box-shadow: 0 0 0 2px rgb(26 79 176 / 0.25);
+  background: #f4f8ff;
+}
+.opt svg {
+  display: block;
+}
+.opt .lab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+.opt .lab i {
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 2px solid #8a8a96;
+}
+.opt.sel .lab i {
+  border: 5px solid var(--paper-focus);
+}
+.ans {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 12px;
+}
+.ans .go {
+  padding: 8px 26px;
+  border-radius: 8px;
+  background: var(--paper-button);
+  color: var(--paper-button-text);
+  font-weight: 700;
+  font-size: 17px;
+}
+.ans .note {
+  color: #6b6b76;
+  font-size: 15px;
+}
+.ans .skip {
+  margin-left: auto;
+  color: var(--paper-focus);
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: underline;
+}
+/* эталонный ответ: после попытки лист остаётся как был, верный вариант — зелёная рамка с «✓», внизу — полоса итога (ТЗ-6.3) */
+.opt.sel.ref {
+  border-color: #3cb85c;
+  background: #effaf1;
+  box-shadow: 0 0 0 2px #3cb85c;
+}
+.opt .lab .ok-mark {
+  color: #2e9e4c;
+}
+.sheet .verdict {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #e7f7eb;
+  color: #1f6b35;
+  font-size: 17px;
+  font-weight: 800;
+}
+.sheet .verdict .badge {
+  padding: 3px 10px;
+  border-radius: 8px;
+  background: #3cb85c;
+  color: #fff;
+}
+.sheet .verdict .hint {
+  margin-left: auto;
+  color: #2a2840;
+  font-weight: 700;
+}
+
+/* «неверно» — красная полоса итога (Э3: эталон после неверной попытки; Э1 пока не использует) */
+.sheet .verdict.bad {
+  background: #fbeaea;
+  color: #b3261e;
+}
+.sheet .verdict.bad .badge {
+  background: #b3261e;
+}
+

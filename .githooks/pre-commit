@@ -16,6 +16,9 @@ for file in $staged; do
       echo "pre-commit: $file не место в репозитории"; fail=1 ;;
     .*/compact-next.md|.*/measurements/*|.*/settings.local.json)
       echo "pre-commit: $file — рабочие данные агента"; fail=1 ;;
+    .seeloop/*|*/.seeloop/*)
+      # Хранилище seeloop (журнал, круги, токены) — никогда в git; `git add -f .` снимает и .gitignore (владелец 14.11, Б4).
+      echo "pre-commit: $file — хранилище seeloop, в git нельзя"; fail=1 ;;
     .env.example) ;;
     .env|.env.*)
       echo "pre-commit: $file — локальные настройки"; fail=1 ;;
@@ -28,7 +31,7 @@ done
 LIMIT=600
 for file in $staged; do
   case "$file" in
-    src/*.ts|src/*.vue|tools/*.mjs|tests/*.ts|.*/hooks/*.mjs) ;;
+    src/*.ts|src/*.vue|tools/*.mjs|tests/*.ts|.*/hooks/*.mjs|gate/*.ts|gate/*.mjs) ;;  # gate/ — сторож доступа (059-Р1, владелец 17.11)
     *) continue ;;
   esac
   [ -f "$file" ] || continue
@@ -97,6 +100,34 @@ fi
 if echo "$staged" | grep -qE '^(tools/mock-|tools/mock-map/|tools/mock-kit/|tools/mock-mk1/|docs/mockups/)'; then
   node tools/mock-check.mjs > /dev/null || { node tools/mock-check.mjs | tail -5; fail=1; }
   python3 tools/mock-map/qc.py taboo > /dev/null 2>&1 || { python3 tools/mock-map/qc.py taboo | tail -5; fail=1; }
+fi
+
+# 6. База знаний docs/kb (владелец 17.11) — собирается из первоисточников, руками не ведётся.
+# Коммит трогает журнал графики, журнал решений, спеки или сам сборщик — пересобрать и добавить в тот же коммит.
+# Сборщик читает рабочую копию: неиндексированная правка тех же файлов попадёт в базу раньше самой правки
+# (как vue-tsc выше) — для обычного коммита это одно и то же.
+# Ветка, отрезанная до появления базы (рабочие копии делят hooksPath), сборщика не имеет — пропускаем.
+if [ -f tools/kb/build.mjs ] && echo "$staged" | grep -qE '^(docs/art-pipeline\.md|docs/design\.md|docs/specs/|docs/mockups/accepted\.json|tools/kb/)'; then
+  if node tools/kb/build.mjs > /dev/null; then
+    git add -A docs/kb
+  else
+    echo "pre-commit: сборка docs/kb упала — node tools/kb/build.mjs"; fail=1
+  fi
+fi
+
+# 6а. Термины (066 Т3, органалитика вопрос 6): «Э1»/«П3» без слова «этап» или «лист» в добавленных строках .md —
+# только предупреждение, коммит не держит.
+if [ -f tools/kb/terms-check.mjs ]; then node tools/kb/terms-check.mjs || true; fi
+
+# 7. Дашборд docs/progress (владелец 18.11) — задачи и прогноз собираются из спек, руками не ведутся.
+# Коммит трогает спеки, дашборд или сборщик — пересобрать и добавить в тот же коммит.
+# Ветка, отрезанная до появления сборщика, его не имеет — пропускаем.
+if [ -f tools/progress/build.mjs ] && echo "$staged" | grep -qE '^(docs/specs/|docs/progress/|tools/progress/)'; then
+  if node tools/progress/build.mjs > /dev/null; then
+    git add docs/progress
+  else
+    echo "pre-commit: сборка docs/progress упала — node tools/progress/build.mjs"; fail=1
+  fi
 fi
 
 [ "$fail" -eq 0 ] || { echo "pre-commit: коммит остановлен"; exit 1; }

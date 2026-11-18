@@ -1,0 +1,70 @@
+{
+  "about": "Голден раскладки jcuken-win: снят 18.11 с src/content/keyboard.json перед его удалением (060-Т8). Ряды по порядку; ch — [без Shift, с Shift]; у служебных клавиш — label. Не править руками: поменялась раскладка — это решение, не обновление голдена.",
+  "id": "jcuken-win",
+  "rows": [
+  [
+    {"code":"Backquote","row":0,"finger":"lp","ch":["ё","Ё"]},
+    {"code":"Digit1","row":0,"finger":"lp","ch":["1","!"]},
+    {"code":"Digit2","row":0,"finger":"lr","ch":["2","\""]},
+    {"code":"Digit3","row":0,"finger":"lm","ch":["3","№"]},
+    {"code":"Digit4","row":0,"finger":"li","ch":["4",";"]},
+    {"code":"Digit5","row":0,"finger":"li","ch":["5","%"]},
+    {"code":"Digit6","row":0,"finger":"ri","ch":["6",":"]},
+    {"code":"Digit7","row":0,"finger":"ri","ch":["7","?"]},
+    {"code":"Digit8","row":0,"finger":"rm","ch":["8","*"]},
+    {"code":"Digit9","row":0,"finger":"rr","ch":["9","("]},
+    {"code":"Digit0","row":0,"finger":"rp","ch":["0",")"]},
+    {"code":"Minus","row":0,"finger":"rp","ch":["-","_"]},
+    {"code":"Equal","row":0,"finger":"rp","ch":["=","+"]},
+    {"code":"Backspace","row":0,"finger":"rp","width":2,"label":"⌫"}
+  ],
+  [
+    {"code":"Tab","row":1,"finger":"lp","width":1.5,"label":"Tab"},
+    {"code":"KeyQ","row":1,"finger":"lp","ch":["й","Й"]},
+    {"code":"KeyW","row":1,"finger":"lr","ch":["ц","Ц"]},
+    {"code":"KeyE","row":1,"finger":"lm","ch":["у","У"]},
+    {"code":"KeyR","row":1,"finger":"li","ch":["к","К"]},
+    {"code":"KeyT","row":1,"finger":"li","ch":["е","Е"]},
+    {"code":"KeyY","row":1,"finger":"ri","ch":["н","Н"]},
+    {"code":"KeyU","row":1,"finger":"ri","ch":["г","Г"]},
+    {"code":"KeyI","row":1,"finger":"rm","ch":["ш","Ш"]},
+    {"code":"KeyO","row":1,"finger":"rr","ch":["щ","Щ"]},
+    {"code":"KeyP","row":1,"finger":"rp","ch":["з","З"]},
+    {"code":"BracketLeft","row":1,"finger":"rp","ch":["х","Х"]},
+    {"code":"BracketRight","row":1,"finger":"rp","ch":["ъ","Ъ"]},
+    {"code":"Backslash","row":1,"finger":"rp","ch":["\\","/"],"width":1.5}
+  ],
+  [
+    {"code":"CapsLock","row":2,"finger":"lp","width":1.75,"label":"Caps"},
+    {"code":"KeyA","row":2,"finger":"lp","ch":["ф","Ф"]},
+    {"code":"KeyS","row":2,"finger":"lr","ch":["ы","Ы"]},
+    {"code":"KeyD","row":2,"finger":"lm","ch":["в","В"]},
+    {"code":"KeyF","row":2,"finger":"li","ch":["а","А"],"bump":true},
+    {"code":"KeyG","row":2,"finger":"li","ch":["п","П"]},
+    {"code":"KeyH","row":2,"finger":"ri","ch":["р","Р"]},
+    {"code":"KeyJ","row":2,"finger":"ri","ch":["о","О"],"bump":true},
+    {"code":"KeyK","row":2,"finger":"rm","ch":["л","Л"]},
+    {"code":"KeyL","row":2,"finger":"rr","ch":["д","Д"]},
+    {"code":"Semicolon","row":2,"finger":"rp","ch":["ж","Ж"]},
+    {"code":"Quote","row":2,"finger":"rp","ch":["э","Э"]},
+    {"code":"Enter","row":2,"finger":"rp","width":2.25,"label":"Enter"}
+  ],
+  [
+    {"code":"ShiftLeft","row":3,"finger":"lp","width":2.25,"label":"Shift"},
+    {"code":"KeyZ","row":3,"finger":"lp","ch":["я","Я"]},
+    {"code":"KeyX","row":3,"finger":"lr","ch":["ч","Ч"]},
+    {"code":"KeyC","row":3,"finger":"lm","ch":["с","С"]},
+    {"code":"KeyV","row":3,"finger":"li","ch":["м","М"]},
+    {"code":"KeyB","row":3,"finger":"li","ch":["и","И"]},
+    {"code":"KeyN","row":3,"finger":"ri","ch":["т","Т"]},
+    {"code":"KeyM","row":3,"finger":"ri","ch":["ь","Ь"]},
+    {"code":"Comma","row":3,"finger":"rm","ch":["б","Б"]},
+    {"code":"Period","row":3,"finger":"rr","ch":["ю","Ю"]},
+    {"code":"Slash","row":3,"finger":"rp","ch":[".",","]},
+    {"code":"ShiftRight","row":3,"finger":"rp","width":2.75,"label":"Shift"}
+  ],
+  [
+    {"code":"Space","row":4,"finger":"th","ch":[" "," "],"width":6.25}
+  ]
+  ]
+}

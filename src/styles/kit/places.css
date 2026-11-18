@@ -1,0 +1,319 @@
+/* ЭБ · Ярлыки мест, ступени двора, флажок, ворота в Район. Из docs/mockups/kit/kit.css (строки 943–1260), классы те же; разметка — компоненты src/components/kit. */
+/* ---------- плашка ворот в Район (gateTag, Р40): Карта (слева) и арка Дома (справа), справочная, как .htag.ref ---------- */
+.kb-gate {
+  position: absolute;
+  z-index: 4;
+  transform: translate(-50%, -50%);
+  padding: 4px 12px 5px;
+  border-radius: 12px;
+  text-align: center;
+  white-space: nowrap;
+  background: rgb(21 20 58 / 0.94);
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.4);
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.85);
+}
+.kb-gate b {
+  display: block;
+  font-size: 15px;
+  color: var(--text);
+}
+.kb-gate i {
+  font-style: normal;
+  color: var(--text-muted);
+}
+.kb-gate span {
+  display: block;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+/* ворота открыты: зелёная кайма — как у пройденного (не золотая: золото — «сегодня» и главная кнопка) */
+.kb-gate.open {
+  box-shadow:
+    inset 0 0 0 2px rgb(111 216 156 / 0.75),
+    0 3px 10px rgb(0 0 0 / 0.4);
+}
+/* ---------- ярлык места (placeTag, Р41 п.6): Дом (здания, места, стенд, табличка стадиона) и Карта (двор, «Наш двор») ----------
+   Одна часть на основе .kb-gate: один радиус, размер имени и заливка у всех; состояние — ТОЛЬКО цветом каймы и подмесом цвета в заливку
+   (tokens). Правило Р38: нажимаемое — кайма и «›» после имени (.go); справочное (.ref) — без каймы; закрытое (.lock) — тише. */
+.kb-place {
+  --pc: transparent; /* цвет состояния: кайма и подмес в заливку */
+  --pt: 0%; /* доля подмеса */
+  position: absolute;
+  z-index: 2;
+  transform: translate(-50%, 0); /* якорь — середина верхней кромки; .mid — центр */
+  box-sizing: border-box;
+  padding: 4px 12px 5px;
+  border-radius: 12px;
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1.2;
+  background: color-mix(in srgb, var(--pc) var(--pt), rgb(21 20 58 / 0.94));
+  box-shadow:
+    inset 0 0 0 2px var(--pc),
+    0 3px 10px rgb(0 0 0 / 0.4);
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.85);
+}
+.kb-place.mid {
+  transform: translate(-50%, -50%);
+}
+/* столбец (Путь клуба, 051-Р12): ярлык — обычный блок во всю ширину столбца вёрстки, текст влево, строки переносятся;
+   размеры, кайма и заливка — те же, что у ярлыка на сцене */
+.kb-place.flow {
+  position: relative;
+  transform: none;
+  text-align: left;
+  white-space: normal;
+}
+.kb-place.go,
+.kb-place.near {
+  --pc: var(--map-point);
+  --pt: 14%;
+}
+.kb-place.done {
+  --pc: var(--map-point-done);
+  --pt: 22%;
+}
+/* «сегодня»: ТАБУ 11.11 — не золотая кайма и подмес, а сплошная белая плашка с тёмным текстом: на фоне тёмных ярлыков читается сильнее золота */
+.kb-place.cur {
+  --pc: #fff;
+  --pt: 100%;
+  --pip-ink: #1b1f3a;
+  text-shadow: none;
+}
+.kb-place.cur b,
+.kb-place.cur .go,
+.kb-place.cur .news {
+  color: #1b1f3a;
+}
+.kb-place.cur .sub {
+  color: #3a3f66;
+}
+.kb-place.cur .lk-ic {
+  filter: grayscale(1) brightness(0.3);
+  opacity: 0.8;
+}
+.kb-place.cur .dots i {
+  box-shadow: inset 0 0 0 1.5px rgb(27 31 58 / 0.45);
+}
+.kb-place.cur .dots i.ok {
+  box-shadow: none;
+}
+.kb-place.cur .dots i.nx {
+  box-shadow: inset 0 0 0 1.5px #1b1f3a;
+}
+.kb-place.home {
+  --pc: var(--map-home);
+  --pt: 30%;
+}
+/* подсказка у предмета (Путь клуба, 052-Р37 б): вид .kb-chip.tip — спокойная кайма --border, без подмеса; носик рисует лист (цвет каймы и заливки) */
+.kb-place.tip {
+  --pc: transparent;
+  background: rgb(21 20 58 / 0.94);
+  box-shadow:
+    inset 0 0 0 1.5px var(--border),
+    0 6px 18px rgb(0 0 0 / 0.5);
+}
+.kb-place b {
+  display: block;
+  font-size: 15px;
+  color: var(--text);
+}
+.kb-place.lock b {
+  color: var(--text-muted);
+}
+.kb-place .sub {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+/* нажимаемое: «›» после имени */
+.kb-place .go {
+  margin-left: 6px;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text); /* ТАБУ 11.11: стрелка на синей подложке — белая, не золотая */
+}
+.kb-place .lk-ic {
+  height: 13px;
+  margin-right: 4px;
+  vertical-align: -2px;
+  filter: grayscale(1) brightness(1.15);
+  opacity: 0.85;
+}
+/* карта: ярлык двора не уже 92 px, «Наш двор» — 120 */
+.kb-place.yd {
+  min-width: 92px;
+}
+.kb-place.yd.home {
+  min-width: 120px;
+}
+/* стадион: десять точек и новость золотой строкой над названием */
+.kb-place .dots {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+  margin: 3px 0 2px;
+}
+.kb-place .dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px rgb(207 227 255 / 0.4);
+}
+.kb-place .dots i.ok {
+  background: var(--map-point-done);
+  box-shadow: none;
+}
+.kb-place .dots i.nx {
+  box-shadow: inset 0 0 0 1.5px var(--text); /* ТАБУ 11.11: кольцо «следующая ступень» на синем ярлыке — белое */
+}
+.kb-place .news {
+  display: block;
+  margin-bottom: 2px;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 13px;
+  color: #fff; /* ТАБУ 11.11: новость на синей табличке — белая */
+}
+.kb-place .news .ic {
+  height: 13px;
+  vertical-align: -2px;
+}
+/* метка «новое» на кромке (вид — .kb-tag.solid): справа сверху; на ярлыке двора — слева (справа флажок Кубка); жёлтая точка — не главная метка */
+.kb-place .new {
+  position: absolute;
+  top: -16px;
+  right: -8px;
+  font-size: 13px;
+}
+.kb-place.yd .new {
+  top: -15px;
+  right: auto;
+  left: 4px;
+  font-size: 12px;
+}
+.kb-place .dot {
+  position: absolute;
+  top: -4px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text); /* ТАБУ 11.11: точка на кромке синего ярлыка — белая */
+  box-shadow: 0 0 0 1.5px rgb(21 20 58);
+}
+
+/* итог пройденного двора в шапке окна выбора и в подсказке наведения (ТЗ-1.4): золотая строка 13 px */
+.pickcard .ysum,
+.pop .ysum {
+  font-size: 13px;
+  color: #fff; /* ТАБУ 11.11: итог на синем — белый полужирный */
+  font-weight: 800;
+}
+.kb-chip.tip .ysum {
+  color: #fff;
+  font-weight: 800;
+}
+/* ★ в итоге двора — на светлой плашке (ТАБУ 11.11, как награды: .award-plate): золото лежит на ней, а не на синем */
+.ysum .sp {
+  display: inline-block;
+  padding: 0 4px;
+  border-radius: 5px;
+  background: var(--award-plate);
+  box-shadow: inset 0 0 0 1.5px var(--award-plate-edge);
+  color: #b07a08;
+  line-height: 1.25;
+}
+
+/* ---------- состояния ярлыка места (Р42 п.3; были в map.css): модификаторы .kb-place, задаёт placeTag({ mods }) ---------- */
+/* наведение на двор: белая кайма и свечение */
+.kb-place.picked {
+  box-shadow: inset 0 0 0 3px var(--text), 0 0 22px rgb(255 246 224 / 0.6);
+}
+/* наведение на пройденный двор с золотой ступенью (ТЗ-1.4): ТАБУ 11.11 — золотую кайму на синем ярлыке заменила двойная белая (наведение — одинарная); золото ступени показывает карточка рядом */
+.kb-place.picked.gold {
+  box-shadow: inset 0 0 0 3px #fff, 0 0 0 3px rgb(255 255 255 / 0.4), 0 0 22px rgb(255 255 255 / 0.6);
+}
+/* праздничный свет после титула (ТЗ-8.7): пройденные дворы светятся тёплым белым */
+.kb-place.fest {
+  box-shadow: inset 0 0 0 2px var(--map-point-done), 0 0 16px rgb(255 241 201 / 0.55), 0 4px 12px rgb(0 0 0 / 0.35);
+}
+/* «Наш двор» в день Кубка: белая кайма и флажок (ТАБУ 11.11: золотая на синем ярлыке — нельзя) */
+.kb-place.home.cupday {
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 18px 4px rgb(255 255 255 / 0.4);
+}
+.kb-place.home.cupday .flag {
+  width: 9px;
+  vertical-align: -1px;
+}
+/* Р43: «впереди» — светлее токена --map-pip-off (контраст к тёмному ярлыку 2,0 → 4,4:1); в продукте токен заменить при реализации */
+:root {
+  --map-pip-next: #6a7fb0;
+}
+/* ступени двора: точка на урок (placePips); контрольный — квадрат с белой каймой, товарищеский — белый центр, «за звёздами» — голубое кольцо */
+.pips {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+  margin: 3px 0 1px;
+}
+.pip {
+  position: relative;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--map-pip-next);
+}
+:root {
+  --pip-ink: #fff; /* цвет «сегодня» и кольца «контрольный» на тёмном ярлыке; на белом ярлыке «сегодня» (.kb-place.cur) — тёмный */
+}
+.pip.ctl {
+  border-radius: 2px;
+  box-shadow: 0 0 0 1.5px var(--pip-ink); /* ТАБУ 11.11: кольцо «контрольный» — белое; квадрат, а не круг — форма отличает от «сегодня» (круг с заливкой) */
+}
+.pip.done,
+.pip.ring {
+  background: var(--map-point-done);
+}
+.pip.ring {
+  box-shadow: 0 0 0 2px var(--map-point);
+}
+.pip.cur {
+  background: var(--pip-ink); /* ТАБУ 11.11: «сегодня» — белая заливка (на белом ярлыке — тёмная) с мягким свечением */
+  box-shadow: 0 0 6px var(--pip-ink);
+}
+.pip.fr::after {
+  content: '';
+  position: absolute;
+  inset: 2.5px;
+  border-radius: 50%;
+  background: #fff;
+}
+.pip em {
+  display: none;
+}
+/* флажок Кубка у двора: справа сверху; big — ближайший */
+.nflag {
+  position: absolute;
+  right: -10px;
+  top: -14px;
+  font-size: 14px;
+  color: var(--map-flag);
+}
+.nflag.big {
+  font-size: 22px;
+  top: -22px;
+}
+.nflag svg {
+  width: 13px;
+  height: 15px;
+  color: #fff;
+}
+.nflag.big svg {
+  width: 20px;
+  height: 23px;
+}
+

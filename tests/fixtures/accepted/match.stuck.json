@@ -1,0 +1,212 @@
+{
+ "id": "match.stuck",
+ "codes": {
+  "1920": "Э1.24"
+ },
+ "screen": "match",
+ "route": "/result",
+ "state": "«Застрял»: что дальше — помощь или отдых",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 466380,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.longer-words",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.yd-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.six-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.six-keys-review": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.fzh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.fzh-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.fzh-again": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.eight-keys-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.test-eight": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.pr": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.pr-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 18,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 31,
+   "days": 9,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 10360,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "Саша",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  }
+ },
+ "result": {
+  "view": {
+   "starsAll": 0,
+   "back": false,
+   "knower": false,
+   "grew": [
+    {
+     "finger": "lm",
+     "from": 1,
+     "to": 2
+    }
+   ],
+   "replay": "both",
+   "passed": false,
+   "help": "reserve",
+   "rest": true,
+   "verdict": "loss",
+   "total": {
+    "me": 2,
+    "opp": 3
+   },
+   "stars": 0,
+   "newStars": 0,
+   "record": {
+    "kind": "kept",
+    "delta": 0,
+    "best": {
+     "cpm": 12,
+     "permille": 900
+    }
+   },
+   "permille": 890,
+   "cpm": 11,
+   "correct": 188,
+   "coins": 9,
+   "fans": 188,
+   "missing": {
+    "kind": "goals",
+    "n": 2
+   }
+  },
+  "lessonNo": 17,
+  "street": "Водопроводной"
+ }
+}

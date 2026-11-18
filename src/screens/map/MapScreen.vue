@@ -1,398 +1,270 @@
 <script setup lang="ts">
-// Карта Двора (спека 019, design §1, §5): где ребёнок на пути из 32 уроков. Шапка (клуб, звёзды, монеты, входы), поле с
-// точками, карточкой урока или места, до первого доигранного матча — пузырь тренера; в углу версия, «Что нового»
-// и «Старая версия». Клавиатура без мыши (ТЗ-0.16): стрелки по точкам, Tab по группам (шапка — последняя, в DOM она
-// после поля, на экране — сверху), Enter — карточка и «Играть», Esc — закрыть карточку или окно; решает `app/map/keys`.
-// Окна (лист лиги, «Что нового», правка клуба) лежат поверх, остальное под ними `inert`; при закрытии фокус
-// возвращается на кнопку, откуда открыли, или на точку/место. Запись в сохранение — только «Готово» правки клуба и
-// отметка «Что нового увидено»; «Играть» уводит на матч урока.
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { clubRef, coachData, markNewsSeenNow } from '../../app/club/club';
-import { courseLessons } from '../../app/course/load';
-import { clubNeedsFix, EDIT_QUERY, overlayFromQuery, type Overlay } from '../../app/map/chrome';
-import { matchTo, PATH_PATH } from '../../app/map/go';
-import { keyAction } from '../../app/map/keys';
-import { coins, cpmOf, focusFromQuery, greeting, mapModel } from '../../app/map/state';
-import { oldVersionUrl } from '../../app/versions/build';
-import { APP_VERSION } from '../../app/version';
-import { pending, replay, type NewsCard as NewsCardData } from '../../app/whatsNew';
-import ClubEdit from '../../components/club/ClubEdit.vue';
-import CoachBubble from '../../components/coach/CoachBubble.vue';
-import LeagueSheet from '../../components/map/LeagueSheet.vue';
-import LessonCard from '../../components/map/LessonCard.vue';
-import { placeInfo } from '../../components/map/labels';
-import MapHeader from '../../components/map/MapHeader.vue';
-import NewsCard from '../../components/map/NewsCard.vue';
-import PlaceCard from '../../components/map/PlaceCard.vue';
-import YardMap from '../../components/map/YardMap.vue';
-import { coachOf } from '../../engine/coach/coach';
-import { HEADER_FOCUS } from '../../engine/map/focus';
-import { isPlayablePoint } from '../../engine/map/model';
-import { ru } from '../../i18n/ru';
-
-const route = useRoute();
-const router = useRouter();
-
-const ctx = computed(() => mapModel.value);
-const names = Object.fromEntries(courseLessons.map((l) => [l.id, l.name]));
-
-const root = ref<HTMLElement | null>(null);
-// Фокус по умолчанию — текущий урок; `?focus=` в dev-сборке ставит другой (быстрые проверки и кадры).
-const active = ref(ctx.value ? focusFromQuery(route.query.focus, ctx.value.model, import.meta.env.DEV) : '');
-const cardOpen = ref(true);
-const going = ref(false);
-
-const coach = computed(() => coachOf(coachData, clubRef.value.coach));
-const clubName = computed(() => clubRef.value.name.trim() || ru.clubForm.pickName);
-
-const point = computed(() => {
-  const p = ctx.value?.model.points.find((x) => x.id === active.value);
-  return p && isPlayablePoint(p) ? p : null;
-});
-
-/** Флажок, здание или ворота в фокусе — их карточка. */
-const place = computed(() => {
-  const c = ctx.value;
-  return c && !point.value ? placeInfo(c.model, active.value, { cup: c.input.league.cup, nextLeague: c.input.nextLeague?.name ?? '' }) : null;
-});
-
-const card = computed(() => (cardOpen.value ? point.value : null));
-const shownPlace = computed(() => (cardOpen.value ? place.value : null));
-
-// Окна поверх карты. Адрес `?sheet|news=1` (dev) открывает их для кадров, `?edit=1` (все сборки) — правку клуба (меню «Клуб»); иначе «Что нового» встаёт само,
-// если игрок не видел новостей (новичку отметка равна версии — карточки нет).
-const asked = overlayFromQuery(route.query, import.meta.env.DEV);
-const hasEditQuery = (): boolean => route.query.edit !== undefined;
-const news = ref<NewsCardData | null>(asked === 'news' ? replay() : asked === null ? pending(clubRef.value.newsSeen) : null);
-const overlay = ref<Overlay | null>(news.value ? 'news' : asked === 'sheet' || asked === 'edit' ? asked : null);
-const canReplay = replay() !== null;
-const fix = computed(() => clubNeedsFix(clubRef.value));
-const oldUrl = oldVersionUrl(import.meta.env.BASE_URL);
-let opener: HTMLElement | null = null;
-// После закрытия окна двойной щелчок не должен попасть в «Играть» под ним (как на главной v1).
-const SETTLE_MS = 400;
-const settling = ref(false);
-
-const elOf = (id: string): HTMLElement | null => root.value?.querySelector<HTMLElement>(`[data-focus="${id}"]`) ?? null;
-
-function focusOn(id: string): void {
-  active.value = id;
-  cardOpen.value = true;
-  elOf(id)?.focus({ preventScroll: true });
-}
-
-function play(id: string): void {
-  if (going.value || settling.value) return;
-  going.value = true;
-  // Кнопка заперта до смены маршрута: двойной Enter или щелчок — один переход.
-  void router.push(matchTo(id)).finally(() => {
-    going.value = false;
-  });
-}
-
 /**
- * Открыть лист или правку; `from` — кнопка, на которую вернётся фокус. Правка живёт и в адресе (`?edit=1`): по нему
- * пункт меню «Клуб» светится, пока окно открыто; закрытие убирает его (`replace`), и F5 окно заново не открывает.
+ * Карта Двора (065 Т8, спека 048/054): состояние и входы. Поле — `MapBoard`, правила и переходы — `engine/map`, строки — `ru.map`.
+ * Управление (054): ← → дворы, ↑ ↓ уроки (окно уроков открывается само), Enter — переезд (автобус и плашка «Едем…», Э2.08),
+ * второй Enter — на матч; Esc — закрыть окно, потом на Дом; в переезде Esc — сразу на Дом (`travelKey`, 065-Р170).
+ * `?travel=1` — открыть сразу в переезде (вход с Дома «На матч», 012-Р39). Наведение — подсказка, выбор — клик или стрелки (054-Р1). Колёсика нет (063-Р28, К4).
+ * Выбранный урок уходит в матч через `?lesson=<id>`; без выбора — текущий (`course:ru.current`).
  */
-function openOverlay(what: 'sheet' | 'edit', from: HTMLElement | null): void {
-  opener = from;
-  overlay.value = what;
-  if (what === 'edit' && !hasEditQuery()) void router.replace({ query: { ...route.query, ...EDIT_QUERY } });
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { dreamText, fill } from '../../app/home/texts';
+import { stageScale } from '../../components/shell/stageScale';
+import KeyButton from '../../components/kit/KeyButton.vue';
+import ScreenHead from '../../components/league/ScreenHead.vue';
+import EventPlate from '../../components/panel/EventPlate.vue';
+import CoachBubble from '../../components/panel/CoachBubble.vue';
+import GoCard from '../../components/panel/GoCard.vue';
+import PickCard from '../../components/panel/PickCard.vue';
+import { homeView } from '../../engine/home';
+import { enterLesson, mapView, navigate, pickYard, travelKey, travelOf, type MapKey, type MapSel, type TravelPhase } from '../../engine/map';
+import { ru } from '../../i18n/ru';
+import { yardAt } from './geometry';
+import MapBoard from './MapBoard.vue';
+import { useMapInput } from './useMapInput';
+
+const t = ru.map;
+/** Строка окна уроков — по форме `PickRow` компонента `PickCard` (тип из .vue линтер не видит). */
+interface PickRow {
+  name: string;
+  sub: string;
+  stars: string;
+  state: 'done' | 'ring' | 'cur';
+  sel?: boolean;
+  tag?: string;
+  today?: string;
+  play?: string;
 }
+const router = useRouter();
+const route = useRoute();
+const { session, stand, pack, player, home, map, club, lessonId, lessonName } = useMapInput();
 
-// Адрес меняется под открытой картой (экран тот же): «Клуб» в меню открывает правку, «Карта» — закрывает.
-watch(
-  () => route.query.edit,
-  (edit) => {
-    if (edit !== undefined && overlay.value === null) openOverlay('edit', null);
-    // Лист или «Что нового» открыты — они остаются, лишний `edit` из адреса убираем (правку откроет следующий клик).
-    else if (edit !== undefined && overlay.value !== 'edit') {
-      const rest = { ...route.query };
-      delete rest.edit;
-      void router.replace({ query: rest });
-    } else if (edit === undefined && overlay.value === 'edit') closeOverlay();
-  },
-);
+const win = ref({ w: globalThis.innerWidth, h: globalThis.innerHeight });
+const onResize = (): void => void (win.value = { w: globalThis.innerWidth, h: globalThis.innerHeight });
+const W = computed(() => stageScale(win.value.w, win.value.h).width);
 
-function openNews(e: Event): void {
-  opener = e.currentTarget as HTMLElement;
-  news.value = replay();
-  overlay.value = news.value ? 'news' : null;
+const sel = ref<MapSel | undefined>(undefined);
+const opened = ref(false);
+const hover = ref<number | null>(null);
+const going = ref(false);
+/** Переезд идёт: автобус на пути, вместо карточки «На матч» — плашка «Едем…» (Э2.08). Вход — Enter на Карте, `?travel=1` или стенд кадра. */
+const phase = ref<TravelPhase>(stand?.travel === true || route.query.travel === '1' ? 'travel' : 'idle');
+
+const view = computed(() => (map.value ? mapView(map.value, sel.value) : null));
+const hv = computed(() => (home.value ? homeView(home.value) : null));
+const head = computed(() => (hv.value ? dreamText(hv.value) : null));
+const canPlay = computed(() => session.status.value === 'ok' && !going.value);
+const trip = computed(() => (view.value ? travelOf(view.value.selLesson.n) : null));
+const busOn = computed(() => (phase.value === 'travel' && trip.value ? { stage: trip.value.stage, bus: trip.value.bus } : null));
+const tripWho = computed(() => (trip.value ? fill(t.travelWho, { street: trip.value.street }) : ''));
+const tripLesson = computed(() => (view.value ? fill(t.travelLesson, { n: view.value.selLesson.n, name: lessonName(view.value.selLesson.n) }) : ''));
+const coach = computed(() => (home.value?.day === 1 && home.value.cur === 1 ? t.coachDay1 : ''));
+const coachOpen = ref(true);
+
+const stars = (k: number): string => (k ? '★'.repeat(k) + '☆'.repeat(3 - k) : '');
+const rows = computed<PickRow[]>(() => {
+  const v = view.value;
+  if (!v) return [];
+  return v.nodes[v.sel.stage - 1]!.lessons
+    .filter((l) => l.reach)
+    .map((l): PickRow => ({
+      name: fill(t.lesson, { n: l.n, name: lessonName(l.n) }),
+      sub: l.away ? t.away : t.home,
+      stars: stars(l.stars),
+      state: l.state === 'near' ? 'cur' : l.state,
+      sel: l.n === v.sel.lesson,
+      ...(l.control || l.friendly ? { tag: l.control ? t.control : t.friendly } : {}),
+      ...(l.state === 'cur' ? { today: t.today } : {}),
+      ...(l.n === v.sel.lesson ? { play: t.play } : {}),
+    }));
+});
+const pick = computed(() => {
+  const v = view.value;
+  if (!v || !opened.value) return null;
+  const at = yardAt(W.value, v.sel.stage);
+  return { style: { left: `${at[0] - 160}px`, bottom: `${640 - at[1] + 34}px`, width: '320px' }, street: v.nodes[v.sel.stage - 1]!.street, stage: v.sel.stage };
+});
+const goLead = computed(() => (view.value ? fill(t.lead, { n: view.value.selLesson.n, where: view.value.selLesson.away ? t.away : t.home }) : ''));
+const goRival = computed(() => (view.value ? fill(t.rival, { street: view.value.nodes[view.value.sel.stage - 1]!.street }) : ''));
+/** Вид урока — чипом в конце ленты (как в кадре): контрольный — белый, товарищеский — тихий. */
+const goKind = computed(() => (view.value?.selLesson.control ? t.control : view.value?.selLesson.friendly ? t.friendly : ''));
+/** «Кубок — после урока N»: в день первого запуска (реплика тренера) строки нет, как в кадре Э2.07. */
+const goCup = computed(() => {
+  const n = view.value?.cupAfter;
+  return n != null && !coach.value ? fill(t.cupAfter, { n }) : '';
+});
+
+function onPick(stage: number): void {
+  if (!map.value || !view.value || phase.value === 'travel') return;
+  sel.value = pickYard(map.value, view.value.sel, stage);
+  opened.value = true;
 }
-
-/** Закрыть окно: фокус — туда, откуда открыли (если кнопка ещё на месте), иначе на выбранную точку или место. */
-function closeOverlay(): void {
-  if (overlay.value === null) return;
-  const wasNews = overlay.value === 'news';
-  overlay.value = null;
-  // `edit` из адреса уходит при любом закрытии: иначе «Клуб» в меню на том же адресе ничего бы не открыл.
-  if (hasEditQuery()) {
-    const rest = { ...route.query };
-    delete rest.edit;
-    void router.replace({ query: rest });
-  }
-  news.value = null;
-  // Отметка «Что нового увидено» — только по закрытию окна: перезагрузка с открытым окном покажет его снова.
-  if (wasNews) markNewsSeenNow();
-  settling.value = true;
-  globalThis.setTimeout(() => (settling.value = false), SETTLE_MS);
-  void nextTick(() => {
-    const back = opener?.isConnected ? opener : elOf(active.value);
-    opener = null;
-    back?.focus({ preventScroll: true });
-  });
-}
-
-function toPath(): void {
-  if (going.value) return;
-  going.value = true;
-  void router.push(PATH_PATH).finally(() => {
-    going.value = false;
-  });
-}
-
-/** Лист лиги → «Путь клуба»: окно закрывается, переход один. */
-function sheetToPath(): void {
-  closeOverlay();
-  toPath();
-}
-
-/** Зажатый Enter на «Что нового» не должен открывать карточку заново, пока ребёнок её закрывает. */
-const noRepeat = (e: KeyboardEvent): void => {
-  if (e.repeat) e.preventDefault();
-};
-
-function onKey(e: KeyboardEvent): void {
-  const c = ctx.value;
-  if (!c || overlay.value !== null || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
-  const target = e.target instanceof HTMLElement ? e.target : null;
-  const onBody = target === globalThis.document.body;
-  if (!onBody && !(target && root.value?.contains(target))) return;
-  // Фокус потерян (щелчок мимо): первая клавиша возвращает его на выбранный элемент.
-  if (onBody && ['ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
-    e.preventDefault();
-    elOf(active.value)?.focus({ preventScroll: true });
+/**
+ * Enter и кнопка: на Карте — показать переезд, в переезде — в матч с выбранным уроком. Холостой Enter (урок недоступен, чужая
+ * вкладка, повтор после перехода) ничего не делает (К1, К3).
+ */
+function go(): void {
+  if (!map.value || !view.value || !canPlay.value) return;
+  const n = enterLesson(map.value, view.value.sel);
+  const id = n === null ? undefined : lessonId(n);
+  if (id === undefined) return;
+  const step = travelKey(phase.value, 'enter');
+  phase.value = step.phase;
+  if (step.go !== 'match') {
+    opened.value = false;
     return;
   }
-  const from = target?.closest<HTMLElement>('[data-focus]')?.dataset.focus ?? null;
-  const act = keyAction(c.model, e.key, {
-    from,
-    active: active.value,
-    shift: e.shiftKey,
-    repeat: e.repeat,
-    cardOpen: cardOpen.value,
-    exists: (id) => elOf(id) !== null,
-  });
-  if (act.do === 'native') return;
-  e.preventDefault();
-  if (act.do === 'focus') focusOn(act.id);
-  else if (act.do === 'open') cardOpen.value = true;
-  else if (act.do === 'close') cardOpen.value = false;
-  else if (act.do === 'play') play(act.id);
+  going.value = true;
+  void router.push({ path: '/match', query: { lesson: id } });
 }
-
-function onFocusIn(e: FocusEvent): void {
-  const id = e.target instanceof HTMLElement ? e.target.closest<HTMLElement>('[data-focus]')?.dataset.focus : undefined;
-  if (id && id !== HEADER_FOCUS) {
-    active.value = id;
-    cardOpen.value = true;
+const ARROWS: Record<string, MapKey> = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' };
+function key(e: KeyboardEvent): void {
+  const arrow = ARROWS[e.key];
+  if (going.value) return;
+  if (phase.value === 'travel') {
+    // в переезде стрелок нет: выбор уже сделан; Esc — назад, на Дом (строка плашки)
+    if (e.key === 'Escape' && travelKey(phase.value, 'escape').go === 'home') void router.push('/home');
+    else if (e.key === 'Enter' && !e.repeat && !(e.target instanceof HTMLButtonElement)) go();
+    return;
   }
+  if (arrow !== undefined && map.value && view.value) {
+    e.preventDefault();
+    sel.value = navigate(map.value, view.value.sel, arrow);
+    opened.value = true;
+  } else if (e.key === 'Escape') {
+    if (opened.value) opened.value = false;
+    else if (coachOpen.value && coach.value) coachOpen.value = false;
+    else void router.push('/home');
+  } else if (e.key === 'Enter' && !e.repeat && !(e.target instanceof HTMLButtonElement)) go();
 }
-
 onMounted(() => {
-  globalThis.addEventListener('keydown', onKey);
-  // Окно, открытое при входе, берёт фокус себе.
-  if (overlay.value === null) elOf(active.value)?.focus({ preventScroll: true });
+  globalThis.addEventListener('keydown', key);
+  globalThis.addEventListener('resize', onResize);
 });
-onBeforeUnmount(() => globalThis.removeEventListener('keydown', onKey));
+onUnmounted(() => {
+  globalThis.removeEventListener('keydown', key);
+  globalThis.removeEventListener('resize', onResize);
+});
 </script>
 
 <template>
   <main
-    ref="root"
-    class="map-screen"
-    @focusin="onFocusIn"
+    v-if="view && home && hv && head"
+    class="mapscreen"
   >
-    <template v-if="ctx">
-      <!-- В DOM шапка после поля и перед углом (Tab: точки, флажки, здания, шапка, угол), на экране — сверху. -->
-      <div
-        class="stage"
-        :inert="overlay !== null"
-      >
-        <YardMap
-          :model="ctx.model"
-          :view="ctx.input.layout.view"
-          :names="names"
-          :league-name="ctx.input.league.name"
-          :active="active"
-          @select="focusOn"
+    <MapBoard
+      :view="view"
+      :width="W"
+      :built="hv.stadium.built"
+      :end="home.end"
+      :region="home.region"
+      :kit-body="club.kit?.body ?? '#2f9a27'"
+      :hover="hover"
+      :travel="busOn"
+      @pick="onPick"
+      @hover="hover = $event"
+    />
+
+    <ScreenHead
+      :title="t.title"
+      :city="club.city || t.defaultCity"
+      :stars="`${hv.stars.n}/${hv.stars.of}`"
+      :fans="hv.fans.n"
+      :coins="hv.coins"
+      :dream-text="head.text"
+      :dream-pct="head.pct"
+      :chips="[t.leagueSheet]"
+    />
+
+    <PickCard
+      v-if="pick"
+      class="abs pickwin"
+      :style="pick.style"
+      :title="fill(t.pickTitle, { street: pick.street })"
+      :sub="fill(t.pickStep, { n: pick.stage })"
+      :rows="rows"
+      :hint="t.pickHint"
+      @close="opened = false"
+    />
+
+    <CoachBubble
+      :style="{ position: 'absolute', zIndex: 3, left: '12px', bottom: '46px' }"
+      :text="coachOpen ? coach : ''"
+      :width="W > 1100 ? 430 : 400"
+      @close="coachOpen = false"
+    />
+
+    <EventPlate
+      v-if="phase === 'travel' && trip"
+      :style="{ right: '12px', bottom: '12px', width: W > 1100 ? '375px' : '300px' }"
+      :sub="t.travelBack"
+    >
+      <span class="gc-line">{{ trip.away ? t.travelAway : t.travelIncoming }} <b>{{ tripWho }}</b></span>
+      <span class="gc-line">{{ tripLesson }}</span>
+      <template #action>
+        <KeyButton
+          primary
+          md
+          :sub="ru.kit.enter"
+          @click="go"
         >
-          <div class="dock">
-            <CoachBubble
-              v-if="greeting"
-              :coach="coach"
-              :text="coach.greet"
-            />
-            <LessonCard
-              v-if="card"
-              :point="card"
-              :name="names[card.id] ?? ''"
-              :cpm="cpmOf(card.id)"
-              :busy="going || settling"
-              @play="play(card.id)"
-            />
-            <PlaceCard
-              v-else-if="shownPlace"
-              :info="shownPlace"
-            />
-          </div>
-        </YardMap>
-      </div>
-
-      <MapHeader
-        class="top"
-        :inert="overlay !== null"
-        :name="clubName"
-        :city="clubRef.city"
-        :stars="ctx.model.stars"
-        :coins="coins"
-        :fix="fix"
-        @open="openOverlay"
-        @path="toPath"
-      />
-
-      <!-- Угол карты: номер версии (по нему сверяют присланный файл), «Что нового» снова и старая версия. -->
-      <footer
-        class="corner"
-        :inert="overlay !== null"
+          {{ t.travelGo }}
+        </KeyButton>
+      </template>
+    </EventPlate>
+    <GoCard
+      v-else
+      :style="{ position: 'absolute', zIndex: 3, right: '12px', bottom: '12px', width: W > 1100 ? '360px' : '300px' }"
+      variant="map"
+      :lead="goLead"
+      :lead2="goRival"
+      :chip="goKind"
+      :chip-kind="view.selLesson.control ? '' : 'nt'"
+      :where="goCup"
+      cup
+      @go="go"
+    />
+  </main>
+  <main
+    v-else
+    class="mapscreen wait"
+  >
+    <p v-if="pack.state.value === 'loading' || !player">
+      {{ t.loading }}
+    </p>
+    <template v-else>
+      <p>{{ t.packFail }}</p>
+      <KeyButton
+        primary
+        md
+        @click="pack.retry()"
       >
-        {{ ru.news.plate }} {{ APP_VERSION }}
-        <template v-if="canReplay">
-          ·
-          <button
-            type="button"
-            class="link"
-            @click="openNews"
-            @keydown.enter="noRepeat"
-          >
-            {{ ru.news.link }}
-          </button>
-        </template>
-        ·
-        <a
-          :href="oldUrl"
-          target="_blank"
-          rel="noopener"
-        >{{ ru.map.corner.old }}</a>
-      </footer>
-
-      <LeagueSheet
-        v-if="overlay === 'sheet'"
-        :model="ctx.model"
-        :league-name="ctx.input.league.name"
-        @close="closeOverlay"
-        @path="sheetToPath"
-      />
-      <NewsCard
-        v-else-if="overlay === 'news' && news"
-        :card="news"
-        @close="closeOverlay"
-      />
-      <ClubEdit
-        v-else-if="overlay === 'edit'"
-        @close="closeOverlay"
-      />
+        {{ t.packRetry }}
+      </KeyButton>
     </template>
   </main>
 </template>
 
 <style scoped>
-/*
- * 1024×640 без прокрутки страницы: высота экрана — окно минус верхняя панель (66 px) и поля содержимого (2×24 px).
- * Окно внутри увеличенного дерева делится на масштаб страницы. Высота панели меню — одна переменная.
- */
-.map-screen {
-  --chrome: 114px;
-
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  height: calc(100vh / var(--ui-scale) - var(--chrome));
-  min-height: 360px;
-  color: var(--text);
-}
-
-/* Шапка в DOM после поля (порядок Tab, design §5.3), на экране — первой. */
-.top {
-  order: -1;
-}
-
-/* Угол: мелко, цель нажатия — не меньше 40 px по высоте у ссылок. */
-.corner {
-  display: flex;
-  gap: var(--space-2);
-  align-items: center;
-  min-height: 44px;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-}
-
-.corner a,
-.corner .link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 var(--space-2);
-  border: 0;
-  background: none;
-  color: var(--accent);
-  font: inherit;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.corner a:focus-visible,
-.corner .link:focus-visible {
-  outline: 3px solid var(--text);
-  outline-offset: 3px;
-}
-
-/* Поле — квадрат 16:9 по центру самой большой возможной области; остальное закрашено землёй карты. */
-.stage {
-  display: grid;
-  flex: 1;
-  place-items: center;
-  min-height: 0;
-  container-type: size;
-  border-radius: 14px;
-  background: var(--map-ground);
-}
-
-/* Низ поля между левой и правой колонками пути: сюда не ложатся ни точки, ни флажки. */
-.dock {
-  --face-size: max(56px, 14cqh);
-
+.mapscreen {
   position: absolute;
-  bottom: 3%;
-  left: 24%;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  width: 40%;
+  inset: 0;
+  overflow: hidden;
 }
-
-.dock :deep(.speech) {
-  padding: var(--space-2) var(--space-3);
+.abs {
+  position: absolute;
 }
-
-.dock :deep(.text) {
-  margin: 0;
-  font-size: 0.95rem;
+.gc-line {
+  display: block;
+  white-space: nowrap;
 }
-
-.dock :deep(.who) {
-  margin: 0;
-  font-size: 0.85rem;
+.pickwin {
+  z-index: 5;
+}
+.wait {
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  text-align: center;
 }
 </style>

@@ -1,0 +1,173 @@
+{
+ "id": "match.quit",
+ "codes": {
+  "1920": "Э1.13"
+ },
+ "screen": "match",
+ "route": "/match",
+ "state": "Пункт меню во время матча — через выход",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 166047,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.longer-words",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.yd-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.six-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.six-keys-review": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.fzh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.fzh-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.fzh-again": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.eight-keys-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.test-eight": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.pr": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.pr-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 18,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 31,
+   "days": 9,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 10360,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "Саша",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  }
+ },
+ "match": {
+  "lesson": 17,
+  "phase": "quit",
+  "model": "образец: счёт и ход атаки — по кадру, Т10 и позже дописывают"
+ }
+}

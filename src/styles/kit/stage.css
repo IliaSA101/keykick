@@ -1,0 +1,17 @@
+/*
+ * Сцена (из docs/mockups/kit/stage.css): размеры частей — в «базовых» px сцены 1024×640.
+ * В макете множитель задавали классы окна (.w1920 …); в игре его считает StageScale (components/shell/stageScale.ts):
+ * zoom и размеры сцены приходят строкой style, поэтому тут только вид и абсолютное место.
+ */
+.stage {
+  position: relative;
+  width: 1024px;
+  height: 640px;
+  overflow: hidden;
+  background: radial-gradient(120% 90% at 50% 0%, #25235f 0%, var(--bg) 55%, #0d0c2a 100%);
+  color: var(--text);
+  user-select: none;
+}
+.abs {
+  position: absolute;
+}

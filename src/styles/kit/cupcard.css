@@ -1,0 +1,113 @@
+/* ЭБ · Карточка «Кубок двора», подсказка с кнопкой, строки окон-списков. Из docs/mockups/kit/kit.css (строки 1261–1372), классы те же; разметка — компоненты src/components/kit. */
+/* ---------- карточка «Кубок двора» (cupCard, ТЗ-1.5, Р42 п.1; была .cupcard в map.css): вход в сетку Кубка на Доме ---------- */
+.kb-cupcard {
+  position: absolute;
+  z-index: 3;
+  padding: 5px 8px 6px;
+  border-radius: 12px;
+  line-height: 1.3;
+}
+.kb-cupcard .cc-lk {
+  font-weight: 800; /* была лента .lk из kit: вес оставлен как был */
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  font-size: 12px; /* не меньше 12 px на 1024 (ретро 023, правило 09.11) */
+  color: var(--text-muted);
+}
+.kb-cupcard .cc-lk i {
+  margin-left: auto;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text); /* ТАБУ 11.11: «›» на синей карточке — белая */
+}
+.kb-cupcard .ic {
+  height: 14px;
+}
+.kb-cupcard b,
+.kb-cupcard > span {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kb-cupcard b {
+  font-size: 13px;
+  /* состояние раунда — до двух строк: «1/8 финала: ответный матч ждёт» резалось на «мат…», «ждёт» (ТЗ-1.5) пропадало (kk-control Р33-5) */
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.kb-cupcard > span {
+  font-size: 12px;
+  color: var(--text-muted);
+  /* соперник следующего раунда — до двух строк (смотр ребёнка Р35б: «с кем матч Кубка» не находили) */
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* ---------- подсказка с кнопкой и «Закрыть Esc» (popCard close/action, Р42 п.2; была .newswin в map.css) ---------- */
+.pop .ph {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.pop .pact {
+  margin-top: 8px;
+}
+
+/* ---------- содержимое окон-списков (statRow, keysRow, Р42 п.4; были .lsrow и .club-keys в map.css) ---------- */
+.kb-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 700;
+}
+.kb-row i {
+  grid-column: 1 / -1;
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 0.15);
+  overflow: hidden;
+}
+.kb-row i b {
+  display: block;
+  height: 100%;
+  background: var(--zone-middle); /* ТАБУ 11.11: полоса на синем — зелёная */
+}
+.kb-row em {
+  font-style: normal;
+  color: #fff;
+  font-weight: 800;
+}
+/* клавиши в полосе: kbd.big — белая выпуклая клавиша, крупнее — буква читается с расстояния (Р43: вид как до Р42, вариантом части) */
+.kb-row .keys {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+kbd.big {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  height: 34px;
+  box-sizing: border-box;
+  padding: 1px 4px;
+  border: 0;
+  border-radius: 8px;
+  font-size: 18px;
+  color: #1b3a12;
+  background: linear-gradient(#ffffff, #e4ecd9);
+  box-shadow: 0 3px 0 #9fb58a;
+}
+

@@ -1,0 +1,14 @@
+{
+  "id": "ru.yard",
+  "course": "ru",
+  "league": "yard",
+  "access": "public",
+  "rev": 1,
+  "shellApi": 1,
+  "files": {
+    "lessons": "lessons.json",
+    "text": {
+      "ru": "text.ru.json"
+    }
+  }
+}

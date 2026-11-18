@@ -1,0 +1,161 @@
+{
+ "id": "map.cup",
+ "codes": {
+  "1024": "Э2.105",
+  "1920": "Э2.24"
+ },
+ "screen": "map",
+ "route": "/map",
+ "state": "Карта · день Кубка: матч дома до урока 10",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 355141,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.fzh",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.yd-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.six-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.six-keys-review": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 29,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 16,
+   "days": 6,
+   "today": "2026-11-18",
+   "todayN": 0,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 5180,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "Саша",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  }
+ },
+ "dayGuess": true,
+ "home": {
+  "cur": 10,
+  "day": 6,
+  "matchesToday": 1,
+  "played": 16,
+  "stars": {
+   "1": 3,
+   "2": 3,
+   "3": 2,
+   "4": 1,
+   "5": 2,
+   "6": 1,
+   "7": 2,
+   "8": 1,
+   "9": 0
+  },
+  "best": 0,
+  "coins": 29,
+  "fans": 5180,
+  "bought": [
+   "gate-sticker",
+   "center-circle",
+   "seats-club",
+   "boots-yard"
+  ],
+  "friendly": true,
+  "round": null,
+  "end": false,
+  "region": false,
+  "pause5": false,
+  "extras": {
+   "cup": null,
+   "events": {},
+   "papers": 2,
+   "paperDay": null,
+   "emblemN": 1,
+   "tourWaits": true,
+   "silver": false
+  }
+ }
+}

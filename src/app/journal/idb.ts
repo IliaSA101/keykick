@@ -1,84 +1,55 @@
-/** Журнал на IndexedDB (design §5): голый API, только запрос → промис. Версия базы 1; подъём версии не пересоздаёт хранилища. */
-import { KEY_FIELD, type IndexEntry, type JournalBackend, type JournalStore } from './backend';
+/** Единственное место, где журнал касается IndexedDB (065-Р14). Браузерная проверка — e2e, не юнит-тест. */
+import type { JournalEntry } from '../../engine/journal';
+import type { JournalDb } from './store';
 
-const INDEX = 'player_t';
-const STORES: JournalStore[] = ['records', 'keys'];
+const STORE = 'matches';
 
-/** Причина отказа IndexedDB — всегда `Error` (у `DOMException` он и есть). */
-function asError(e: unknown): Error {
-  return e instanceof Error ? e : new Error('journal: idb error');
-}
-
-function wrap<T>(req: IDBRequest<T>): Promise<T> {
-  return new Promise((resolve, reject) => {
+const wrap = <T>(req: IDBRequest<T>): Promise<T> =>
+  new Promise((resolve, reject) => {
     req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(asError(req.error));
+    req.onerror = () => reject(req.error ?? new Error('idb'));
   });
-}
 
-/** Открыть базу; заблокирована или недоступна — отказ (журнал уйдёт в память). */
-export function openIdb(name: string, version = 1): Promise<IDBDatabase> {
+const done = (t: IDBTransaction): Promise<void> =>
+  new Promise((res, rej) => {
+    t.oncomplete = () => res();
+    t.onerror = () => rej(t.error ?? new Error('idb tx'));
+    t.onabort = () => rej(t.error ?? new Error('idb abort'));
+  });
+
+/** `null` — IndexedDB нет (приватный режим, старый браузер); фабрику даёт вызывающий: журнал тогда молчит. */
+export function openIdb(factory: IDBFactory | null | undefined, dbName: string): Promise<JournalDb | null> {
+  if (!factory) return Promise.resolve(null);
   return new Promise((resolve, reject) => {
-    if (typeof indexedDB === 'undefined') return reject(new Error('journal: no indexedDB'));
-    const req = indexedDB.open(name, version);
-    // Подъём версии: создаём только недостающие хранилища — повторное `createObjectStore` бросает ConstraintError (018-Р24).
-    req.onupgradeneeded = () => {
-      const db = req.result;
-      for (const s of STORES) {
-        if (db.objectStoreNames.contains(s)) continue;
-        const os = db.createObjectStore(s, { keyPath: KEY_FIELD[s] });
-        os.createIndex(INDEX, ['player', 't']);
-      }
-    };
-    req.onblocked = () => reject(new Error('journal: blocked'));
-    req.onerror = () => reject(asError(req.error));
-    req.onsuccess = () => {
-      const db = req.result;
-      // Будущий подъём версии в другой вкладке не должен висеть на нашем соединении (В6).
-      db.onversionchange = () => db.close();
-      resolve(db);
+    const open = factory.open(dbName, 1);
+    open.onupgradeneeded = () => open.result.createObjectStore(STORE, { keyPath: 'matchId' });
+    open.onerror = () => reject(open.error ?? new Error('idb open'));
+    open.onsuccess = () => {
+      const db = open.result;
+      resolve({
+        all: () => wrap(db.transaction(STORE, 'readonly').objectStore(STORE).getAll()),
+        put: (e: JournalEntry) => {
+          const t = db.transaction(STORE, 'readwrite');
+          t.objectStore(STORE).put(e);
+          return done(t);
+        },
+        remove: (ids: string[]) => {
+          const t = db.transaction(STORE, 'readwrite');
+          for (const id of ids) t.objectStore(STORE).delete(id);
+          return done(t);
+        },
+      });
     };
   });
 }
 
-export function idbBackend(db: IDBDatabase): JournalBackend {
-  const range = (player: string): IDBKeyRange => IDBKeyRange.bound([player, -Infinity], [player, Infinity]);
-  const run = (store: JournalStore, mode: IDBTransactionMode, fn: (os: IDBObjectStore) => void): Promise<void> =>
-    new Promise((resolve, reject) => {
-      const tx = db.transaction(store, mode);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(asError(tx.error));
-      tx.onabort = () => reject(asError(tx.error));
-      fn(tx.objectStore(store));
-    });
-  const objectStore = (store: JournalStore): IDBObjectStore => db.transaction(store, 'readonly').objectStore(store);
-
+/** База открывается при первом обращении; нет IndexedDB — журнал молчит, сбой открытия уходит в `onFail` журнала. */
+export function lazyDb(open: () => Promise<JournalDb | null>): JournalDb {
+  let opened: Promise<JournalDb | null> | undefined;
+  const db = (): Promise<JournalDb | null> => (opened ??= open());
   return {
-    put: (store, items) =>
-      run(store, 'readwrite', (os) => {
-        for (const item of items) os.put(item);
-      }),
-    all(store, player) {
-      const os = objectStore(store);
-      return (player === undefined ? wrap(os.getAll()) : wrap(os.index(INDEX).getAll(range(player)))) as Promise<object[]>;
-    },
-    list(store, player) {
-      return new Promise<IndexEntry[]>((resolve, reject) => {
-        const out: IndexEntry[] = [];
-        const req = objectStore(store).index(INDEX).openKeyCursor(range(player));
-        req.onerror = () => reject(asError(req.error));
-        req.onsuccess = () => {
-          const c = req.result;
-          if (c === null) return resolve(out);
-          out.push({ key: typeof c.primaryKey === 'string' ? c.primaryKey : '', t: (c.key as [string, number])[1] });
-          c.continue();
-        };
-      });
-    },
-    remove: (store, keys) =>
-      run(store, 'readwrite', (os) => {
-        for (const k of keys) os.delete(k);
-      }),
-    close: () => db.close(),
+    all: async () => (await (await db())?.all()) ?? [],
+    put: async (e) => void (await (await db())?.put(e)),
+    remove: async (ids) => void (await (await db())?.remove(ids)),
   };
 }

@@ -1,0 +1,79 @@
+/* ЭБ · Карточка «На матч». Из docs/mockups/kit/kit.css (строки 543–620), классы те же; разметка — компоненты src/components/kit. */
+/* ---------- карточка «На матч»: главная на экране (Дом, карта; дальше Школа, игры, Чемпионат) ---------- */
+/* Разметка — goCard() в kit.mjs: .panel.soft + .gocard.home (Дом) или .gocard.sm.map (карта); внутри лента .lk, главная
+   кнопка (.key-btn.primary.md), строка .where. Прототип без .soft — светлая кайма; .cup — кайма флажка Кубка. */
+.gocard {
+  position: absolute;
+  padding: 10px 16px;
+  text-align: center;
+}
+.gocard:not(.soft) {
+  box-shadow: 0 0 0 3px var(--rim-silver);
+}
+.gocard.cup {
+  box-shadow: 0 0 0 3px var(--map-flag);
+}
+.gocard.home,
+.gocard.map {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.gocard.home {
+  padding: 6px 14px 8px;
+}
+.gocard.map {
+  gap: 5px;
+  padding: 8px 12px;
+}
+.gocard h2 {
+  margin: 2px 0;
+  font-size: 26px;
+  color: #fff; /* ТАБУ 11.11: заголовок на синей карточке — белый, не золотой */
+  font-weight: 800;
+}
+.gocard.home h2 {
+  margin: 0;
+  font-size: 22px;
+}
+.gocard.sm h2 {
+  font-size: 20px;
+}
+.gocard .where {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.gocard .ic {
+  height: 15px;
+  vertical-align: -3px;
+}
+.gocard .lk .ic {
+  margin-right: 4px;
+}
+.gocard .flag {
+  width: 10px;
+  height: 12px;
+  vertical-align: -2px;
+}
+/* лента-подпись карточки (урок, соперник): серым, жирно; .tag — метка вида урока внутри */
+.lk {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+.lk .tag {
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.12);
+  color: var(--text);
+  font-size: 12px;
+}
+/* рекорд не рвётся посреди «зн/мин» */
+.nb {
+  white-space: nowrap;
+}
+

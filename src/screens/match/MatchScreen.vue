@@ -1,358 +1,352 @@
 <script setup lang="ts">
-/*
- * Экран матча v2 (спека 017, Т6): показывает `MatchView` и отдаёт действия наружу (design §10); состояние
- * матча держит движок (`engine/match/machine`), связку и таймеры — `app/match/flow`.
- * Ввод — с клавиатуры всего окна: ребёнку не нужно никуда кликать перед печатью.
- * Фазы: вступление (Пробел/Enter) → разминка → тайм (печать, Esc — пауза) → перерыв (Enter) → пенальти
- * (задача, «Не бить» только кнопкой) → доп. время → минута тренера → итог (слот `result`, Т7). Итог открывается
- * после `screenDelay.shotMs` с ударом на поле, перерыв закрывает один Enter и не сразу (017-Р27).
- */
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import HandsView from '../../components/HandsView.vue';
-import KeyboardView from '../../components/KeyboardView.vue';
-import MatchPitch from '../../components/MatchPitch.vue';
-import AttackText from '../../components/match/AttackText.vue';
-import CoachMinute from '../../components/match/CoachMinute.vue';
-import type { MatchContext } from '../../components/match/context';
-import MatchBreak from '../../components/match/MatchBreak.vue';
-import MatchIntro from '../../components/match/MatchIntro.vue';
-import MatchKick from '../../components/match/MatchKick.vue';
-import MatchPause from '../../components/match/MatchPause.vue';
-import MatchStatus from '../../components/match/MatchStatus.vue';
-import { captionOf } from '../../components/match/labels';
-import { keymap } from '../../app/keymap';
-import { shiftFor } from '../../engine/keymap';
-import type { AttackOutcome } from '../../engine/match/score';
-import { guardOpen, holdsResult, screenDelay, type MatchView } from '../../engine/match/view';
-import { expectedHit, expectedThumb, type KeyPress } from '../../engine/typing';
-import { ru } from '../../i18n/ru';
-
-const props = defineProps<{ view: MatchView; ctx: MatchContext }>();
-const emit = defineEmits<{
-  start: [];
-  press: [press: KeyPress];
-  kickAnswer: [result: 'scored' | 'missed'];
-  skipKick: [];
-  toSecondHalf: [];
-  pause: [];
-  resume: [];
-  quit: [];
-}>();
-
-const t = ru.match2;
-
-const v = computed(() => props.view);
-const typing = computed(() => (v.value.phase === 'kick' ? null : v.value.typing));
-const printing = computed(() => ['warmup', 'half1', 'half2', 'extra', 'coach'].includes(v.value.phase) && !v.value.paused);
-
-const caption = computed(() => captionOf(v.value));
-
-// Удар по воротам по итогу атаки: показываем 1,4 с и гасим (переход к следующей атаке не ждёт).
-const shot = ref<AttackOutcome | null>(null);
-const shotNo = ref(0);
-let shotTimer: ReturnType<typeof globalThis.setTimeout> | undefined;
-watch(
-  () => v.value.lastOutcome,
-  (o) => {
-    globalThis.clearTimeout(shotTimer);
-    if (!o) return void (shot.value = null);
-    shot.value = o.outcome;
-    shotNo.value += 1;
-    shotTimer = globalThis.setTimeout(() => (shot.value = null), screenDelay.shotMs);
-  },
-);
-
-// Итог сразу после последней атаки: пока `resultHeld`, на экране поле с ударом, а не слот итога (017-Р27).
-const resultHeld = ref(false);
-// Удар пенальти уже сыгран на листе, но движку ответ уйдёт по «играем дальше»: табло показывает гол сразу (017-Р32).
-const kickShown = ref<'scored' | 'missed' | null>(null);
-const kickBonus = computed(() => (v.value.phase === 'kick' && kickShown.value === 'scored' ? 1 : 0));
-const breakAt = ref(0);
-// Пауза вне печати (итог, перерыв, пенальти): движок её не знает, это окно поверх экрана (017-Р54).
-const menuPause = ref(false);
-let holdTimer: ReturnType<typeof globalThis.setTimeout> | undefined;
-watch(
-  () => v.value.phase,
-  (to, from) => {
-    globalThis.clearTimeout(holdTimer);
-    resultHeld.value = holdsResult(from, to);
-    if (resultHeld.value) holdTimer = globalThis.setTimeout(() => (resultHeld.value = false), screenDelay.shotMs);
-    if (to === 'break') breakAt.value = globalThis.performance.now();
-    if (to !== 'kick') kickShown.value = null;
-    menuPause.value = false;
-  },
-  { immediate: true },
-);
-const showResult = computed(() => v.value.phase === 'result' && !resultHeld.value);
-
-// Пенальти без задачи (устаревший id в сохранении): решать нечего, играем дальше сами.
-watch(
-  () => v.value.phase === 'kick' && !props.ctx.kickTask,
-  (stuck) => stuck && emit('skipKick'),
-  { immediate: true, flush: 'post' },
-);
-
-// Клавиша, палец и большой — как в v1: подсветка ведёт руки к следующему знаку строки.
-const hit = computed(() => (printing.value && typing.value ? expectedHit(keymap, typing.value) : null));
-const target = computed(() => hit.value?.key ?? null);
-const thumb = computed(() => (printing.value && typing.value ? expectedThumb(keymap, typing.value) : null));
-const shiftFinger = computed(() => (hit.value?.shift && hit.value.key ? (keymap.byCode.get(shiftFor(hit.value.key.finger))?.finger ?? null) : null));
-
-// Клавиатура, руки и строка статуса — только там, где печатают: на пенальти (лист), перерыве и итоге их нет (017-Р29).
-const typingUi = computed(() => !['kick', 'break', 'result'].includes(v.value.phase));
-
-/** Кнопки сработают сами (Enter, Пробел): окно их нажатие не повторяет. */
-const onButton = (e: KeyboardEvent): boolean => e.target instanceof HTMLButtonElement;
-
-/** Перерыв: только Enter и не сразу после входа в фазу — лишний Пробел или Enter не пролистывает счёт (017-Р27). */
-function onBreakKey(e: KeyboardEvent): void {
-  if (e.code !== 'Enter' || onButton(e) || e.repeat) return;
-  e.preventDefault();
-  if (guardOpen(breakAt.value, globalThis.performance.now(), screenDelay.breakMs)) emit('toSecondHalf');
-}
-
-/** «Продолжить»: окно вне печати закрывается у себя, печатная пауза — через движок. */
-function onResume(): void {
-  if (v.value.paused) emit('resume');
-  else menuPause.value = false;
-}
-
 /**
- * Пока открыто окно паузы вне печати, итог, перерыв и пенальти клавиш не видят (их слушатели — на окне): ловим
- * раньше всех, закрываем по Enter и Esc сами, Tab пропускаем в ловушку окна. Enter на кнопке сработает сам.
+ * Экран матча (065 Т9, окна — `MatchWindows.vue`, 065-Р78; спека 065 §4 «Матч», кадры Э1.01–Э1.14): вступление → разминка → два тайма с перерывом → свисток.
+ * Часы, семя, `matchId` и игровой день — только здесь (движок чистый). Печать идёт через `feed`, окна — через `ui`/`sync`
+ * (`app/match/run.ts`), запись — только после свистка (`finishRun`, запрет М3), итог уходит экрану Т10 через `handoff`.
+ * Пенальти (065 Т10б): окно с листом задачи (`PenaltyWindow.vue`), ход ответа — `app/match/penaltyFlow.ts`; заплатка Р75 (перерыв — одна кнопка «Второй тайм») осталась до перерыва Т10в.
  */
-function shield(e: KeyboardEvent): void {
-  if (!menuPause.value || e.code === 'Tab') return;
-  e.stopPropagation();
-  if (e.code === 'Escape' || (e.code === 'Enter' && !onButton(e))) {
+import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { comebackLesson, dictionaryOf, buildStart, feed, hold, isWhistle, release, keyEventOf, lessonsOf, startRun, sync, ui, type Run, type UiAction } from '../../app/match/run';
+import { quiet, shownOf, type Shown } from '../../app/match/effects';
+import { frameRun, type FrameMatch } from '../../app/match/frame';
+import { finishRun, matchRead } from '../../app/match/finish';
+import { openPenalty, skipPenalty, submitPenalty, typeInto, type PenaltyFlow } from '../../app/match/penaltyFlow';
+import { tasks } from '../../app/school/tasks';
+import { putFinished } from '../../app/match/handoff';
+import { matchJournal } from '../../app/journal/app';
+import { usePack } from '../../app/packs/usePack';
+import { useSession } from '../../app/save/session';
+import KeyButton from '../../components/kit/KeyButton.vue';
+import ShellHeader from '../../components/shell/ShellHeader.vue';
+import { soundOn } from '../../components/shell/sound';
+import { stageScale } from '../../components/shell/stageScale';
+import { clubDef, type Club, type ClubKit } from '../../engine/club/section';
+import { ruCourseDef } from '../../engine/course/section';
+import { dayDef } from '../../engine/day/section';
+import { streetName, streetOf } from '../../engine/home';
+import { isComeback, type MatchSave, type RunningMatch } from '../../engine/match';
+import { pickPenaltyTask, parseTasks, type Task } from '../../engine/school/tasks';
+import { correctInput, type AnswerInput } from '../../engine/school/answers';
+import { ru } from '../../i18n/ru';
+import ComebackBanner from './ComebackBanner.vue';
+import MatchScene from './MatchScene.vue';
+import MatchWindows from './MatchWindows.vue';
+import PenaltyWindow from './PenaltyWindow.vue';
+import { litCodes, viewOf, withShow } from './view';
+import leagues from '../../content/courses/ru/leagues.json';
+
+/** Кадр стенда (065 К-Г): матч доигран до места по фикстуре, без клавиш, таймеров и записи. */
+const props = defineProps<{ frame?: FrameMatch }>();
+const t = ru.match;
+const router = useRouter();
+const session = useSession();
+const pack = usePack('ru.yard');
+const win = ref({ w: globalThis.innerWidth, h: globalThis.innerHeight });
+const onResize = (): void => void (win.value = { w: globalThis.innerWidth, h: globalThis.innerHeight });
+const width = computed(() => stageScale(win.value.w, win.value.h).width);
+
+const now = (): number => Date.now();
+const today = (): string => new Date().toLocaleDateString('sv-SE');
+
+const player = computed(() => (session.player.value.kind === 'ok' ? session.player.value : null));
+const sec = <T,>(def: { name: string; empty(): T }): T => (player.value?.env.sections[def.name]?.data as T | undefined) ?? def.empty();
+const club = computed<Club>(() => sec(clubDef));
+const rivalKit = (k: ClubKit): ClubKit => ({ pattern: k.pattern, body: '#f28a1c', sleeves: 'split', trim: '#1f1f1f' });
+
+// --- ход матча
+const shown = ref<Shown>(quiet());
+const run = shallowRef<Run | null>(null);
+const started = ref(false);
+const newKeys = ref('');
+const lessonNo = ref(1);
+const matchId = ref('');
+const finished = ref(false);
+/** Возврат после паузы (ТЗ-2.11): в игре — по дню последнего матча, в кадре стенда — из фикстуры. */
+const comeback = ref(false);
+let timer: ReturnType<typeof globalThis.setInterval> | undefined;
+
+function begin(): void {
+  const p = pack.pack.value;
+  if (!p || !player.value || run.value) return;
+  const count = leagues.find((l) => l.id === 'yard')?.lessons ?? 32;
+  const lessons = lessonsOf(p, 'yard', count);
+  const cur = sec(ruCourseDef).current;
+  const want = router.currentRoute.value.query.lesson; // Карта передаёт выбранный урок (065-Р90); без него — текущий
+  const picked = (props.frame ? lessons.find((l) => l.n === props.frame?.lesson) : (lessons.find((l) => l.id === want) ?? lessons.find((l) => l.id === cur))) ?? lessons[0];
+  if (!picked) return;
+  const t0 = now();
+  comeback.value = props.frame ? props.frame.banner === 'comeback' : isComeback(sec(dayDef).last, t0);
+  const lesson = comeback.value && !props.frame ? comebackLesson(lessons, picked) : picked; // ТЗ-2.11: не строже пройденного
+  lessonNo.value = lesson.n;
+  newKeys.value = lesson.newKeys;
+  matchId.value = `m-${player.value.pid}-${t0}`;
+  if (props.frame) {
+    run.value = frameRun(buildStart(lesson, props.frame.seed, dictionaryOf()), props.frame.spec);
+    started.value = props.frame.started;
+    shown.value = { ...quiet(), shout: props.frame.shout ?? null };
+    if (props.frame.show?.task !== undefined) flow.value = frameFlow(props.frame.show);
+  } else run.value = startRun(buildStart(lesson, t0 % 2147483647, dictionaryOf())).run;
+  lessonId = lesson.id;
+}
+let lessonId = '';
+/** Лист пенальти на экране: пока он открыт, печати нет, а Enter, Esc и Пробел — его. */
+const flow = ref<PenaltyFlow | null>(null);
+/** Кадр стенда: лист из фикстуры (задача — id или своя целиком); `verdict` — лист уже после ответа. */
+function frameFlow(show: NonNullable<FrameMatch['show']>): PenaltyFlow {
+  const raw = show.task;
+  const task: Task | undefined = typeof raw === 'string' ? tasks.find((x) => x.id === raw) : parseTasks([raw])[0];
+  if (task === undefined) throw new Error(`frame: no task ${typeof raw === 'string' ? raw : 'inline'}`);
+  const open = openPenalty(task);
+  if (show.verdict === undefined) return open;
+  return { ...open, stage: 'done', answer: show.verdict === 'goal' ? 'hit' : 'miss', input: show.verdict === 'goal' ? correctInput(task.answer) : open.input };
+}
+watch([pack.state, player], begin, { immediate: true });
+
+const state = computed<RunningMatch | null>(() => (run.value && run.value.state.phase !== 'idle' ? run.value.state : null));
+const view = computed(() => (state.value ? withShow(viewOf(state.value), props.frame?.show, state.value.keymap) : null));
+const phase = computed(() => state.value?.phase ?? 'idle');
+
+// --- возгласы и звук
+let hide: ReturnType<typeof globalThis.setTimeout> | undefined;
+function show(s: Shown): void {
+  if (s.shout === null && s.bump === null) return;
+  shown.value = s;
+  globalThis.clearTimeout(hide);
+  hide = globalThis.setTimeout(() => void (shown.value = { shout: null, bump: null, sounds: [], penalty: false }), 1600);
+}
+const play = (files: readonly string[]): void => {
+  for (const f of files) void new globalThis.Audio(`${import.meta.env.BASE_URL}art/sfx/${f}`).play().catch(() => undefined);
+};
+
+/** Результат шага движка → состояние, звук, авто-пенальти и свисток. */
+function apply(out: { run: Run; effects: Parameters<typeof shownOf>[0] }, kicked = false): void {
+  run.value = out.run;
+  const s = shownOf(out.effects, { warmupEnd: kicked, mute: !soundOn.value });
+  show(s);
+  play(s.sounds);
+  if (out.run.state.phase === 'penalty') {
+    // пенальти — одно на матч (М2): задача по зерну матча; лист открывается один раз
+    if (flow.value === null) flow.value = openPenalty(pickPenaltyTask(tasks, out.run.start.seed, lessonNo.value));
+    return;
+  }
+  if (isWhistle(out.run) && !finished.value && !holding) finish(out.run);
+}
+
+/** Матч стоит на вердикте пенальти (ответ уже ушёл движку): свисток после него ждёт «играем дальше». */
+let holding = false;
+
+/** «Ответить» и «Не бить»: движку уходит ровно один ответ (двойной Enter и клик — холостые, `penaltyFlow`). */
+function sendPenalty(out: { flow: PenaltyFlow; sent: 'hit' | 'miss' | 'skip' | null }): void {
+  const r = run.value;
+  flow.value = out.flow;
+  if (out.sent === null || !r) return;
+  holding = out.sent !== 'skip';
+  apply(feed(r, { type: 'penalty', t: now(), answer: out.sent }));
+  if (out.sent === 'skip') flow.value = null;
+  else if (run.value) run.value = hold(run.value);
+}
+const answerPenalty = (): void => void (flow.value && sendPenalty(submitPenalty(flow.value)));
+const skipShot = (): void => void (flow.value && sendPenalty(skipPenalty(flow.value)));
+/** «Играем дальше» (Пробел, Enter, клик) после вердикта: лист закрывается, время идёт, свисток — если пенальти было последним. */
+function afterPenalty(): void {
+  const f = flow.value;
+  if (!f || f.stage !== 'done' || !run.value) return;
+  flow.value = null;
+  holding = false;
+  run.value = release(run.value);
+  if (isWhistle(run.value) && !finished.value) finish(run.value);
+}
+const typeAnswer = (v: AnswerInput): void => void (flow.value && (flow.value = typeInto(flow.value, v)));
+
+function finish(r: Run): void {
+  finished.value = true;
+  const done = finishRun(r, { now: now(), day: today(), lessonId, matchId: matchId.value }, {
+    read: (): MatchSave => matchRead(player.value?.env.sections),
+    save: (patch) => session.save(patch),
+    journal: matchJournal(),
+  });
+  putFinished(done, { lesson: lessonId, no: lessonNo.value });
+  void router.push('/result');
+}
+
+function act(action: UiAction): void {
+  const before = run.value;
+  if (!before) return;
+  run.value = sync(before, ui(before, action), now());
+}
+function closeAll(): void {
+  let r = run.value;
+  if (!r) return;
+  const before = r;
+  for (let i = 0; i < 3 && r.overlay !== 'none'; i++) r = ui(r, 'esc');
+  run.value = sync(before, r, now());
+}
+const secondHalf = (): void => {
+  if (run.value) apply(feed(run.value, { type: 'half2', t: now() }));
+};
+const start = (): void => void (started.value = true);
+
+/** Клавиши листа: Enter — ответить (после ответа — дальше), Пробел после ответа — дальше, Esc — пауза, как во всём матче (065-Р122 «а», ТЗ-2.21); «Не бить» — кнопкой; печать не идёт. */
+function penaltyKey(e: KeyboardEvent, f: PenaltyFlow): void {
+  const onButton = e.target instanceof HTMLButtonElement && e.target.dataset.act !== undefined;
+  if (e.key === 'Escape') {
     e.preventDefault();
-    if (!e.repeat) menuPause.value = false;
+    act('esc');
+    return;
+  }
+  if (f.stage === 'done') {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      afterPenalty();
+    }
+    return;
+  }
+  if (e.key === 'Enter' && !onButton) {
+    e.preventDefault();
+    answerPenalty();
   }
 }
 
 function onKey(e: KeyboardEvent): void {
-  const x = v.value;
-  if (x.phase === 'quit') return;
-  if (!x.paused && ['result', 'break', 'kick'].includes(x.phase)) {
-    // Esc открывает «Паузу» и здесь (ТЗ-0.16, 017-Р54); дальше — свои клавиши перерыва.
-    if (e.code === 'Escape') {
-      e.preventDefault();
-      if (!e.repeat) menuPause.value = true;
-    } else if (x.phase === 'break') onBreakKey(e);
+  const r = run.value;
+  if (!r || finished.value) return;
+  if (flow.value !== null && r.overlay === 'none') {
+    penaltyKey(e, flow.value);
     return;
   }
-  const go = e.code === 'Space' || e.code === 'Enter';
-  if (x.paused) {
-    // Пауза: Enter и Esc — назад в ту же фазу; «Выйти» — только кнопкой.
-    if ((e.code === 'Enter' && !onButton(e)) || e.code === 'Escape') {
+  if (e.key === 'Escape') {
+    if (r.overlay === 'none') {
       e.preventDefault();
-      if (!e.repeat) emit('resume');
+      act('esc');
     }
     return;
   }
-  if (x.phase === 'intro') {
-    if (go && !onButton(e) && !e.repeat) {
+  if (r.overlay !== 'none') return; // у окон свои клавиши (KitModal)
+  if (e.target instanceof HTMLButtonElement && (e.key === 'Enter' || e.key === ' ')) return;
+  if (!started.value) {
+    if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      emit('start');
+      start();
     }
     return;
   }
-  if (e.code === 'Escape') {
-    e.preventDefault();
-    if (!e.repeat) emit('pause');
+  if (phase.value === 'break') {
+    if (e.key === 'Enter') secondHalf();
     return;
   }
-  const press: KeyPress = {
-    code: e.code,
-    key: e.key,
-    repeat: e.repeat,
-    mod: e.ctrlKey || e.altKey || e.metaKey,
-    caps: e.getModifierState('CapsLock'),
-    time: e.timeStamp,
-  };
-  // Печатный символ не должен листать страницу (пробел) или открывать поиск (/ и ' в Firefox).
-  if (!press.mod && [...e.key].length === 1) e.preventDefault();
-  emit('press', press);
+  const ev = keyEventOf({ code: e.code, key: e.key, repeat: e.repeat, ctrlKey: e.ctrlKey, altKey: e.altKey, metaKey: e.metaKey, caps: e.getModifierState('CapsLock') }, now());
+  if (!ev) return;
+  e.preventDefault();
+  const before = r.state;
+  const out = feed(r, ev);
+  const kicked = before.phase === 'warmup' && out.run.state.phase !== 'idle' && (out.run.state.phase !== 'warmup' || out.run.state.at !== before.at);
+  apply(out, kicked);
+}
+
+function tick(): void {
+  const r = run.value;
+  if (!r || !started.value || r.overlay !== 'none' || finished.value || phase.value === 'break' || flow.value !== null) return;
+  apply(feed(r, { type: 'tick', t: now() }));
 }
 
 onMounted(() => {
-  globalThis.addEventListener('keydown', shield, true);
+  globalThis.addEventListener('resize', onResize);
+  if (props.frame) return;
   globalThis.addEventListener('keydown', onKey);
+  timer = globalThis.setInterval(tick, 250);
 });
-onBeforeUnmount(() => {
-  globalThis.removeEventListener('keydown', shield, true);
+onUnmounted(() => {
+  globalThis.removeEventListener('resize', onResize);
   globalThis.removeEventListener('keydown', onKey);
-  globalThis.clearTimeout(shotTimer);
-  globalThis.clearTimeout(holdTimer);
+  globalThis.clearInterval(timer);
+  globalThis.clearTimeout(hide);
 });
+
+// --- вступление (окна — MatchWindows.vue)
+const NB = ' ';
+const lessonInfo = computed(() => {
+  const s = state.value;
+  const text = pack.pack.value?.text.ru?.lessons[s?.lessonId ?? ''];
+  return { name: text?.name ?? '', keys: newKeys.value, tip: (text as { tip?: string[] } | undefined)?.tip?.[0] ?? '' };
+});
+const rivalName = computed(() => {
+  const s = ru.home.rival.replace('{street}', props.frame?.show?.street ?? streetName(streetOf(lessonNo.value))).replace(' ', NB);
+  return s.charAt(0).toUpperCase() + s.slice(1);
+});
+const overlay = computed(() => run.value?.overlay ?? 'none');
 </script>
 
 <template>
-  <div
-    v-if="showResult"
-    class="result"
-  >
-    <slot
-      name="result"
-      :view="view"
-    >
-      <p>{{ t.result.fallback }}: {{ view.score.typed + view.score.kick }} : {{ view.score.conceded }}</p>
-    </slot>
-    <MatchPause
-      v-if="menuPause"
-      fixed
-      done
-      @resume="onResume"
-      @quit="emit('quit')"
-    />
-  </div>
-  <div
-    v-else-if="view.phase !== 'quit'"
-    class="match"
-  >
-    <div class="column">
-      <MatchPitch
-        :us="ctx.usName"
-        :rival="ctx.rivalName"
-        :us-kit="ctx.usKit"
-        :rival-kit="ctx.rivalKit"
-        :goals="view.score.typed + view.score.kick + kickBonus"
-        :conceded="view.score.conceded"
-        :penalties="view.score.kick + kickBonus"
-        :caption="caption"
-        :decisive="view.decisive"
-        :clock="null"
-        :shot="shot"
-        :shot-id="String(shotNo)"
-      >
-        <MatchIntro
-          v-if="view.phase === 'intro'"
-          :lesson-name="ctx.lessonName"
-          :new-keys="ctx.newKeys"
-          :tip="ctx.tip"
-          :g="ctx.g"
-          :c="ctx.c"
-          :comeback="ctx.comeback ?? false"
-          :softened="ctx.softened ?? false"
-          @start="emit('start')"
-        />
-        <MatchBreak
-          v-else-if="view.phase === 'break'"
-          :us="ctx.usName"
-          :rival="ctx.rivalName"
-          :goals="(view.firstScore?.typed ?? 0) + (view.firstScore?.kick ?? 0)"
-          :conceded="view.firstScore?.conceded ?? 0"
-          :continue2="view.banner === 'continue2'"
-          @next="emit('toSecondHalf')"
-        />
-        <MatchKick
-          v-else-if="view.phase === 'kick' && ctx.kickTask"
-          :task="ctx.kickTask"
-          @answer="(r) => emit('kickAnswer', r)"
-          @shown="(r) => (kickShown = r)"
-          @skip="emit('skipKick')"
-        />
-        <CoachMinute
-          v-else-if="view.phase === 'coach' && view.coach && typing"
-          :keys="view.coach.keys"
-          :left-ms="view.coach.leftMs"
-          :total-ms="ctx.coachMs"
-          :typing="typing"
-          :rows="view.rows"
-          :row="view.row"
-        />
-        <AttackText
-          v-else-if="typing"
-          :typing="typing"
-          :rows="view.rows"
-          :row="view.row"
-        />
-      </MatchPitch>
-
-      <MatchStatus
-        v-if="typingUi"
+  <main class="match">
+    <template v-if="view && state && run">
+      <MatchScene
         :view="view"
-        :printing="printing"
-        :typing="typing"
-        :target="target"
-        :thumb="thumb"
+        :kit="club.kit"
+        :rival-kit="rivalKit(club.kit)"
+        :us="{ name: club.name || t.sides.us, backName: club.backName, backNumber: club.backNumber }"
+        :rival="{ name: rivalName, city: club.city }"
+        :width="width"
+        :layout="flow ? undefined : state.layout"
+        :shout="shown.shout"
+        :bump="shown.bump"
+        :lit="started ? [] : litCodes(newKeys, state.keymap, state.layout)"
+        :ball="shown.shout === null && !flow"
+        :intro="!started"
+        @help="act('help')"
+      />
+      <ShellHeader
+        match
+        :pause="overlay === 'none'"
+        @pause="act('pause')"
       />
 
-      <div
-        v-if="typingUi"
-        class="board"
+      <PenaltyWindow
+        v-if="flow && overlay === 'none'"
+        :flow="flow"
+        :total="view.score"
+        :scroll-end="frame?.show?.scrollEnd"
+        @update:input="typeAnswer"
+        @submit="answerPenalty"
+        @skip="skipShot"
+        @next="afterPenalty"
+      />
+      <ComebackBanner v-if="comeback && !started && overlay === 'none'" />
+      <MatchWindows
+        :state="state"
+        :overlay="overlay"
+        :started="started"
+        :info="lessonInfo"
+        @act="act"
+        @start="start"
+        @second="secondHalf"
+        @close-all="closeAll"
+        @home="router.push('/home')"
+        @leave="router.push('/map')"
+      />
+    </template>
+    <p
+      v-else-if="pack.state.value === 'loading'"
+      class="msg"
+    >
+      {{ t.loading }}
+    </p>
+    <div
+      v-else-if="pack.state.value !== 'ok'"
+      class="msg"
+    >
+      {{ t.failed }}
+      <KeyButton
+        primary
+        @click="pack.retry()"
       >
-        <KeyboardView
-          :target="target"
-          :thumb="thumb"
-          :shift="hit?.shift ?? false"
-          :error="typing?.last === 'error'"
-          :errors="typing?.stats.errors ?? 0"
-          :layout="ctx.layout"
-        />
-        <div class="hands">
-          <HandsView
-            :finger="target?.finger ?? null"
-            :thumb="thumb"
-            :shift-finger="shiftFinger"
-          />
-        </div>
-      </div>
-
-      <MatchPause
-        v-if="view.paused || menuPause"
-        :fixed="menuPause"
-        @resume="onResume"
-        @quit="emit('quit')"
-      />
+        {{ t.again }}
+      </KeyButton>
     </div>
-  </div>
+  </main>
 </template>
 
 <style scoped>
-/*
- * Размеры — окна 1024×640: клавиатура 760, строка 2rem и поле 230 (TypingLine, MatchPitch).
- * На больших окнах матч растёт целиком, одним множителем (App.vue, app/viewport), — отдельные
- * части здесь не растут.
- */
-.match {
-  --board-w: 760px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: var(--space-3);
-}
-/* Низкое окно (1024×640, 017-Р29): клавиатура уже — подсказка решающей серии в две строки влезает без прокрутки. */
-@media (max-height: 700px) { .match { --board-w: 680px; } }
-
-/* Колонка матча: поле, подсказка, клавиатура. Пауза — поверх неё. */
-.column {
-  flex: 0 1 calc(var(--board-w) + 60px);
-  min-width: 0;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-/*
- * Руки поверх клавиатуры: та же ширина, тот же верх и шкала (HandsView), указательные и средние —
- * над основным рядом. Картинка полупрозрачная, чтобы буквы под пальцами читались; метки — нет.
- */
-.board {
-  position: relative;
-  max-width: var(--board-w);
-  width: 100%;
-  margin: 0 auto;
-  /* Запас под ногти больших пальцев (они ниже пробела); что ниже — обрезается, а не растит страницу. */
-  padding-bottom: 30px;
-  overflow: hidden;
-}
-
-.hands {
-  position: absolute;
-  inset: 0 0 auto;
-  --hands-opacity: 0.35; /* руки на основном ряду закрывают буквы — прозрачнее (017-Т3) */
-  pointer-events: none;
-}
+.match { position: absolute; inset: 0; color: var(--text); }
+.msg { position: absolute; inset: 0; display: grid; place-content: center; gap: 12px; text-align: center; font-size: 20px; }
 </style>

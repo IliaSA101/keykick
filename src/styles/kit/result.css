@@ -1,0 +1,166 @@
+/* ЭБ · Плашка награды, итог матча, вымпел Кубка. Из docs/mockups/kit/kit.css (строки 1601–1765), классы те же; разметка — компоненты src/components/kit. */
+/* ---------- Плашка награды (ЭБ; Э1, Э3, Дом, газета) ----------
+   Светлая подложка под медаль, щит, кубок: золото и жёлтое лежат на ней, а не на синем (ТАБУ, 023-Р5).
+   Цвет — rgb(236 232 220), как плашка щита на Доме (tools/mock-map/home_sprites.py: PLATE), кант 2 px. Кант Дома — тёмно-синий
+   (24 40 92): здесь он тёплый серо-коричневый — не синий и не золотой, иначе золото медали оказывается у синего. Плашка по
+   размеру содержимого плюс поле --award-pad; от каймы окна и золотых деталей — не вплотную (≥ 24 px, kk-art 11.11). */
+:root {
+  --award-plate: rgb(236 232 220);
+  --award-plate-edge: rgb(118 110 96);
+}
+.award-plate {
+  display: grid;
+  width: fit-content;
+  place-items: center;
+  box-sizing: border-box;
+  padding: var(--award-pad, 12px);
+  background: var(--award-plate);
+  border: 2px solid var(--award-plate-edge);
+  border-radius: 8px;
+  color: #2a2840;
+}
+.award-plate img,
+.award-plate svg {
+  display: block;
+}
+
+/* ---------- графитовая панель: .panel.soft.graphite — panel({ soft, graphite }) в kit.mjs ----------
+   Коллекция (спека 049): панели поверх сцены раздевалки, музея, пака — графит ~86 %, форма и награда не на синем. */
+.panel.soft.graphite { background: rgb(36 37 43 / 0.86); box-shadow: inset 0 0 0 1.5px #5a5d6c, 0 12px 28px rgb(0 0 0 / 0.45); backdrop-filter: blur(3px); }
+
+/* Единый кубок (038-Р27): золотой кубок champ/img/cup.webp на синей карточке — на светлой плашке --award-plate с каймой --award-plate-edge
+   (ТАБУ 11.11: золото не лежит на синем и не касается его; серебряный фильтр убран). Плашка — по размеру значка, поле 2×3 px, отступ от текста. */
+.kb-cupcard .ic,
+.gocard .ic,
+.kb-event .ic img,
+.kb-place .news .ic,
+.hbanner .ic,
+.kb-cup {
+  box-sizing: content-box;
+  padding: 2px 3px;
+  margin-right: 3px;
+  border-radius: 5px;
+  background: var(--award-plate);
+  box-shadow: 0 0 0 1.5px var(--award-plate-edge);
+}
+.kb-event .ic img {
+  padding: 4px 6px;
+  border-radius: 8px;
+}
+
+/* ---------- итог матча: resultCard() в tools/mock-kit/result.mjs (025-Р24, главная 11.11; Э1, Э3) ----------
+   Переехал из match-v2/mock.css: стили заведены под .kb-result, а не глобальными (.stat, .rec, .coin остались у «Не беды!» в match-v2).
+   Размеры и цвета те же, что были у Э1 — пиксели итога не меняются. ★, рекорд и монеты — на плашках .award-plate (ТАБУ). */
+.kb-result {
+  left: 50%;
+  margin-left: -370px;
+  width: 740px;
+  /* непрозрачная: итог стоит поверх поля и ворот — сквозь 0.96 просвечивала сетка (050 №17а, kk-art П6 р5) */
+  background: linear-gradient(160deg, rgb(58 63 134), rgb(31 33 82));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.kb-result h2 {
+  font-size: 40px;
+  color: #fff;
+  font-weight: 800;
+}
+.kb-result-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+/* столбцы — ровной сеткой: колонки по 170 px и последняя на остаток (число колонок, минимум три, задаёт resultCard() в grid-template-columns);
+   без рекорда «Скорость» не уезжает вправо (12.11) */
+.kb-result-stats {
+  display: grid;
+  align-items: start;
+  padding: 0 40px 0 0;
+}
+/* строка тренера (необязательная): портрет и пузырь — как у реплики тренера (.kb-coach / .kb-bub), не больше двух строк */
+.kb-result-coach {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.kb-result-coach .ava {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  background: #fff; /* 050-Р53: лицо, не фигура; подложка белая (ТАБУ: шарф «Ветерана» на синем) */
+  box-shadow: 0 0 0 2.5px #fff;
+}
+/* речь тренера — кремовая бумага, как плашки звёзд и рекорда (050-Р53, kk-art: синяя таблетка на синей карточке весила меньше строки монет) */
+.kb-result-coach .kb-bub {
+  flex: 0 1 auto;
+  max-width: 640px;
+  padding: 6px 14px 7px;
+  border-radius: 4px 14px 14px 14px;
+  background: var(--award-plate);
+  box-shadow: inset 0 0 0 1.5px var(--award-plate-edge);
+  color: #2a2418;
+  font-size: 16px;
+  line-height: 1.25;
+}
+.kb-result-coach .kb-bub .nm {
+  display: inline;
+  padding: 0 6px 0 0;
+  line-height: inherit;
+  font-size: 16px;
+  color: #1f6b3a;
+}
+.kb-result-coach .kb-bub p {
+  display: inline;
+  font-weight: 600;
+}
+.kb-result-sum {
+  display: flex;
+  gap: 34px;
+  align-items: baseline;
+}
+.kb-result .stat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.kb-result .stat b {
+  font-size: 28px;
+  line-height: 1.1;
+}
+.kb-result .stat span {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.kb-result .stat .rec {
+  display: inline-block;
+  font-size: 17px;
+  padding: 3px 12px;
+  font-weight: 900;
+}
+.kb-result .big-stars {
+  display: inline-flex;
+  align-items: center;
+  font-size: 40px;
+  letter-spacing: 4px;
+  line-height: 1;
+}
+.kb-result .coin {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  vertical-align: -4px;
+  background: radial-gradient(circle at 35% 30%, #fff1b0, var(--accent) 55%, #b58516);
+  box-shadow: 0 0 0 1.5px #8a6410;
+}
+
+/* ---------- вымпел Кубка на карте (ТЗ-8.8; часть из Э5 Чемпионата, сквозной круг 1, 12.11): без круга, белый ореол ---------- */
+.kb-pen {position:absolute;z-index:6;display:block}
+.kb-pen i {position:absolute;inset:-26px -16px;border-radius:50%;background:radial-gradient(closest-side, rgb(255 250 240 / 0.55) 0 40%, rgb(255 250 240 / 0.22) 62%, transparent 94%)}
+.kb-pen img {position:relative;display:block;width:auto;filter:drop-shadow(0 0 5px rgb(255 250 240 / 0.7)) drop-shadow(0 3px 4px rgb(0 0 0 / 0.55))}
+

@@ -2,36 +2,14 @@
  * Стражи по исходникам: правила проекта, которые иначе держались бы только на памяти.
  * Каждый страж проверяет и себя — что он вообще что-то видит (иначе молчал бы всегда).
  */
-import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { REWARD_SOURCES } from '../src/engine/save/rewards';
 import { plural } from '../src/i18n/plural';
 import { ru } from '../src/i18n/ru';
+import { codeFiles, rel, root, walk, withoutComments } from './guards/lib';
 
-const root = join(import.meta.dirname, '..');
-
-function walk(dir: string): string[] {
-  return readdirSync(dir).flatMap((name) => {
-    const path = join(dir, name);
-    return statSync(path).isDirectory() ? walk(path) : [path];
-  });
-}
-
-const rel = (path: string) => relative(root, path).split(sep).join('/');
-const codeFiles = (dir: string) => walk(join(root, dir)).filter((p) => /\.(ts|vue|mjs)$/.test(p));
-
-/**
- * Текст без комментариев и стилей: комментарии у нас по-русски законно,
- * а тексты интерфейса — нет. `//` после двоеточия не трогаем: это ссылка в строке.
- */
-export function withoutComments(source: string): string {
-  return source
-    .replace(/<style[\s\S]*?<\/style>/g, '')
-    .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/(^|[^:])\/\/.*$/gm, '$1');
-}
+// Стражи этапа Э1 (063 С1, С4, С5) — tests/guards/e1.test.ts; общие помощники — tests/guards/lib.ts.
 
 const CYRILLIC = /[А-Яа-яЁё]/;
 
@@ -87,7 +65,7 @@ describe('тесты без .only и .skip (web-frontend, 14.11)', () => {
   const FOCUS = /\b(?:it|test|describe)\.(?:only|skip)\(/;
   const files = walk(join(root, 'tests')).filter((p) => /\.(test|spec)\.ts$/.test(p) && !p.endsWith('guards.test.ts'));
   it('страж видит тесты и узнаёт .only', () => {
-    expect(files.length).toBeGreaterThan(20);
+    expect(files.length).toBeGreaterThanOrEqual(20); // С6 (063 design §7): поднят с 9 (060 Т0) к значению v2 — тестов этапа Э1 хватает
     expect(FOCUS.test("it.only('x', () => {})")).toBe(true);
     expect(FOCUS.test("it('only', () => {})")).toBe(false);
   });
@@ -111,21 +89,6 @@ describe('тексты ru.ts', () => {
     const bad = all.filter(([, v]) => typeof v !== 'string' || v.trim() === '').map(([k]) => k);
     expect(bad).toEqual([]);
   });
-
-  it('подсказки матча — одной строкой рядом с полоской хода (до 52 знаков)', () => {
-    // Длинная подсказка раскладки шла в две строки, и страница матча уходила за край окна 640.
-    const fingers = [...Object.values(ru.keyboard.fingers), ...Object.values(ru.keyboard.thumbs)].map(
-      (f) => `${ru.match.hints.finger} ${f}`,
-    );
-    const hints = [
-      ...Object.values(ru.match.hints),
-      ...fingers,
-      ru.match.warmup.hint,
-      ...Object.values(ru.match.decisiveHint),
-    ];
-    expect(hints.length).toBeGreaterThan(5);
-    expect(hints.filter((h) => h.length > 52)).toEqual([]);
-  });
 });
 
 describe('движок без Vue, DOM, часов и случайности', () => {
@@ -147,14 +110,58 @@ describe('движок без Vue, DOM, часов и случайности', (
   });
 });
 
-describe('хранилище — только через storage.ts (спека 013)', () => {
-  // Ключи зависят от мажорной версии и канала сборки: обход storage.ts писал бы под ключами сына из /next/ и v2.
-  const files = codeFiles('src').filter((p) => !p.endsWith(`app${sep}storage.ts`));
-  it('страж видит код', () => expect(files.length).toBeGreaterThan(10));
-  it('localStorage и sessionStorage — только в src/app/storage.ts', () => {
-    const bad = files.filter((p) => /\b(localStorage|sessionStorage)\b/.test(withoutComments(readFileSync(p, 'utf8'))));
-    expect(bad.map(rel)).toEqual([]);
+/** Правило «шаблон — только в этих файлах или папках» (папка — с `/` на конце); нарушение — шаблон вне разрешённых. */
+interface OutsideRule {
+  name: string;
+  pattern: RegExp;
+  allowed: string[];
+}
+
+export function outsideViolation(file: string, source: string, rule: OutsideRule): boolean {
+  const ok = rule.allowed.some((a) => (a.endsWith('/') ? file.startsWith(a) : file === a));
+  return !ok && rule.pattern.test(withoutComments(source));
+}
+
+describe('хранилище, сеть и замки — только в своих папках (060 §8 п. 1–2)', () => {
+  // Ключи хранилища зависят от мажорной версии и канала сборки: обход storage.ts писал бы под чужими ключами.
+  // Сеть живёт в загрузчике пакетов, звуке и доступе; замки вкладок — в одном файле сохранения.
+  const storage: OutsideRule = {
+    name: 'localStorage, sessionStorage, indexedDB',
+    pattern: /\b(localStorage|sessionStorage|indexedDB)\b/,
+    allowed: ['src/app/save/storage.ts'],
+  };
+  const net: OutsideRule = { name: 'fetch(', pattern: /\bfetch\(/, allowed: ['src/app/packs/', 'src/app/sound/', 'src/app/access/'] };
+  const locks: OutsideRule = { name: 'navigator.locks', pattern: /\bnavigator\.locks\b/, allowed: ['src/app/save/locks.ts'] };
+  const rules = [storage, net, locks];
+  const setItem = "localStorage.setItem('k', v);";
+  const idb = "const db = window.indexedDB.open('x');";
+  const get = "const r = await fetch('/packs/a.json');";
+  const lock = "await navigator.locks.request('save', fn);";
+  const files = codeFiles('src').map(rel);
+
+  it('страж видит код и узнаёт нарушение в строке-образце', () => {
+    expect(files.length).toBeGreaterThanOrEqual(20);
+    expect(outsideViolation('src/app/x.ts', setItem, storage)).toBe(true);
+    expect(outsideViolation('src/app/x.ts', idb, storage)).toBe(true);
+    expect(outsideViolation('src/app/x.ts', 'sessionStorage.clear();', storage)).toBe(true);
+    expect(outsideViolation('src/app/save/storage.ts', setItem, storage)).toBe(false);
+    expect(outsideViolation('src/app/storage.ts', setItem, storage)).toBe(true); // старый адрес больше не свой
+    expect(outsideViolation('src/screens/A.vue', get, net)).toBe(true);
+    expect(outsideViolation('src/app/packs/load.ts', get, net)).toBe(false);
+    expect(outsideViolation('src/app/sound/play.ts', get, net)).toBe(false);
+    expect(outsideViolation('src/app/access/gate.ts', get, net)).toBe(false);
+    expect(outsideViolation('src/app/packs-extra/x.ts', get, net)).toBe(true); // папка — с границей
+    expect(outsideViolation('src/app/x.ts', lock, locks)).toBe(true);
+    expect(outsideViolation('src/app/save/locks.ts', lock, locks)).toBe(false);
+    expect(outsideViolation('src/app/x.ts', "// localStorage в комментарии\nconst a = 1;", storage)).toBe(false);
   });
+
+  for (const rule of rules) {
+    it(`${rule.name} — только в ${rule.allowed.join(', ')}`, () => {
+      const bad = files.filter((p) => outsideViolation(p, readFileSync(join(root, p), 'utf8'), rule));
+      expect(bad).toEqual([]);
+    });
+  }
 });
 
 /** Слой файла: первая папка под src (`engine`, `app`…), для файлов в корне src — `root`. */
@@ -173,8 +180,9 @@ const LAYERS: Record<string, string[]> = {
   components: ['app', 'engine', 'content', 'i18n', 'art', 'styles'],
   screens: ['components', 'app', 'engine', 'content', 'i18n', 'art', 'styles'],
 };
-/** Роутер — единственный в app, кто знает экраны. */
-const LAYER_EXCEPTIONS: Record<string, string[]> = { 'src/app/router.ts': ['screens'] };
+/** Роутер (подсистема `app/router/`, 063-Р1, владелец 18.11) — единственный в app, кто знает экраны. */
+const LAYER_EXCEPTIONS: [prefix: string, layers: string[]][] = [['src/app/router/', ['screens']]];
+const exceptionsOf = (file: string) => LAYER_EXCEPTIONS.filter(([p]) => file.startsWith(p)).flatMap(([, l]) => l);
 
 /** Импорты файла, которые нарушают слои: относительные пути, сведённые к `src/...`. */
 export function layerViolations(file: string, source: string): string[] {
@@ -193,7 +201,7 @@ export function layerViolations(file: string, source: string): string[] {
     // Вне src (package.json — номер версии) слоёв нет.
     if (path[0] !== 'src') continue;
     const to = layerOf(path.join('/'));
-    if (to !== from && !allowed.includes(to) && !(LAYER_EXCEPTIONS[file] ?? []).includes(to)) bad.push(`${file} → ${spec}`);
+    if (to !== from && !allowed.includes(to) && !exceptionsOf(file).includes(to)) bad.push(`${file} → ${spec}`);
   }
   return bad;
 }
@@ -203,11 +211,14 @@ describe('слои: кто кого импортирует', () => {
   const files = codeFiles('src').map(rel);
 
   it('страж видит слои и узнаёт нарушение', () => {
-    expect(files.some((p) => p.startsWith('src/screens/'))).toBe(true);
+    expect(files.filter((p) => p.startsWith('src/engine/')).length).toBeGreaterThanOrEqual(10); // С6: с Т4 экраны есть — слой screens виден и самой выборке
+    expect(files.filter((p) => p.startsWith('src/screens/')).length).toBeGreaterThanOrEqual(2);
+    expect(files.length).toBeGreaterThanOrEqual(20);
     expect(layerViolations('src/engine/save/rules.ts', "import { x } from '../../app/storage';")).toHaveLength(1);
     expect(layerViolations('src/components/A.vue', "import S from '../screens/HomeScreen.vue';")).toHaveLength(1);
     expect(layerViolations('src/engine/save/rules.ts', "import { y } from '../match/flow';")).toEqual([]);
-    expect(layerViolations('src/app/router.ts', "const H = () => import('../screens/HomeScreen.vue');")).toEqual([]);
+    expect(layerViolations('src/app/router/index.ts', "const H = () => import('../../screens/HomeScreen.vue');")).toEqual([]);
+    expect(layerViolations('src/app/store/index.ts', "const H = () => import('../../screens/HomeScreen.vue');")).toHaveLength(1);
   });
 
   it('в src нет импортов против слоёв', () => {
@@ -231,84 +242,121 @@ export function importsOf(file: string, source: string): string[] {
   return out;
 }
 
-const WALLET = 'src/engine/wallet/wallet.ts';
-/** Вызовы кассы (018 design §8): имена функций `engine/wallet/wallet.ts`. */
-const CASH_CALL = /\b(creditPresses|creditStake|credit|spend)\s*\(/;
-/** Запись раздела кошелька в обход кассы: ключ показа (`wallet/view`) открыт всем, писать им — только подсистеме. */
-const WALLET_SET = /\bset\s*\(\s*walletKey\b/;
-
-/**
- * Нарушения кассы (ТЗ-0.3, 018 design §8): раздел `wallet/save` импортирует только сама касса; кассу (импорт
- * `wallet/wallet` или вызов её функций) — только `callers` той награды, чья это касса, и сама подсистема `wallet`.
- */
-export function cashViolations(file: string, source: string): string[] {
-  const imports = importsOf(file, source);
-  const bad: string[] = [];
-  if (file.startsWith('src/engine/wallet/')) return bad;
-  if (imports.includes('src/engine/wallet/save')) bad.push(`${file} → wallet/save`);
-  if (WALLET_SET.test(withoutComments(source))) bad.push(`${file} → запись кошелька мимо кассы`);
-  const allowed = Object.values(REWARD_SOURCES).some((r) => r.cash === WALLET && r.callers.includes(file));
-  const calls = imports.includes('src/engine/wallet/wallet') || CASH_CALL.test(withoutComments(source));
-  if (calls && !allowed) bad.push(`${file} → касса`);
-  return bad;
+/** Статические импорты файла (`from '…'`, `import '…'`; не `import()`): относительные сведены к пути от корня репозитория. */
+export function staticImports(file: string, source: string): string[] {
+  const dir = file.split('/').slice(0, -1);
+  const out: string[] = [];
+  for (const m of withoutComments(source).matchAll(/\b(?:from|import)\s+['"]([^'"]+)['"]/g)) {
+    const spec = m[1] ?? '';
+    if (!spec.startsWith('.')) {
+      out.push(spec);
+      continue;
+    }
+    const path = [...dir];
+    for (const step of spec.split('/')) {
+      if (step === '..') path.pop();
+      else if (step !== '.') path.push(step);
+    }
+    out.push(path.join('/'));
+  }
+  return out;
 }
 
-describe('награды — только через кассу из REWARD_SOURCES (ТЗ-0.3, 018 design §8)', () => {
-  // Монеты не появляются ниоткуда: кто платит — записан в реестре, раздел кошелька трогает только касса.
-  const files = codeFiles('src').map(rel);
+/** Импорты из папки пакета `src/content/packs/<id>/` — пакет едет только загрузчиком, а не бандлом. */
+export function packImportViolations(file: string, source: string): string[] {
+  return staticImports(file, source)
+    .filter((to) => /(^|\/)content\/packs\/[^/]+\//.test(to))
+    .map((to) => `${file} → ${to}`);
+}
 
-  it('страж видит нарушение', () => {
-    const shop = 'src/app/shop.ts';
-    expect(cashViolations(shop, "import { section } from '../engine/wallet/save.ts';")).toHaveLength(1);
-    expect(cashViolations(shop, "import type { WalletSave } from '../engine/wallet/save';")).toHaveLength(1);
-    expect(cashViolations(shop, "export { section } from '../engine/wallet/save';")).toHaveLength(1);
-    expect(cashViolations(shop, "const w = await import('../engine/wallet/save');")).toHaveLength(1);
-    expect(cashViolations('src/engine/school/save.ts', "import { spend } from '../wallet/wallet';")).toHaveLength(1);
-    expect(cashViolations('src/engine/match/verdict.ts', "tx => credit(tx, 5, 'match')")).toHaveLength(1);
-    expect(cashViolations('src/engine/matchResult/coins.ts', "import { creditPresses } from '../wallet/wallet';")).toEqual([]);
-    expect(cashViolations(WALLET, "import { section } from './save';")).toEqual([]);
-    // Показ монет (019-Т8): ключ и баланс из `wallet/view` — можно всем; писать этим ключом — нельзя.
-    expect(cashViolations('src/components/map/MapHeader.vue', "import { walletKey, coinsOf } from '../../engine/wallet/view';")).toEqual([]);
-    expect(cashViolations('src/app/shop.ts', "updatePlayer((tx) => tx.set(walletKey, { ...w, coins: 9 }))")).toHaveLength(1);
-    // Маска реестра — не импорт.
-    expect(cashViolations('src/app/save/registry.ts', "import.meta.glob('../../engine/*/save.ts')")).toEqual([]);
+describe('пакеты — не в бандле (060 §8 п. 3)', () => {
+  // Закрытый пакет в импорте открытого кода попал бы в публичный dist; открытые едут так же, одним путём.
+  // Разрешено: tools/packs.mjs (сборка раскладывает пакеты в dist) и тесты.
+  const files = [...codeFiles('src'), ...codeFiles('tools')].map(rel).filter((p) => p !== 'tools/packs.mjs');
+
+  it('страж видит код и узнаёт импорт пакета в строке-образце', () => {
+    expect(files.length).toBeGreaterThanOrEqual(20);
+    expect(packImportViolations('src/app/x.ts', "import p from '../content/packs/ru.yard/pack.json';")).toHaveLength(1);
+    expect(packImportViolations('src/app/course/load.ts', "import { a } from '../../content/packs/ru.moscow/lessons.json';")).toHaveLength(1);
+    expect(packImportViolations('tools/build.mjs', "import x from '../src/content/packs/ru.yard/text.json'")).toHaveLength(1);
+    expect(packImportViolations('src/app/x.ts', "import '../content/packs/ru.yard/side.json';")).toHaveLength(1);
+    expect(packImportViolations('src/app/x.ts', "export { a } from '../content/packs/ru.yard/a';")).toHaveLength(1);
+    expect(packImportViolations('src/app/x.ts', "import t from '../content/tasks.json';")).toEqual([]);
+    expect(packImportViolations('src/app/x.ts', "// import p from '../content/packs/ru.yard/pack.json';")).toEqual([]);
   });
 
-  it('файл показа монет (`wallet/view`) не пишет: ни кассы, ни `set`, ни `SectionTx`', () => {
-    // Ловит: зачисление или трату, добавленные в открытый всем файл показа, — обход кассы через разрешённый импорт.
-    const view = withoutComments(readFileSync(join(root, 'src/engine/wallet/view.ts'), 'utf8'));
-    expect(CASH_CALL.test(view) || /\bset\s*\(|SectionTx|from '\.\/wallet'/.test(view)).toBe(false);
-  });
-
-  it('файлы реестра наград существуют: переезд файла не оставит мёртвую строку', () => {
-    const named = Object.values(REWARD_SOURCES).flatMap((r) => [...r.callers, ...(r.cash ? [r.cash] : [])]);
-    expect(named.length).toBeGreaterThan(1);
-    expect(named.filter((f) => !files.includes(f))).toEqual([]);
-  });
-
-  it('в src касса и раздел кошелька — только у разрешённых', () => {
-    expect(files.length).toBeGreaterThan(10);
-    expect(files.flatMap((p) => cashViolations(p, readFileSync(join(root, p), 'utf8')))).toEqual([]);
+  it('вне tools/packs.mjs и тестов никто не импортирует src/content/packs/<id>/', () => {
+    const bad = files.flatMap((p) => packImportViolations(p, readFileSync(join(root, p), 'utf8')));
+    expect(bad).toEqual([]);
   });
 });
 
-describe('родительская панель', () => {
-  it('открывается только ссылкой: экраны ребёнка на неё не ведут', () => {
-    const childFacing = [join(root, 'src/App.vue'), ...codeFiles('src/screens')].filter(
-      (p) => !p.endsWith('ParentScreen.vue'),
-    );
-    expect(childFacing.length).toBeGreaterThan(3);
-    const linking = childFacing.filter((p) => /["'`]\/parent\b/.test(readFileSync(p, 'utf8')));
-    expect(linking.map(rel)).toEqual([]);
+/** Закрытые пакеты, чья папка не покрыта строкой `publish-exclude.txt` (те же правила, что у `isExcluded` в tools/publish-main.mjs). */
+export function uncoveredClosedPacks(packs: { dir: string; access: string }[], excludeText: string): string[] {
+  const lines = excludeText
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('#'));
+  const covered = (path: string) => lines.some((e) => (e.endsWith('/') ? path.startsWith(e) : path === e));
+  return packs.filter((p) => p.access === 'closed' && !covered(p.dir)).map((p) => p.dir);
+}
+
+describe('закрытые пакеты не публикуются (060 §8 п. 4)', () => {
+  // Папка пакета с access:'closed' обязана быть в tools/publish-exclude.txt, иначе она уйдёт в открытый main.
+  const packsDir = join(root, 'src/content/packs');
+  // В открытом main файла исключений нет (он сам в исключениях), но нет и закрытых папок — проверка проходит пусто.
+  const excludeFile = join(root, 'tools/publish-exclude.txt');
+  const exclude = existsSync(excludeFile) ? readFileSync(excludeFile, 'utf8') : '';
+  const packs = existsSync(packsDir)
+    ? readdirSync(packsDir)
+        .filter((id) => existsSync(join(packsDir, id, 'pack.json')))
+        .map((id) => ({
+          dir: `src/content/packs/${id}/`,
+          access: String((JSON.parse(readFileSync(join(packsDir, id, 'pack.json'), 'utf8')) as { access?: unknown }).access),
+        }))
+    : [];
+
+  it('страж узнаёт непокрытую папку в строке-образце', () => {
+    const closed = [{ dir: 'src/content/packs/ru.moscow/', access: 'closed' }];
+    expect(uncoveredClosedPacks(closed, '# кухня\ndocs/\n')).toEqual(['src/content/packs/ru.moscow/']);
+    expect(uncoveredClosedPacks(closed, 'docs/\nsrc/content/packs/ru.moscow/\n')).toEqual([]);
+    expect(uncoveredClosedPacks(closed, 'src/content/packs/\n')).toEqual([]);
+    expect(uncoveredClosedPacks(closed, 'src/content/packs/ru.moscow\n')).toEqual(['src/content/packs/ru.moscow/']); // без «/» — не папка
+    expect(uncoveredClosedPacks(closed, 'src/content/packs/ru.moscow/pack.json\n')).toEqual(['src/content/packs/ru.moscow/']);
+    expect(uncoveredClosedPacks(closed, '# src/content/packs/ru.moscow/\n')).toEqual(['src/content/packs/ru.moscow/']);
+    expect(uncoveredClosedPacks([{ dir: 'src/content/packs/ru.yard/', access: 'public' }], 'docs/\n')).toEqual([]);
+    expect(uncoveredClosedPacks([], 'docs/\n')).toEqual([]);
   });
 
-  it('ссылки быстрой проверки матча — только на ней: матч по ним не сохраняется', () => {
-    // Адрес проверки строит checkQuery (app/matchJump); звать его может только блок родителя.
-    const files = codeFiles('src').filter((p) => !p.endsWith('matchJump.ts'));
-    expect(files.length).toBeGreaterThan(10);
-    const users = files.filter((p) => /\bcheckQuery\b|[?&]at=/.test(withoutComments(readFileSync(p, 'utf8'))));
-    // ParentCheck (v1) уходит в 018-Т6а: после него ссылок быстрой проверки нет нигде; до — только он.
-    expect(users.map(rel).filter((p) => p !== 'src/components/ParentCheck.vue')).toEqual([]);
+  it('каждый закрытый пакет в src/content/packs покрыт publish-exclude.txt', () => {
+    expect(uncoveredClosedPacks(packs, exclude)).toEqual([]);
+  });
+});
+
+/** Импорты движка из `content`, кроме схем и JSON: движок знает только типы схем и данные. */
+export function engineContentViolations(file: string, source: string): string[] {
+  if (layerOf(file) !== 'engine') return [];
+  return importsOf(file, source)
+    .filter((to) => (to === 'src/content' || to.startsWith('src/content/')) && !to.startsWith('src/content/schema/') && !to.endsWith('.json'))
+    .map((to) => `${file} → ${to}`);
+}
+
+describe('движок смотрит в content только через схемы и JSON (060 §8 п. 5)', () => {
+  const files = codeFiles('src/engine').map(rel);
+
+  it('страж видит движок и узнаёт нарушение в строке-образце', () => {
+    expect(files.length).toBeGreaterThanOrEqual(10);
+    expect(engineContentViolations('src/engine/save/rules.ts', "import { x } from '../../content/helpers';")).toHaveLength(1);
+    expect(engineContentViolations('src/engine/a.ts', "import { x } from '../content';")).toHaveLength(1);
+    expect(engineContentViolations('src/engine/a.ts', "export * from '../content/packs/loader';")).toHaveLength(1);
+    expect(engineContentViolations('src/engine/a.ts', "import type { Course } from '../content/schema/course';")).toEqual([]);
+    expect(engineContentViolations('src/engine/a.ts', "import tasks from '../content/tasks.json';")).toEqual([]);
+    expect(engineContentViolations('src/app/a.ts', "import { x } from '../content/helpers';")).toEqual([]); // это правило — только про движок
+  });
+
+  it('в src/engine нет импортов из content мимо schema и JSON', () => {
+    const bad = files.flatMap((p) => engineContentViolations(p, readFileSync(join(root, p), 'utf8')));
+    expect(bad).toEqual([]);
   });
 });
 
@@ -324,25 +372,5 @@ describe('склонение по числу', () => {
       '0 ошибок',
       '104 ошибки',
     ]);
-  });
-});
-
-describe('перехват ошибок — первым (спека 014, К7)', () => {
-  it('первый импорт src/main.ts — components/crash/installCrash', () => {
-    // Ловит: перестановку импортов — бросок при оценке App.vue или роутера до перехвата дал бы белый экран, а не экран сбоя.
-    const text = withoutComments(readFileSync('src/main.ts', 'utf8'));
-    const first = /^\s*import\b[^;]*?['"]([^'"]+)['"]/m.exec(text);
-    expect(first?.[1]).toBe('./components/crash/installCrash');
-  });
-});
-
-describe('кнопка «Сломать» (dev, спека 014-Т6)', () => {
-  it('breakButton подключает только src/dev/routes.ts: из игры её не достать', () => {
-    // Ловит: импорт кнопки сбоя из экрана или main.ts в обход dev-маршрутов — она попала бы в выпускную сборку.
-    const files = codeFiles('src').filter((p) => !p.endsWith('breakButton.ts'));
-    expect(files.length).toBeGreaterThan(10);
-    // Импорт по пути (статический и `import()`), а не слово: ключ текстов `ru.dev.breakButton` — не подключение.
-    const users = files.filter((p) => /(from|import)\s*\(?\s*['"][^'"]*\/breakButton(\.ts)?['"]/.test(withoutComments(readFileSync(p, 'utf8'))));
-    expect(users.map(rel)).toEqual(['src/dev/routes.ts']);
   });
 });

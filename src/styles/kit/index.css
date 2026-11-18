@@ -1,0 +1,18 @@
+/* ЭБ · все части одним подключением (порядок — как в макете: части, затем сцена, затем «живые» правки). */
+@import './header.css';
+@import './buttons.css';
+@import './panels.css';
+@import './gocard.css';
+@import './toggle.css';
+@import './head.css';
+@import './tag.css';
+@import './coach.css';
+@import './event.css';
+@import './places.css';
+@import './cupcard.css';
+@import './task.css';
+@import './result.css';
+@import './gamepanel.css';
+@import './stage.css';
+@import './live.css';
+@import './shell.css';

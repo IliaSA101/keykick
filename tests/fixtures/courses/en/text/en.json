@@ -1,0 +1,8 @@
+{
+  "leagues": {
+    "yard": { "name": "Yard", "announce": "The first yard, the first team: learn to type without looking at the keys." }
+  },
+  "cups": {
+    "cup-yard": "Yard Cup"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "id": "ru",
+  "layout": "jcuken-win",
+  "explain": ["ru"],
+  "leagues": ["yard", "district", "city", "country", "europe", "world"]
+}

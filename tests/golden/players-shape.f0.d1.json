@@ -1,9 +1,0 @@
-{
-  "(root)": "object",
-  "current": "string",
-  "lastId": "number",
-  "players": "array",
-  "players[]": "object",
-  "players[].id": "string",
-  "players[].name": "string"
-}

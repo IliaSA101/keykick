@@ -1,0 +1,114 @@
+{
+ "id": "home.lock1",
+ "codes": {
+  "1024": "Э2.116"
+ },
+ "screen": "home",
+ "route": "/home",
+ "state": "Дом · день 1 после 3 матчей: «ещё 1 матч» · 1024",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 135134,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.vl-combos",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 0,
+     "best": 12,
+     "tries": 1,
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 47,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 3,
+   "days": 1,
+   "today": "2026-11-18",
+   "todayN": 3,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 1540,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "Саша",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  }
+ },
+ "home": {
+  "cur": 4,
+  "day": 1,
+  "matchesToday": 3,
+  "played": 3,
+  "stars": {
+   "1": 3,
+   "2": 3,
+   "3": 2
+  },
+  "best": 12,
+  "coins": 47,
+  "fans": 1540,
+  "bought": [
+   "gate-sticker"
+  ],
+  "friendly": false,
+  "round": null,
+  "end": false,
+  "region": false,
+  "pause5": false,
+  "extras": {
+   "cup": null,
+   "events": {},
+   "papers": 0,
+   "paperDay": null,
+   "emblemN": 0,
+   "tourWaits": false,
+   "silver": false
+  }
+ }
+}

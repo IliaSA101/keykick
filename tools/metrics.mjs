@@ -49,8 +49,13 @@ if (!dump || !Array.isArray(dump.records)) {
   process.exit(2)
 }
 
+// Журнал игры снесён вместе с v2 (060 Т0) и вернётся в Э1 — до тех пор говорим об этом прямо, а не падаем на импорте
+if (!fs.existsSync(path.join(root, 'src/engine/journal/metrics.ts'))) {
+  console.error('Журнала игры пока нет: снесён с v2 (060 Т0), вернётся в Э1 — метрики считать не по чему')
+  process.exit(2)
+}
 const { module: mod } = await runnerImport(path.join(root, 'src/engine/journal/metrics.ts'))
-const course = JSON.parse(fs.readFileSync(path.join(root, 'src/content/leagues.json'), 'utf8'))
+const course = JSON.parse(fs.readFileSync(path.join(root, 'src/content/courses/ru/leagues.json'), 'utf8'))
 const keys = Array.isArray(dump.keys) ? dump.keys : []
 
 const players = [...new Set([...dump.records, ...keys].map((x) => x.player))].filter((p) => !onlyPlayer || p === onlyPlayer)

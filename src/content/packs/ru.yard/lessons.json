@@ -1,0 +1,62 @@
+{
+  "order": ["ru.yard.ao","ru.yard.ao-pairs","ru.yard.vl","ru.yard.vl-combos","ru.yard.first-words","ru.yard.yd","ru.yard.yd-combos","ru.yard.six-keys-words","ru.yard.six-keys-review","ru.yard.fzh","ru.yard.fzh-words","ru.yard.fzh-again","ru.yard.eight-keys-words","ru.yard.test-eight","ru.yard.pr","ru.yard.pr-words","ru.yard.longer-words","ru.yard.row-no-eh","ru.yard.eh","ru.yard.eh-combos","ru.yard.test-row","ru.yard.short-words","ru.yard.long-words","ru.yard.mixed-words","ru.yard.return-match","ru.yard.rematch","ru.yard.first-phrases","ru.yard.phrases","ru.yard.longer-phrases","ru.yard.fingers-not-words","ru.yard.final-first","ru.yard.final"],
+  "rowWidth": 29,
+  "stages": [
+    {"n":1,"newKeys":"ао"},
+    {"n":2,"newKeys":"вл"},
+    {"n":3,"newKeys":"ыд"},
+    {"n":4,"newKeys":"фж"},
+    {"n":5,"newKeys":"пр"},
+    {"n":6,"newKeys":"э"},
+    {"n":7,"newKeys":""},
+    {"n":8,"newKeys":""},
+    {"n":9,"newKeys":""},
+    {"n":10,"newKeys":""}
+  ],
+  "ladders": {
+    "letters": ["letters","letters","letters","letters"],
+    "pairs": ["letters","pairs","pairs","pairs"],
+    "combos": ["pairs","combos","combos","combos"],
+    "words": ["pairs","combos","words","words"],
+    "phrases": ["combos","words","phrases","phrases"]
+  },
+  "lengthBands": [
+    {"stages":[1,4],"min":270,"max":345},
+    {"stages":[5,8],"min":420,"max":534},
+    {"stages":[9,10],"min":570,"max":620}
+  ],
+  "lessons": {
+    "ru.yard.ao": {"stage":1,"friendly":true,"material":"letters","trap":true,"attacks":[16,18,20,22],"rows":1,"g":1,"c":5,"warmup":124},
+    "ru.yard.ao-pairs": {"stage":1,"material":"pairs","attacks":[16,18,20,22],"rows":1,"g":1,"c":5,"warmup":120},
+    "ru.yard.vl": {"stage":2,"friendly":true,"material":"pairs","attacks":[16,18,20,23],"rows":1,"g":1,"c":5,"warmup":116},
+    "ru.yard.vl-combos": {"stage":2,"material":"combos","attacks":[16,18,20,23],"rows":1,"g":1,"c":5,"warmup":116},
+    "ru.yard.first-words": {"stage":2,"material":"words","attacks":[17,19,22,24],"rows":1,"g":1,"c":5,"warmup":114},
+    "ru.yard.yd": {"stage":3,"friendly":true,"material":"pairs","attacks":[14,17,19,21],"rows":1,"g":1,"c":4,"warmup":128},
+    "ru.yard.yd-combos": {"stage":3,"material":"combos","attacks":[14,17,19,21],"rows":1,"g":1,"c":4,"warmup":128},
+    "ru.yard.six-keys-words": {"stage":3,"material":"words","attacks":[16,18,20,22],"rows":1,"g":1,"c":4,"warmup":118},
+    "ru.yard.six-keys-review": {"stage":3,"material":"words","attacks":[17,19,22,24],"rows":1,"g":1,"c":4,"warmup":106},
+    "ru.yard.fzh": {"stage":4,"friendly":true,"material":"pairs","attacks":[17,20,22,24],"rows":1,"g":1,"c":4,"warmup":104},
+    "ru.yard.fzh-words": {"stage":4,"material":"words","attacks":[17,20,22,24],"rows":1,"g":1,"c":4,"warmup":104},
+    "ru.yard.fzh-again": {"stage":4,"material":"combos","focus":"фж","attacks":[19,21,23,26],"rows":1,"g":1,"c":4,"warmup":94},
+    "ru.yard.eight-keys-words": {"stage":4,"material":"words","attacks":[21,23,25,27],"rows":1,"g":1,"c":4,"warmup":96},
+    "ru.yard.test-eight": {"stage":4,"control":true,"material":"words","focus":"фываолдж","attacks":[22,25,27,29],"rows":1,"g":1,"c":4,"warmup":98},
+    "ru.yard.pr": {"stage":5,"friendly":true,"material":"pairs","attacks":[31,33,35,37],"rows":2,"g":1,"c":6,"warmup":168},
+    "ru.yard.pr-words": {"stage":5,"material":"words","attacks":[31,33,35,37],"rows":2,"g":1,"c":6,"warmup":162},
+    "ru.yard.longer-words": {"stage":5,"material":"words","attacks":[33,35,37,39],"rows":2,"g":1,"c":6,"warmup":168},
+    "ru.yard.row-no-eh": {"stage":5,"material":"words","attacks":[36,38,40,42],"rows":2,"g":1,"c":6,"warmup":166},
+    "ru.yard.eh": {"stage":6,"friendly":true,"material":"combos","focus":"эж","attacks":[40,42,44,47],"rows":2,"g":2,"c":5,"warmup":132},
+    "ru.yard.eh-combos": {"stage":6,"material":"combos","focus":"э","attacks":[40,42,44,47],"rows":2,"g":2,"c":5,"warmup":126},
+    "ru.yard.test-row": {"stage":6,"control":true,"material":"words","focus":"э","attacks":[43,45,47,49],"rows":2,"g":2,"c":5,"warmup":126},
+    "ru.yard.short-words": {"stage":7,"material":"words","wordLen":[1,4],"attacks":[46,48,50,52],"rows":2,"g":2,"c":5,"warmup":128},
+    "ru.yard.long-words": {"stage":7,"material":"words","wordLen":[5,10],"attacks":[49,51,53,56],"rows":2,"g":2,"c":5,"warmup":116},
+    "ru.yard.mixed-words": {"stage":7,"material":"words","attacks":[50,53,55,57],"rows":2,"g":2,"c":5,"warmup":104},
+    "ru.yard.return-match": {"stage":8,"material":"words","focusWeak":3,"attacks":[50,53,55,57],"rows":2,"g":2,"c":5,"warmup":104},
+    "ru.yard.rematch": {"stage":8,"material":"words","focusWeak":3,"attacks":[50,53,55,57],"rows":2,"g":2,"c":5,"warmup":104},
+    "ru.yard.first-phrases": {"stage":9,"friendly":true,"material":"phrases","attacks":[48,52,57,61],"rows":3,"g":2,"c":5,"warmup":134},
+    "ru.yard.phrases": {"stage":9,"material":"phrases","attacks":[48,52,57,61],"rows":3,"g":2,"c":5,"warmup":134},
+    "ru.yard.longer-phrases": {"stage":9,"material":"phrases","attacks":[52,56,60,64],"rows":3,"g":2,"c":5,"warmup":106},
+    "ru.yard.fingers-not-words": {"stage":9,"material":"combos","focus":"фжэпр","focusWeak":3,"noWords":true,"attacks":[55,60,64,68],"rows":3,"g":2,"c":5,"warmup":100},
+    "ru.yard.final-first": {"stage":10,"material":"phrases","chants":true,"attacks":[60,64,68,72],"rows":3,"g":2,"c":5,"warmup":92},
+    "ru.yard.final": {"stage":10,"material":"phrases","chants":true,"attacks":[60,64,68,72],"rows":3,"g":2,"c":5,"warmup":92}
+  }
+}
