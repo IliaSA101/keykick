@@ -1,0 +1,127 @@
+{
+ "id": "comics.intro-p1",
+ "codes": {
+  "1920": "Э6.67"
+ },
+ "screen": "comics",
+ "route": "/home",
+ "state": "Завязка: панель 1, вторая закрыта",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 127121,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.ao",
+   "lessons": {},
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 0,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 0,
+   "days": 1,
+   "today": "2026-11-18",
+   "todayN": 0,
+   "last": 1794992400000,
+   "typedMs": 0,
+   "todayMs": 0,
+   "msDay": null,
+   "warmFrom": 0,
+   "acc": {},
+   "series": null
+  },
+  "stadium": {
+   "fans": 0,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "story": {
+   "comics": {},
+   "papers": {},
+   "adviceDay": 0,
+   "tiredDay": 0
+  },
+  "cup": {
+   "tours": [
+    {
+     "me": null,
+     "opp": null,
+     "tries": 0
+    },
+    {
+     "me": null,
+     "opp": null,
+     "tries": 0
+    },
+    {
+     "me": null,
+     "opp": null,
+     "tries": 0
+    }
+   ],
+   "ko": {
+    "r16": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "qf": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "sf": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "f": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    }
+   },
+   "first": null,
+   "packs": [],
+   "title": null,
+   "titleDay": null,
+   "replays": 0
+  }
+ },
+ "story": {
+  "window": {
+   "comic": "intro",
+   "panel": 1
+  }
+ }
+}

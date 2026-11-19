@@ -1,0 +1,810 @@
+{
+ "id": "paper.8",
+ "codes": {
+  "1024": "Э6.05",
+  "1920": "Э6.04"
+ },
+ "screen": "paper",
+ "route": "/home",
+ "state": "Выпуск 8: чемпион",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 516847,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.final",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-10-30",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-10-30",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-10-31",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-10-31",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-01",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-02",
+     "fails": 0
+    },
+    "ru.yard.yd-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-02",
+     "fails": 0
+    },
+    "ru.yard.six-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-03",
+     "fails": 0
+    },
+    "ru.yard.six-keys-review": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-03",
+     "fails": 0
+    },
+    "ru.yard.fzh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-04",
+     "fails": 0
+    },
+    "ru.yard.fzh-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-05",
+     "fails": 0
+    },
+    "ru.yard.fzh-again": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-05",
+     "fails": 0
+    },
+    "ru.yard.eight-keys-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-06",
+     "fails": 0
+    },
+    "ru.yard.test-eight": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-06",
+     "fails": 0
+    },
+    "ru.yard.pr": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-07",
+     "fails": 0
+    },
+    "ru.yard.pr-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-08",
+     "fails": 0
+    },
+    "ru.yard.longer-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-08",
+     "fails": 0
+    },
+    "ru.yard.row-no-eh": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-09",
+     "fails": 0
+    },
+    "ru.yard.eh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.eh-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.test-row": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.short-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.long-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.mixed-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.return-match": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.rematch": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.first-phrases": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.phrases": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.longer-phrases": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.fingers-not-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.final-first": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.final": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 140,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 66,
+   "days": 21,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000,
+   "typedMs": 0,
+   "todayMs": 0,
+   "msDay": null,
+   "warmFrom": 0,
+   "acc": {},
+   "series": null
+  },
+  "stadium": {
+   "fans": 26000,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "story": {
+   "comics": {
+    "intro": 1,
+    "group": 10,
+    "final": 18
+   },
+   "papers": {
+    "1": {
+     "day": 3,
+     "shown": true,
+     "facts": {
+      "played": 9,
+      "goals": 20,
+      "fans": 2680,
+      "speed": 14,
+      "tasks": 9,
+      "tours": 1,
+      "title": false
+     }
+    },
+    "2": {
+     "day": 6,
+     "shown": true,
+     "facts": {
+      "played": 16,
+      "goals": 36,
+      "fans": 5180,
+      "speed": 18,
+      "tasks": 19,
+      "tours": 1,
+      "title": false
+     }
+    },
+    "3": {
+     "day": 6,
+     "shown": true,
+     "facts": {
+      "played": 19,
+      "goals": 43,
+      "fans": 6520,
+      "speed": 19,
+      "tasks": 24,
+      "tours": 2,
+      "title": false
+     }
+    },
+    "4": {
+     "day": 8,
+     "shown": true,
+     "facts": {
+      "played": 24,
+      "goals": 54,
+      "fans": 8680,
+      "speed": 21,
+      "tasks": 47,
+      "tours": 5,
+      "title": false
+     }
+    },
+    "5": {
+     "day": 10,
+     "shown": true,
+     "facts": {
+      "played": 35,
+      "goals": 79,
+      "fans": 14280,
+      "speed": 25,
+      "tasks": 75,
+      "tours": 9,
+      "title": false
+     }
+    },
+    "6": {
+     "day": 12,
+     "shown": true,
+     "facts": {
+      "played": 42,
+      "goals": 95,
+      "fans": 17840,
+      "speed": 27,
+      "tasks": 84,
+      "tours": 10,
+      "title": false
+     }
+    },
+    "7": {
+     "day": 16,
+     "shown": true,
+     "facts": {
+      "played": 53,
+      "goals": 119,
+      "fans": 24540,
+      "speed": 29,
+      "tasks": 130,
+      "tours": 16,
+      "title": true
+     }
+    },
+    "8": {
+     "day": 18,
+     "shown": false,
+     "facts": {
+      "played": 66,
+      "goals": 149,
+      "fans": 33200,
+      "speed": 32,
+      "tasks": 159,
+      "tours": 21,
+      "title": true
+     }
+    }
+   },
+   "adviceDay": 0,
+   "tiredDay": 0
+  },
+  "cup": {
+   "tours": [
+    {
+     "me": 2,
+     "opp": 1,
+     "tries": 0
+    },
+    {
+     "me": 1,
+     "opp": 1,
+     "tries": 0
+    },
+    {
+     "me": 1,
+     "opp": 1,
+     "tries": 0
+    }
+   ],
+   "ko": {
+    "r16": {
+     "tries": 1,
+     "won": true,
+     "me": 1,
+     "opp": 1,
+     "series": "w"
+    },
+    "qf": {
+     "tries": 0,
+     "won": true,
+     "me": 2,
+     "opp": 1,
+     "series": null
+    },
+    "sf": {
+     "tries": 0,
+     "won": true,
+     "me": 2,
+     "opp": 1,
+     "series": null
+    },
+    "f": {
+     "tries": 0,
+     "won": true,
+     "me": 2,
+     "opp": 1,
+     "series": null
+    }
+   },
+   "first": {
+    "me": 2,
+    "opp": 1
+   },
+   "packs": [
+    "g1",
+    "g2",
+    "g3",
+    "r16",
+    "qf",
+    "sf",
+    "f"
+   ],
+   "title": "gold",
+   "titleDay": "2026-11-18",
+   "replays": 0
+  },
+  "school": {
+   "knower": 0,
+   "grade": 2,
+   "emblem": 0,
+   "level": {},
+   "trainerSkip": [],
+   "solved": [
+    "ru.yard.t1",
+    "ru.yard.t2",
+    "ru.yard.t3",
+    "ru.yard.t4",
+    "ru.yard.t5",
+    "ru.yard.t6",
+    "ru.yard.t7",
+    "ru.yard.t8",
+    "ru.yard.t9",
+    "ru.yard.t10",
+    "ru.yard.t11",
+    "ru.yard.t12",
+    "ru.yard.t13",
+    "ru.yard.t14",
+    "ru.yard.t15",
+    "ru.yard.t16",
+    "ru.yard.t17",
+    "ru.yard.t18",
+    "ru.yard.t19",
+    "ru.yard.t20",
+    "ru.yard.t21",
+    "ru.yard.t22",
+    "ru.yard.t23",
+    "ru.yard.t24",
+    "ru.yard.t25",
+    "ru.yard.t26",
+    "ru.yard.t27",
+    "ru.yard.t28",
+    "ru.yard.t29",
+    "ru.yard.t30",
+    "ru.yard.t31",
+    "ru.yard.t32",
+    "ru.yard.t33",
+    "ru.yard.t34",
+    "ru.yard.t35",
+    "ru.yard.t36",
+    "ru.yard.t37",
+    "ru.yard.t38",
+    "ru.yard.t39",
+    "ru.yard.t40",
+    "ru.yard.t41",
+    "ru.yard.t42",
+    "ru.yard.t43",
+    "ru.yard.t44",
+    "ru.yard.t45",
+    "ru.yard.t46",
+    "ru.yard.t47",
+    "ru.yard.t48",
+    "ru.yard.t49",
+    "ru.yard.t50",
+    "ru.yard.t51",
+    "ru.yard.t52",
+    "ru.yard.t53",
+    "ru.yard.t54",
+    "ru.yard.t55",
+    "ru.yard.t56",
+    "ru.yard.t57",
+    "ru.yard.t58",
+    "ru.yard.t59",
+    "ru.yard.t60",
+    "ru.yard.t61",
+    "ru.yard.t62",
+    "ru.yard.t63",
+    "ru.yard.t64",
+    "ru.yard.t65",
+    "ru.yard.t66",
+    "ru.yard.t67",
+    "ru.yard.t68",
+    "ru.yard.t69",
+    "ru.yard.t70",
+    "ru.yard.t71",
+    "ru.yard.t72",
+    "ru.yard.t73",
+    "ru.yard.t74",
+    "ru.yard.t75",
+    "ru.yard.t76",
+    "ru.yard.t77",
+    "ru.yard.t78",
+    "ru.yard.t79",
+    "ru.yard.t80",
+    "ru.yard.t81",
+    "ru.yard.t82",
+    "ru.yard.t83",
+    "ru.yard.t84",
+    "ru.yard.t85",
+    "ru.yard.t86",
+    "ru.yard.t87",
+    "ru.yard.t88",
+    "ru.yard.t89",
+    "ru.yard.t90",
+    "ru.yard.t91",
+    "ru.yard.t92",
+    "ru.yard.t93",
+    "ru.yard.t94",
+    "ru.yard.t95",
+    "ru.yard.t96",
+    "ru.yard.t97",
+    "ru.yard.t98",
+    "ru.yard.t99",
+    "ru.yard.t100",
+    "ru.yard.t101",
+    "ru.yard.t102",
+    "ru.yard.t103",
+    "ru.yard.t104",
+    "ru.yard.t105",
+    "ru.yard.t106",
+    "ru.yard.t107",
+    "ru.yard.t108",
+    "ru.yard.t109",
+    "ru.yard.t110",
+    "ru.yard.t111",
+    "ru.yard.t112",
+    "ru.yard.t113",
+    "ru.yard.t114",
+    "ru.yard.t115",
+    "ru.yard.t116",
+    "ru.yard.t117",
+    "ru.yard.t118",
+    "ru.yard.t119",
+    "ru.yard.t120",
+    "ru.yard.t121",
+    "ru.yard.t122",
+    "ru.yard.t123",
+    "ru.yard.t124",
+    "ru.yard.t125",
+    "ru.yard.t126",
+    "ru.yard.t127",
+    "ru.yard.t128",
+    "ru.yard.t129",
+    "ru.yard.t130",
+    "ru.yard.t131",
+    "ru.yard.t132",
+    "ru.yard.t133",
+    "ru.yard.t134",
+    "ru.yard.t135",
+    "ru.yard.t136",
+    "ru.yard.t137",
+    "ru.yard.t138",
+    "ru.yard.t139",
+    "ru.yard.t140",
+    "ru.yard.t141",
+    "ru.yard.t142",
+    "ru.yard.t143",
+    "ru.yard.t144",
+    "ru.yard.t145",
+    "ru.yard.t146",
+    "ru.yard.t147",
+    "ru.yard.t148",
+    "ru.yard.t149",
+    "ru.yard.t150",
+    "ru.yard.t151",
+    "ru.yard.t152",
+    "ru.yard.t153",
+    "ru.yard.t154",
+    "ru.yard.t155",
+    "ru.yard.t156",
+    "ru.yard.t157",
+    "ru.yard.t158",
+    "ru.yard.t159"
+   ],
+   "tours": [
+    {
+     "n": 1,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 7919
+    },
+    {
+     "n": 2,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 15838
+    },
+    {
+     "n": 3,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 23757
+    },
+    {
+     "n": 4,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 31676
+    },
+    {
+     "n": 5,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 39595
+    },
+    {
+     "n": 6,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 47514
+    },
+    {
+     "n": 7,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 55433
+    },
+    {
+     "n": 8,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 63352
+    },
+    {
+     "n": 9,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 71271
+    },
+    {
+     "n": 10,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 79190
+    },
+    {
+     "n": 11,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 87109
+    },
+    {
+     "n": 12,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 95028
+    },
+    {
+     "n": 13,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 102947
+    },
+    {
+     "n": 14,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 110866
+    },
+    {
+     "n": 15,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 118785
+    },
+    {
+     "n": 16,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 126704
+    },
+    {
+     "n": 17,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 134623
+    },
+    {
+     "n": 18,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 142542
+    },
+    {
+     "n": 19,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 150461
+    },
+    {
+     "n": 20,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 158380
+    },
+    {
+     "n": 21,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 166299
+    }
+   ]
+  }
+ },
+ "story": {
+  "window": {
+   "paper": 8
+  }
+ }
+}

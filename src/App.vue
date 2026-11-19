@@ -1,9 +1,8 @@
 <script setup lang="ts">
-/** Оболочка: сцена-масштаб, шапка, окно маршрута, плашка сеанса, служебные окна (обновление, квота), строка низа. Входные экраны (`meta.bare`) — без шапки и низа. */
+/** Оболочка: сцена-масштаб, шапка, окно маршрута, плашка сеанса, служебные окна (обновление, квота). Входные экраны (`meta.bare`) — без шапки; меню игрока — в шапке (068-Р82). */
 import { computed } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
 import { useSession } from './app/save/session';
-import FooterLine from './components/shell/FooterLine.vue';
 import SessionNotice from './components/shell/SessionNotice.vue';
 import ShellHeader from './components/shell/ShellHeader.vue';
 import StageScale from './components/shell/StageScale.vue';
@@ -19,7 +18,7 @@ const name = computed(() => (session.player.value.kind === 'ok' ? session.player
   <StageScale>
     <ShellHeader
       v-if="!bare"
-      :page="String(route.meta.menu ?? route.name ?? '')"
+      :page="route.query.win === 'club' ? 'club' : String(route.meta.menu ?? route.name ?? '')"
     />
     <RouterView />
     <SessionNotice
@@ -27,9 +26,5 @@ const name = computed(() => (session.player.value.kind === 'ok' ? session.player
       :player-name="name"
     />
     <SystemWindows />
-    <FooterLine
-      v-if="!bare && name !== ''"
-      :name="name"
-    />
   </StageScale>
 </template>

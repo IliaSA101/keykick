@@ -60,6 +60,8 @@ export interface HomeInput {
   end: boolean;
   /** Район есть (кнопка «В Район»). */
   region: boolean;
+  /** Праздник титула: игровой день, когда Кубок двора выигран (068-Р62); назавтра — обычный Дом и Карта. */
+  festive?: boolean;
   /** Возврат после паузы ≥ 5 дней: на главной разминка без счёта (ТЗ-2.11). */
   pause5: boolean;
   extras: HomeExtras;
@@ -70,7 +72,9 @@ export type MainAction =
   | { kind: 'round'; flag: number; home: boolean; street: number; nextLesson: number | null }
   | { kind: 'lesson'; lesson: number; control: boolean; friendly: boolean; home: boolean; street: number; best: number; warm: boolean; waitingFlag: number | null }
   | { kind: 'region'; cup: 'ours' | 'silver' | 'waits' }
-  | { kind: 'stars'; missing: number; from: number; to: number };
+  | { kind: 'stars'; missing: number; from: number; to: number }
+  /** Двор пройден целиком (96/96), Района нет (068-Р9): строка и «На карту». */
+  | { kind: 'done' };
 
 /** Карточка Кубка двора на Доме. */
 export type CupCard =

@@ -130,7 +130,13 @@
    "days": 6,
    "today": "2026-11-18",
    "todayN": 1,
-   "last": 1794992400000
+   "last": 1794992400000,
+   "typedMs": 0,
+   "todayMs": 0,
+   "msDay": null,
+   "warmFrom": 0,
+   "acc": {},
+   "series": null
   },
   "stadium": {
    "fans": 8680,
@@ -188,7 +194,7 @@
    "cup": {
     "key": "группа C: 2-е место · 3 очка",
     "params": {
-     "sub": "2-й матч с Парковой, <span class=\"nb\">после урока 14</span>"
+     "sub": "2-й матч с Парковой, после урока 14"
     }
    },
    "events": {},

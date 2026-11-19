@@ -39,6 +39,7 @@ function begin(event: StartEvent): StepOut {
     half1: zero(),
     half2: zero(),
     extra: zero(),
+    extraTime: event.extra ?? true,
     penalty: noPenalty(),
     warm: null,
     presses: [],
@@ -125,7 +126,7 @@ function advance(s0: RunningMatch, effects: Effect[], forgive = false): RunningM
     effects.push({ kind: 'sound', sound: 'whistle' });
     return { ...s, phase: 'break', at: s.at + 1, row: 0, typing: null, attackErrors: 0, breakAt: s.now };
   }
-  if (next.phase === 'extra' && !isDraw(totalOf(s))) return finish(s, effects);
+  if (next.phase === 'extra' && (!s.extraTime || !isDraw(totalOf(s)))) return finish(s, effects);
   if (next.phase !== cur?.phase) effects.push({ kind: 'sound', sound: 'whistle' });
   return startAttack(s, s.at + 1, forgive);
 }

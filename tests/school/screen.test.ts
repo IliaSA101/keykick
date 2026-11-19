@@ -10,6 +10,7 @@ import { finishTour } from '../../src/engine/school/finish';
 import { setGrade } from '../../src/engine/school/level';
 import { kindOf } from '../../src/engine/school/order';
 import { emptySchool, schoolDef, type School } from '../../src/engine/school/section';
+import { emptyDay } from '../../src/engine/day/section';
 import type { Task } from '../../src/engine/school/tasks';
 import { step, tourPlan as planOrNull, type Tour } from '../../src/engine/school/tour';
 import { routes } from '../../src/app/router/routes';
@@ -341,7 +342,7 @@ describe('К2 Школа: вход в тур и «Пересдать» (067-Р97
 
   const today = '2026-11-19';
   const allRight = (t: Tour): Tour => play(t, t.tasks.map(() => true));
-  const dayRow = { today, todayN: 2, played: 2, days: 1, last: 0 };
+  const dayRow = { ...emptyDay(), today, todayN: 2, played: 2, days: 1, last: 0 };
 
   // Ловит: «Тур ждёт» пропадает после поражения или победы, пока тур дня не взят (Р73); или остаётся, когда тур уже взят
   it('К2 Р73: «Тур ждёт» — пока тур дня не взят, хоть второй матч; тур взят — «штрафные»; тур повтора не считается', () => {

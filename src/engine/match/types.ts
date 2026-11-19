@@ -104,6 +104,8 @@ export interface StartEvent {
   dict: Dictionary;
   keymap: Keymap;
   stats?: TypingStats;
+  /** Играть доп. время при ничьей (по умолчанию да); матч группы Кубка — `false`: ничья засчитывается (068-Р3, ТЗ-8.5). */
+  extra?: boolean;
 }
 
 export interface KeyEvent {
@@ -167,6 +169,8 @@ export interface RunningMatch {
   half1: Score;
   half2: Score;
   extra: Score;
+  /** Доп. время при ничьей разрешено (флаг `extra` старта). */
+  extraTime: boolean;
   penalty: PenaltyState;
   /** Счётчики на конец разминки: из них вычитается всё, что по правилам считается без неё. */
   warm: TypingStats | null;

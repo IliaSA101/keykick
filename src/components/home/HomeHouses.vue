@@ -13,22 +13,31 @@ import KeyButton from '../../components/kit/KeyButton.vue';
 import KitPanel from '../../components/kit/KitPanel.vue';
 import PlaceTag from '../../components/league/PlaceTag.vue';
 import StepDots from '../../components/league/StepDots.vue';
-import { stageOf, type HomeInput, type HouseId } from '../../engine/home';
+import { paperFresh, placeX, regionSignShown, stageOf, standTop, type HomeInput, type HouseId } from '../../engine/home';
 import type { HomeView } from '../../engine/home/view';
 import { ru } from '../../i18n/ru';
+import { isNarrowStage } from '../shell/stageScale';
 import { stepBoxOf, sxOf, syOf } from './geometry';
 
-const props = defineProps<{ view: HomeView; input: HomeInput; scene: Scene; width: number; peek: boolean; building: boolean; newStep: string | null }>();
-const emit = defineEmits<{ build: []; closeBuilding: []; open: [house: HouseId] }>();
+const props = defineProps<{ view: HomeView; input: HomeInput; scene: Scene; width: number; peek: boolean; building: boolean; newStep: string | null; standOpen?: boolean }>();
+const emit = defineEmits<{ build: []; stand: []; closeBuilding: []; open: [house: HouseId] }>();
 const t = ru.home;
 const base = import.meta.env.BASE_URL;
 
 const HOUSES = ['school', 'locker', 'base', 'museum'] as const satisfies readonly HouseId[];
 const sx = (x: number): number => sxOf(props.width, x);
+/** x ярлыка, прижатый внутрь окна: поле у края — `placeX` (068 Т9-5, «Музей клуба» на 1024 не срезается). */
+const fit = (x: number, name: string, go: boolean, rows: readonly string[] = []): number => placeX(x, props.width, { name, go, rows });
 const note = computed(() => stadiumText(props.view, props.input));
 const place = computed(() => yard.places.find((p) => p.stage === stageOf(Math.min(props.input.cur, 32))));
-const showArch = computed(() => props.input.cur >= 25);
-const showStand = computed(() => props.input.cur >= 31 || props.input.end);
+const showArch = computed(() => regionSignShown(props.input, props.view.main));
+/** Ярлык стенда; пока открыто его окно «Стенгазета», ярлык не дублируется (макет, Р38 п.2). */
+const showStand = computed(() => (props.input.cur >= 31 || props.input.end) && !props.standOpen);
+/** Ярлык стенда: x по макету (0.69 кадра) в поле окна, верх — над главной карточкой при 96/96 (068-Р98). */
+const standPos = computed(() => {
+  const x = fit(sx(0.69 * 1920), t.stand, true);
+  return { x, y: standTop(syOf(0.72 * 1072), x, props.width, isNarrowStage(props.width), props.view.main.kind, { name: t.stand, go: true }) };
+});
 
 /** «Что построят»: вырезка следующей основы по рамке заготовки, окно — над ней, хвост в её верх (048 §3, макет peekCard). */
 const PEEK_W = 268;
@@ -49,7 +58,7 @@ const peekStyle = computed(() => ({ left: `${sx((box.value[0] + box.value[2]) / 
     :key="h"
     :kind="view.houses[h].lock ? 'lock' : 'go'"
     :go="!view.houses[h].lock"
-    :x="sx(yard.houses[h].label[0]!)"
+    :x="fit(sx(yard.houses[h].label[0]!), t.houses[h], !view.houses[h].lock, houseText(view.houses[h]).rows)"
     :y="syOf(yard.houses[h].label[1]!)"
     :name="t.houses[h]"
     :rows="houseText(view.houses[h]).rows"
@@ -71,7 +80,7 @@ const peekStyle = computed(() => ({ left: `${sx((box.value[0] + box.value[2]) / 
   <PlaceTag
     v-if="place && !peek"
     kind="ref"
-    :x="sx(place.at[0]!)"
+    :x="fit(sx(place.at[0]!), t.places[place.id] ?? place.id, false)"
     :y="syOf(place.at[1]!)"
     :name="t.places[place.id] ?? place.id"
     :mark="place.id === 'arch' ? t.placeOpen : t.markPlace"
@@ -88,10 +97,11 @@ const peekStyle = computed(() => ({ left: `${sx((box.value[0] + box.value[2]) / 
     v-if="showStand"
     kind="go"
     go
-    :x="sx(0.69 * 1920)"
-    :y="syOf(0.72 * 1072)"
+    :x="standPos.x"
+    :y="standPos.y"
     :name="t.stand"
-    @click="emit('build')"
+    :mark="paperFresh(input) ? t.markFresh : ''"
+    @click="emit('stand')"
   />
   <PlaceTag
     v-if="!peek"
@@ -99,13 +109,15 @@ const peekStyle = computed(() => ({ left: `${sx((box.value[0] + box.value[2]) / 
     :x="width / 2"
     :y="104"
     :name="t.stadium"
-    :head="newStep ? fill(t.newStep, { name: t.steps[newStep] ?? '' }) : ''"
+    :head="input.festive ? t.festive : newStep ? fill(t.newStep, { name: t.steps[newStep] ?? '' }) : ''"
     :rows="[note.line, note.note].filter(Boolean)"
   >
-    <StepDots
-      :built="view.stadium.built"
-      :of="view.stadium.of"
-    />
+    <template #dots>
+      <StepDots
+        :built="view.stadium.built"
+        :of="view.stadium.of"
+      />
+    </template>
   </PlaceTag>
 
   <KitPanel

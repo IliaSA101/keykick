@@ -35,6 +35,9 @@ export interface StadiumView {
 /** Сколько ступеней Двора построено на уроке `cur` (за титул `end` — все): единственное место, откуда Дом и догрузка графики берут ступень. */
 export const builtOf = (cur: number, end = false): number => Math.min(cfg.stepsTotal, STEPS.filter((s) => s.after < cur).length + (end ? 1 : 0));
 
+/** Табло построено: ступень «scoreboard» из `yard.json` среди уже достроенных (`built` — из `builtOf`; не зависит от титула и «Двор пройден»). */
+export const scoreboardBuilt = (built: number): boolean => built > STEPS.findIndex((s) => s.id === 'scoreboard');
+
 export function stadiumView(i: HomeInput): StadiumView {
   const built = builtOf(i.cur, i.end);
   const next = STEPS.find((s) => s.after >= i.cur);

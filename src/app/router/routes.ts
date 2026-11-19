@@ -43,7 +43,7 @@ export const routes: RouteRecordRaw[] = [
   { path: '/', redirect: '/home' },
   // `title` получает только заглушка: у живых экранов проп уходил бы атрибутом на корень (всплывала подсказка «Клуб» над экраном)
   ...MENU_ROUTES.map((id) => {
-    const screen = id === 'home' ? () => import('../../screens/home/HomeScreen.vue') : id === 'path' ? () => import('../../screens/path/PathScreen.vue') : id === 'map' ? () => import('../../screens/map/MapScreen.vue') : id === 'club' ? () => import('../../screens/club/ClubScreen.vue') : null;
+    const screen = id === 'home' ? () => import('../../screens/home/HomeScreen.vue') : id === 'path' ? () => import('../../screens/path/PathScreen.vue') : id === 'map' ? () => import('../../screens/map/MapScreen.vue') : id === 'club' ? () => import('../../screens/club/ClubScreen.vue') : id === 'cup' ? () => import('../../screens/cup/CupScreen.vue') : null;
     return screen ? { path: `/${id}`, name: id, component: screen } : { path: `/${id}`, name: id, component: stub, props: { title: title(id) } };
   }),
   // Музей клуба (067 Т11): здание Дома — в шапке подсвечен пункт «Дом» (`meta.menu`); ярлык открывает его, когда замок снят

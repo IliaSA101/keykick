@@ -28,6 +28,8 @@ const props = defineProps<{
   plan: BreakPlan;
   /** Итог только что сыгранной игры (Э4.17): вместо карточек. */
   after: AfterGame | null;
+  /** Поверх открыта микроразминка (068-Р100, как Р84 для вступления): окно перерыва под ней скрыто, а не просвечивает. */
+  covered?: boolean;
 }>();
 const emit = defineEmits<{ act: [UiAction]; start: []; second: []; learn: [id: string]; 'close-all': []; home: []; leave: [] }>();
 
@@ -112,7 +114,7 @@ const goldTime = (id: string): string => mmss((GAMES.find((g) => g.id === id)?.t
   </section>
 
   <section
-    v-if="state.phase === 'break' && overlay === 'none'"
+    v-if="state.phase === 'break' && overlay === 'none' && covered !== true"
     class="card panel brk"
     :class="{ lite: plan.lead === null && !after }"
   >

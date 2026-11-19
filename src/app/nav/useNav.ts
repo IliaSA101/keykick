@@ -63,6 +63,11 @@ export function useNav() {
    */
   function send(input: NavInput, now: number = performance.now()): NavEffect {
     const screen = String(route.name ?? '');
+    // 068-Р17: «Клуб» с Карты — окно «Карточка клуба» над Картой (Э2.31/38), а не экран /club над Домом
+    if (screen === 'map' && input.t === 'menu' && input.item === 'club') {
+      if (!moving) push('/map?win=club', null);
+      return { kind: 'none' };
+    }
     if (!isScreen(screen)) {
       if (input.t === 'menu' && !moving) push(`/${input.item}`, null);
       return { kind: 'none' };

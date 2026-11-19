@@ -1,0 +1,114 @@
+{
+ "id": "match.break-warm-2",
+ "codes": {
+  "Р100": "кадра на листе нет"
+ },
+ "screen": "match",
+ "route": "/match",
+ "state": "Р100: перерыв + микроразминка (сверка с Э6.45 · 1024)",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 993544,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.vl",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 0,
+     "best": 100,
+     "tries": 1,
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 20,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 4,
+   "days": 2,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000,
+   "typedMs": 0,
+   "todayMs": 0,
+   "msDay": null,
+   "warmFrom": 0,
+   "acc": {},
+   "series": null
+  },
+  "stadium": {
+   "fans": 1000,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "learn": {
+   "games": {
+    "arrows": {
+     "step": 2,
+     "plays": 3,
+     "best": 41000,
+     "last": "2026-11-16"
+    },
+    "mouse": {
+     "step": 2,
+     "plays": 1,
+     "best": 36000,
+     "last": "2026-11-16"
+    }
+   },
+   "recent": [
+    "arrows"
+   ]
+  }
+ },
+ "match": {
+  "seed": 993544,
+  "lesson": 3,
+  "started": true,
+  "spec": {
+   "outcomes": "kkgggc",
+   "toBreak": true
+  },
+  "show": {
+   "street": "Водопроводной"
+  },
+  "warm": "far"
+ }
+}

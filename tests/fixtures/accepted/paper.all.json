@@ -1,0 +1,471 @@
+{
+ "id": "paper.all",
+ "codes": {
+  "1920": "Э6.08"
+ },
+ "screen": "paper",
+ "route": "/home",
+ "state": "Доска: 8 выпусков",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 303640,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.final",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-10-30",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-10-30",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-10-31",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-10-31",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-01",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-02",
+     "fails": 0
+    },
+    "ru.yard.yd-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-02",
+     "fails": 0
+    },
+    "ru.yard.six-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-03",
+     "fails": 0
+    },
+    "ru.yard.six-keys-review": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-03",
+     "fails": 0
+    },
+    "ru.yard.fzh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-04",
+     "fails": 0
+    },
+    "ru.yard.fzh-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-05",
+     "fails": 0
+    },
+    "ru.yard.fzh-again": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-05",
+     "fails": 0
+    },
+    "ru.yard.eight-keys-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-06",
+     "fails": 0
+    },
+    "ru.yard.test-eight": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-06",
+     "fails": 0
+    },
+    "ru.yard.pr": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-07",
+     "fails": 0
+    },
+    "ru.yard.pr-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-08",
+     "fails": 0
+    },
+    "ru.yard.longer-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-08",
+     "fails": 0
+    },
+    "ru.yard.row-no-eh": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-09",
+     "fails": 0
+    },
+    "ru.yard.eh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.eh-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.test-row": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.short-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.long-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.mixed-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.return-match": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.rematch": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.first-phrases": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.phrases": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.longer-phrases": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.fingers-not-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.final-first": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.final": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 140,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 66,
+   "days": 21,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000,
+   "typedMs": 0,
+   "todayMs": 0,
+   "msDay": null,
+   "warmFrom": 0,
+   "acc": {},
+   "series": null
+  },
+  "stadium": {
+   "fans": 26000,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "story": {
+   "comics": {
+    "intro": 1,
+    "group": 10,
+    "final": 18
+   },
+   "papers": {
+    "1": {
+     "day": 3,
+     "shown": true,
+     "facts": {
+      "played": 9,
+      "goals": 20,
+      "fans": 2680,
+      "speed": 14,
+      "tasks": 9,
+      "tours": 1,
+      "title": false
+     }
+    },
+    "2": {
+     "day": 6,
+     "shown": true,
+     "facts": {
+      "played": 16,
+      "goals": 36,
+      "fans": 5180,
+      "speed": 18,
+      "tasks": 19,
+      "tours": 1,
+      "title": false
+     }
+    },
+    "3": {
+     "day": 6,
+     "shown": true,
+     "facts": {
+      "played": 19,
+      "goals": 43,
+      "fans": 6520,
+      "speed": 19,
+      "tasks": 24,
+      "tours": 2,
+      "title": false
+     }
+    },
+    "4": {
+     "day": 8,
+     "shown": true,
+     "facts": {
+      "played": 24,
+      "goals": 54,
+      "fans": 8680,
+      "speed": 21,
+      "tasks": 47,
+      "tours": 5,
+      "title": false
+     }
+    },
+    "5": {
+     "day": 10,
+     "shown": true,
+     "facts": {
+      "played": 35,
+      "goals": 79,
+      "fans": 14280,
+      "speed": 25,
+      "tasks": 75,
+      "tours": 9,
+      "title": false
+     }
+    },
+    "6": {
+     "day": 12,
+     "shown": true,
+     "facts": {
+      "played": 42,
+      "goals": 95,
+      "fans": 17840,
+      "speed": 27,
+      "tasks": 84,
+      "tours": 10,
+      "title": false
+     }
+    },
+    "7": {
+     "day": 16,
+     "shown": true,
+     "facts": {
+      "played": 53,
+      "goals": 119,
+      "fans": 24540,
+      "speed": 29,
+      "tasks": 130,
+      "tours": 16,
+      "title": true
+     }
+    },
+    "8": {
+     "day": 18,
+     "shown": true,
+     "facts": {
+      "played": 66,
+      "goals": 149,
+      "fans": 33200,
+      "speed": 32,
+      "tasks": 159,
+      "tours": 21,
+      "title": true
+     }
+    }
+   },
+   "adviceDay": 0,
+   "tiredDay": 0
+  },
+  "cup": {
+   "tours": [
+    {
+     "me": 2,
+     "opp": 1,
+     "tries": 0
+    },
+    {
+     "me": 1,
+     "opp": 1,
+     "tries": 0
+    },
+    {
+     "me": 1,
+     "opp": 1,
+     "tries": 0
+    }
+   ],
+   "ko": {
+    "r16": {
+     "tries": 1,
+     "won": true,
+     "me": 1,
+     "opp": 1,
+     "series": "w"
+    },
+    "qf": {
+     "tries": 0,
+     "won": true,
+     "me": 2,
+     "opp": 1,
+     "series": null
+    },
+    "sf": {
+     "tries": 0,
+     "won": true,
+     "me": 2,
+     "opp": 1,
+     "series": null
+    },
+    "f": {
+     "tries": 0,
+     "won": true,
+     "me": 2,
+     "opp": 1,
+     "series": null
+    }
+   },
+   "first": {
+    "me": 2,
+    "opp": 1
+   },
+   "packs": [
+    "g1",
+    "g2",
+    "g3",
+    "r16",
+    "qf",
+    "sf",
+    "f"
+   ],
+   "title": "gold",
+   "titleDay": "2026-11-18",
+   "replays": 0
+  }
+ },
+ "story": {
+  "window": {
+   "board": "all"
+  }
+ }
+}

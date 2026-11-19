@@ -155,6 +155,17 @@ describe('openPlayer: годный конверт', () => {
     expect(res.env.sections.club?.data).toEqual({ stars: 2, since: '2026-11-02' });
   });
 
+  it('К5 068 Т3: конверт с `day` v1 открывается до v2 без потерь, чужой раздел цел', () => {
+    // Ловит: миграция `day` 1 → 2 теряет счётчики v1 или бьёт игрока в карантин; чужой раздел затирается при подъёме.
+    const v1 = { played: 4, days: 3, today: '2026-11-10', todayN: 1, last: 5 };
+    const raw = rawWith({ club: { v: 1, data: { stars: 2, since: '2026-11-02' } }, day: { v: 1, data: v1 } });
+    const res = ok(openPlayer(raw, [clubDef, dayDef] as SectionDef<unknown>[]));
+    expect(res.changed).toBe(true);
+    expect(res.env.sections.day).toEqual({ v: 2, data: { ...dayDef.empty(), ...v1 } });
+    expect(dayDef.check(res.env.sections.day?.data)).toEqual([]);
+    expect(res.env.sections.club?.data).toEqual({ stars: 2, since: '2026-11-02' });
+  });
+
   it('повторяющееся имя раздела в реестре — ошибка программиста', () => {
     // Ловит: два описания одного раздела молча перебивают друг друга при открытии.
     expect(() => openPlayer(serializePlayer(base()), [clubDef, clubDef] as SectionDef<unknown>[])).toThrow(/duplicate/);

@@ -23,14 +23,20 @@
      "stars": 3,
      "best": 0,
      "tries": 1,
-     "done": "2026-11-13",
+     "done": "2026-11-17",
      "fails": 0
     },
     "ru.yard.ao-pairs": {
      "stars": 3,
      "best": 0,
      "tries": 1,
-     "done": "2026-11-15",
+     "done": "2026-11-18",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 0,
+     "best": 100,
+     "tries": 1,
      "fails": 0
     }
    },
@@ -44,10 +50,16 @@
   },
   "day": {
    "played": 4,
-   "days": 9,
+   "days": 2,
    "today": "2026-11-18",
    "todayN": 1,
-   "last": 1794992400000
+   "last": 1794992400000,
+   "typedMs": 0,
+   "todayMs": 0,
+   "msDay": null,
+   "warmFrom": 0,
+   "acc": {},
+   "series": null
   },
   "stadium": {
    "fans": 1000,
@@ -65,11 +77,56 @@
     "sleeves": "#ffffff",
     "trim": "#ffffff"
    }
+  },
+  "learn": {
+   "games": {
+    "arrows": {
+     "step": 2,
+     "plays": 3,
+     "best": 41000,
+     "last": "2026-11-16"
+    },
+    "mouse": {
+     "step": 2,
+     "plays": 1,
+     "best": 36000,
+     "last": "2026-11-16"
+    },
+    "tab": {
+     "step": 2,
+     "plays": 1,
+     "best": 39000,
+     "last": "2026-11-16"
+    }
+   },
+   "recent": [
+    "tab"
+   ]
   }
  },
  "match": {
+  "seed": 459198,
   "lesson": 3,
-  "phase": "break-after",
-  "model": "образец: счёт и ход атаки — по кадру, Т10 и позже дописывают"
+  "started": true,
+  "spec": {
+   "outcomes": "kkgggc",
+   "toBreak": true
+  },
+  "show": {
+   "street": "Водопроводной"
+  },
+  "after": {
+   "id": "tab",
+   "end": {
+    "tier": 2,
+    "coins": 1,
+    "ms": 39000,
+    "best": 39000,
+    "record": false,
+    "misses": 1,
+    "goldRepeat": false,
+    "was": null
+   }
+  }
  }
 }

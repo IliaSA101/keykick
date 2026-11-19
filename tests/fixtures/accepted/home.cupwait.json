@@ -257,7 +257,13 @@
    "days": 21,
    "today": "2026-11-18",
    "todayN": 1,
-   "last": 1794992400000
+   "last": 1794992400000,
+   "typedMs": 0,
+   "todayMs": 0,
+   "msDay": null,
+   "warmFrom": 0,
+   "acc": {},
+   "series": null
   },
   "stadium": {
    "fans": 31020,
@@ -275,6 +281,157 @@
     "sleeves": "#ffffff",
     "trim": "#ffffff"
    }
+  },
+  "story": {
+   "comics": {
+    "intro": 1,
+    "group": 10
+   },
+   "papers": {
+    "1": {
+     "day": 3,
+     "shown": true,
+     "facts": {
+      "played": 9,
+      "goals": 20,
+      "fans": 2680,
+      "speed": 14,
+      "tasks": 9,
+      "tours": 1,
+      "title": false
+     }
+    },
+    "2": {
+     "day": 6,
+     "shown": true,
+     "facts": {
+      "played": 16,
+      "goals": 36,
+      "fans": 5180,
+      "speed": 18,
+      "tasks": 19,
+      "tours": 1,
+      "title": false
+     }
+    },
+    "3": {
+     "day": 6,
+     "shown": true,
+     "facts": {
+      "played": 19,
+      "goals": 43,
+      "fans": 6520,
+      "speed": 19,
+      "tasks": 24,
+      "tours": 2,
+      "title": false
+     }
+    },
+    "4": {
+     "day": 8,
+     "shown": true,
+     "facts": {
+      "played": 24,
+      "goals": 54,
+      "fans": 8680,
+      "speed": 21,
+      "tasks": 47,
+      "tours": 5,
+      "title": false
+     }
+    },
+    "5": {
+     "day": 10,
+     "shown": true,
+     "facts": {
+      "played": 35,
+      "goals": 79,
+      "fans": 14280,
+      "speed": 25,
+      "tasks": 75,
+      "tours": 9,
+      "title": false
+     }
+    },
+    "6": {
+     "day": 12,
+     "shown": true,
+     "facts": {
+      "played": 42,
+      "goals": 95,
+      "fans": 17840,
+      "speed": 27,
+      "tasks": 84,
+      "tours": 10,
+      "title": false
+     }
+    }
+   },
+   "adviceDay": 0,
+   "tiredDay": 0
+  },
+  "cup": {
+   "tours": [
+    {
+     "me": 2,
+     "opp": 1,
+     "tries": 0
+    },
+    {
+     "me": 1,
+     "opp": 1,
+     "tries": 0
+    },
+    {
+     "me": 1,
+     "opp": 1,
+     "tries": 0
+    }
+   ],
+   "ko": {
+    "r16": {
+     "tries": 1,
+     "won": true,
+     "me": 1,
+     "opp": 1,
+     "series": "w"
+    },
+    "qf": {
+     "tries": 0,
+     "won": true,
+     "me": 2,
+     "opp": 1,
+     "series": null
+    },
+    "sf": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "f": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    }
+   },
+   "first": {
+    "me": 2,
+    "opp": 1
+   },
+   "packs": [
+    "g1",
+    "g2",
+    "g3",
+    "r16",
+    "qf"
+   ],
+   "title": null,
+   "titleDay": null,
+   "replays": 0
   }
  },
  "home": {

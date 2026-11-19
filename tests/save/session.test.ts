@@ -25,7 +25,7 @@ vi.mock('../../src/app/parent/download', () => ({
 describe('session: разделы сборки и запись (К8)', () => {
   it('К8: реестр — club, course:ru, seen, wallet, day, school, form; новый игрок целиком годен, шаги `up` есть до текущей версии', () => {
     // Ловит: раздел забыт в реестре (его нет в сохранении) или поднят до `v` без шага `up`.
-    expect(SECTIONS.map((d) => d.name)).toEqual(['club', 'course:ru', 'seen', 'wallet', 'day', 'school', 'form', 'stadium', 'path', 'album', 'shop', 'learn', 'base', 'coach']);
+    expect(SECTIONS.map((d) => d.name)).toEqual(['club', 'course:ru', 'seen', 'wallet', 'day', 'school', 'form', 'stadium', 'path', 'album', 'shop', 'learn', 'base', 'coach', 'cup', 'story']);
     for (const d of SECTIONS) for (let k = 2; k <= d.v; k++) expect(typeof d.up[k]).toBe('function');
     for (const d of SECTIONS) expect(d.check(d.empty())).toEqual([]);
     expect(createPlayer({ pid: 'a', name: 'А' }, SECTIONS).sections['seen']!.v).toBe(1);
@@ -43,7 +43,7 @@ describe('session: разделы сборки и запись (К8)', () => {
     expect(session.tabPid.value).toBe('p1');
     expect(session.entryState()).toEqual({ device: 'ok', players: ['p1'], tabPid: 'p1', player: 'ok' });
     expect(disk(mem, 'device').players).toEqual([{ pid: 'p1', order: 0 }]);
-    expect(Object.keys(disk(mem, 'player.p1').sections).sort()).toEqual(['album', 'base', 'club', 'coach', 'course:ru', 'day', 'form', 'learn', 'path', 'school', 'seen', 'shop', 'stadium', 'wallet']);
+    expect(Object.keys(disk(mem, 'player.p1').sections).sort()).toEqual(['album', 'base', 'club', 'coach', 'course:ru', 'cup', 'day', 'form', 'learn', 'path', 'school', 'seen', 'shop', 'stadium', 'story', 'wallet']);
     for (const [k, v] of Object.entries(FOREIGN)) expect(mem.map.get(k)).toBe(v);
   });
 

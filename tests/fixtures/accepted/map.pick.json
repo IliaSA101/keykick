@@ -152,7 +152,13 @@
    "days": 9,
    "today": "2026-11-18",
    "todayN": 1,
-   "last": 1794992400000
+   "last": 1794992400000,
+   "typedMs": 0,
+   "todayMs": 0,
+   "msDay": null,
+   "warmFrom": 0,
+   "acc": {},
+   "series": null
   },
   "stadium": {
    "fans": 11780,
@@ -216,7 +222,7 @@
    "cup": {
     "key": "группа C: 2-е место · 4 очка",
     "params": {
-     "sub": "3-й матч с Полевой, <span class=\"nb\">после урока 18</span>"
+     "sub": "3-й матч с Полевой, после урока 18"
     }
    },
    "events": {

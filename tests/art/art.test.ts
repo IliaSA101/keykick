@@ -5,6 +5,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { homeArtFiles as homeArtAt, mapArtFiles, pathArtFiles } from '../../src/app/preload/art';
 import { artBackgrounds, artFiles, artPathEager, artPathLazy, screenArt } from '../../src/art/assets';
 import { QINDEX_OF_Q76, webpInfo } from './webp';
 
@@ -18,6 +19,12 @@ const homeArtFiles: string[] = [
     ) ?? [],
   ),
 ];
+
+/** Картинки Кубка и сюжета (068 Т4): манифест `story-art.json` — имя → файл; ролик титула лежит в public/video. */
+const storyArt = JSON.parse(
+  readFileSync(join(import.meta.dirname, '..', '..', 'src', 'content', 'story-art.json'), 'utf8'),
+) as { files: Record<string, string>; video: Record<string, string> };
+const storyArtFiles: string[] = Object.values(storyArt.files);
 
 /** Все файлы под public/<dir> путями от public, с прямыми слэшами — как в artFiles. */
 function filesUnder(dir: string): string[] {
@@ -36,7 +43,7 @@ describe('графика', () => {
   });
 
   it('в public/art нет файлов, о которых не знает код', () => {
-    const known = new Set<string>([...Object.values(artFiles), ...homeArtFiles]);
+    const known = new Set<string>([...Object.values(artFiles), ...homeArtFiles, ...storyArtFiles]);
     const all = filesUnder('art');
     expect(all.length).toBeGreaterThan(2);
     const orphans = all.filter((f) => !known.has(f));
@@ -129,5 +136,49 @@ describe('графика', () => {
     // первый экран не растёт: сразу — не больше 0,2 МБ (облака, кубок), уровни 2–6 — в ленивой части
     expect(eager.reduce((sum, f) => sum + size(f), 0)).toBeLessThanOrEqual(0.2 * MB);
     expect(lazy).toEqual(expect.arrayContaining(['art/path/district.webp', 'art/path/city.webp']));
+  });
+  /**
+   * Кубок и сюжет (068 Т4, К6): картинки лежат в art/cup и art/story, ролик титула ≤ 1 МБ (ТЗ-9.7); первый экран не растёт —
+   * ни Дом, ни Карта, ни Путь, ни экраны screenArt эти файлы в первую загрузку не берут.
+   */
+  describe('Кубок и сюжет (068 Т4)', () => {
+    it('манифест: каждый файл на месте, лежит в art/cup или art/story, без повторов; имена — латиницей', () => {
+      expect(storyArtFiles.length).toBeGreaterThan(100);
+      expect(new Set(storyArtFiles).size).toBe(storyArtFiles.length);
+      expect(storyArtFiles.filter((f) => !existsSync(join(publicDir, f)))).toEqual([]);
+      expect(storyArtFiles.filter((f) => !/^art\/(cup|story)\//.test(f))).toEqual([]);
+      expect(Object.keys(storyArt.files).filter((k) => !/^[a-z][A-Za-z0-9]*$/.test(k))).toEqual([]);
+      // обратно: всё, что лежит в art/cup и art/story, есть в манифесте
+      const onDisk = [...filesUnder('art/cup'), ...filesUnder('art/story')];
+      expect(onDisk.filter((f) => !storyArtFiles.includes(f))).toEqual([]);
+    });
+
+    it('ролик титула ≤ 1 МБ', () => {
+      expect(Object.values(storyArt.video).length).toBeGreaterThan(0);
+      for (const f of Object.values(storyArt.video)) {
+        expect(existsSync(join(publicDir, f)), f).toBe(true);
+        expect(size(f), f).toBeLessThanOrEqual(1 * MB);
+      }
+    });
+
+    it('фоны Кубка и сюжета: не уже 1920 px и не пережаты (кодек не грубее q76)', () => {
+      const bg = [
+        'art/cup/bg-final.webp', 'art/cup/board.webp', 'art/cup/board-fest.webp', 'art/cup/title-key.webp',
+        'art/story/paper/stand-v2-1920.webp', 'art/story/paper/stand-v3-1920.webp', 'art/story/paper/board-1920.webp',
+      ];
+      expect(bg.filter((f) => !storyArtFiles.includes(f))).toEqual([]);
+      expect(bg.filter((f) => webpInfo(join(publicDir, f)).w < 1920), 'уже 1920 px').toEqual([]);
+      expect(bg.filter((f) => webpInfo(join(publicDir, f)).qindex > QINDEX_OF_Q76), 'пережаты').toEqual([]);
+    });
+
+    it('первый экран не растёт: Кубок и сюжет не в artFiles, screenArt, Доме, Карте и Пути', () => {
+      const mine = new Set<string>(storyArtFiles);
+      expect(Object.values(artFiles).filter((f) => mine.has(f))).toEqual([]);
+      const inScreens = Object.values(screenArt).flatMap((keys) => keys.map((k) => artFiles[k]));
+      expect(inScreens.filter((f) => mine.has(f))).toEqual([]);
+      const first = [...mapArtFiles(), ...pathArtFiles()];
+      for (let cur = 1; cur <= 33; cur++) first.push(...homeArtAt(cur, []));
+      expect(first.filter((f) => mine.has(f))).toEqual([]);
+    });
   });
 });

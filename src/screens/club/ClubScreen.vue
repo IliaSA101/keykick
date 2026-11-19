@@ -6,9 +6,9 @@
  * сеанс (`session.save({ club })`), раздел тот же, что у первого запуска. Окна не стоят вместе: Esc в одном закрывает только его.
  */
 import { computed, inject, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useClubEdit, stored } from '../../app/club/edit';
-import { providedHardKeys } from '../../app/club/provide';
+import { clubCardOf } from '../../app/club/cardData';
 import { useHomeInput } from '../../app/home/useHomeInput';
 import ClubEditWindow from '../../components/club/ClubEditWindow.vue';
 import ClubRow from '../../components/club/ClubRow.vue';
@@ -18,13 +18,9 @@ import HomeBackdrop from '../../components/home/HomeBackdrop.vue';
 import KeyButton from '../../components/kit/KeyButton.vue';
 import KitModal from '../../components/panel/KitModal.vue';
 import { ENTER_DELAY } from '../../components/panel/focusCycle';
-import { backLine, clubCard, swapCoach } from '../../engine/club/card';
+import { backLine, swapCoach } from '../../engine/club/card';
 import { clubDef, type Club } from '../../engine/club/section';
 import { COACHES, DEFAULT_COACH } from '../../engine/club/start';
-import type { CoachKeys } from '../../engine/coach/section';
-import type { Day } from '../../engine/day/section';
-import type { Stadium } from '../../engine/home/section';
-import type { School } from '../../engine/school/section';
 import { ru } from '../../i18n/ru';
 import ClubStats from './ClubStats.vue';
 import CoachSwap from './CoachSwap.vue';
@@ -32,17 +28,10 @@ import CoachSwap from './CoachSwap.vue';
 /** Стенд кадров: трудные клавиши и открытое окно кадра. В игре — null. */
 const stand = inject<(() => { hardKeys?: string[]; win?: 'edit' | 'swap' }) | null>('kk-club-stand', null)?.() ?? null;
 const router = useRouter();
+const route = useRoute();
 const { session, input, data } = useHomeInput();
 const club = computed<Club>(() => data<Club>('club', clubDef.empty()));
-const card = computed(() =>
-  clubCard({
-    played: data<Day>('day', { played: 0, days: 0, today: null, todayN: 0, last: null }).played,
-    goals: data<Stadium>('stadium', { fans: 0, goals: 0 }).goals,
-    solved: data<School | null>('school', null)?.solved.length ?? 0,
-    course: data('course:ru', { lessons: {}, archive: {} }),
-    hardKeys: stand?.hardKeys ?? providedHardKeys({ coach: data<CoachKeys | null>('coach', null) }),
-  }),
-);
+const card = computed(() => clubCardOf(data, stand?.hardKeys));
 const coach = computed(() => (COACHES.some((c) => c.id === club.value.coach) ? club.value.coach : DEFAULT_COACH));
 const back = computed(() => backLine(club.value.backName, club.value.backNumber));
 const shirtBack = computed(() => ({ name: club.value.backName, number: club.value.backNumber }));
@@ -56,7 +45,7 @@ function openEdit(): void {
   open();
   win.value = 'edit';
 }
-if (win.value === 'edit') openEdit(); // стенд кадров открывает окно сразу: черновик — текущий клуб, как после «Изменить»
+if (win.value === 'edit' || route.query.edit === '1') openEdit(); // «Изменить» из карточки клуба на Карте (`?edit=1`, 068-Р17) // стенд кадров открывает окно сразу: черновик — текущий клуб, как после «Изменить»
 /** «Сохранить»: клуб из черновика; отказ записи (чужая вкладка) окно не закрывает. */
 function save(): void {
   if (saveClub()) win.value = 'card';

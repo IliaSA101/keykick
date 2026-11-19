@@ -1,0 +1,209 @@
+{
+ "id": "paper.1",
+ "codes": {
+  "1024": "Э6.02",
+  "1920": "Э6.01"
+ },
+ "screen": "paper",
+ "route": "/home",
+ "state": "Выпуск 1 на входе · длинное имя клуба (крайний случай)",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 516840,
+ "player": {
+  "pid": "p1",
+  "name": "Анастасия-Александра Константиновна Л-Р."
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.yd",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 64,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 9,
+   "days": 3,
+   "today": "2026-11-18",
+   "todayN": 0,
+   "last": 1794992400000,
+   "typedMs": 0,
+   "todayMs": 0,
+   "msDay": null,
+   "warmFrom": 0,
+   "acc": {},
+   "series": null
+  },
+  "stadium": {
+   "fans": 2680,
+   "goals": 0
+  },
+  "club": {
+   "name": "Спортивный клуб Буре",
+   "city": "Набережные Челны-на-Каме",
+   "coach": "",
+   "backName": "АНАСТАСИЯ-АЛ",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "story": {
+   "comics": {
+    "intro": 1
+   },
+   "papers": {
+    "1": {
+     "day": 3,
+     "shown": false,
+     "facts": {
+      "played": 9,
+      "goals": 20,
+      "fans": 2680,
+      "speed": 14,
+      "tasks": 9,
+      "tours": 1,
+      "title": false
+     }
+    }
+   },
+   "adviceDay": 0,
+   "tiredDay": 0
+  },
+  "cup": {
+   "tours": [
+    {
+     "me": null,
+     "opp": null,
+     "tries": 0
+    },
+    {
+     "me": null,
+     "opp": null,
+     "tries": 0
+    },
+    {
+     "me": null,
+     "opp": null,
+     "tries": 0
+    }
+   ],
+   "ko": {
+    "r16": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "qf": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "sf": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "f": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    }
+   },
+   "first": null,
+   "packs": [],
+   "title": null,
+   "titleDay": null,
+   "replays": 0
+  },
+  "school": {
+   "knower": 0,
+   "grade": 2,
+   "emblem": 0,
+   "level": {},
+   "trainerSkip": [],
+   "solved": [
+    "ru.yard.t1",
+    "ru.yard.t2",
+    "ru.yard.t3",
+    "ru.yard.t4",
+    "ru.yard.t5",
+    "ru.yard.t6",
+    "ru.yard.t7",
+    "ru.yard.t8",
+    "ru.yard.t9"
+   ],
+   "tours": [
+    {
+     "n": 1,
+     "kind": "number",
+     "medal": 2,
+     "first": 3,
+     "day": "2026-11-18",
+     "sid": 7919
+    }
+   ]
+  }
+ },
+ "story": {
+  "window": {
+   "paper": 1
+  },
+  "longName": "Спортивный клуб Буревестник имени Ивана",
+  "longCity": "Набережные Челны-на-Каме"
+ }
+}

@@ -3,10 +3,10 @@
  * Выбор тактики перед матчем Мини-футбола (067-Р22, кадры Э4.50, 51): четыре карточки со схемой на поле и строкой «что меняет», выбранная — белая рамка,
  * закрытая — приглушена с подписью тура «Школы», тренер одной строкой говорит, что изменится, «На матч». Выбор и «На матч» — события хозяину (клавиши — у него).
  */
-import { artUrl } from '../../art/assets';
 import { fill } from '../../app/home/texts';
 import { TACTIC_IDS, tacticTour } from '../../engine/base/games/mini';
 import { ru } from '../../i18n/ru';
+import CoachLine from '../../components/day/CoachLine.vue';
 import KeyButton from '../../components/kit/KeyButton.vue';
 import KitPanel from '../../components/kit/KitPanel.vue';
 import TacticScheme from './TacticScheme.vue';
@@ -74,17 +74,7 @@ const say = (): string => t.items[props.selected as keyof typeof t.items]?.say ?
       </button>
     </div>
     <div class="foot">
-      <div class="kb-result-coach">
-        <img
-          class="ava"
-          :src="artUrl('coachFace')"
-          :alt="ru.kit.coachName"
-        >
-        <div class="kb-bub">
-          <b class="nm">{{ ru.kit.coachName }}</b>
-          <p>{{ say() }}</p>
-        </div>
-      </div>
+      <CoachLine :text="say()" />
       <KeyButton
         primary
         md

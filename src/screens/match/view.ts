@@ -45,7 +45,7 @@ const phaseName = (p: RunningMatch['phase']): string => {
 };
 
 /** Название пальца цели для строки «Бей пальцем» (пробел — большой нужной руки). */
-function fingerName(finger: string, thumb: Thumb | null): string {
+export function fingerName(finger: string, thumb: Thumb | null): string {
   const f = ru.match.status.fingers;
   if (finger === 'th') return thumb === 'left' ? f.thl : f.thr;
   return f[finger as keyof typeof f];

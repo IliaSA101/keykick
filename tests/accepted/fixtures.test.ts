@@ -30,7 +30,7 @@ describe('К-Г: фикстуры стенда кадров', () => {
   it.each(all)('%s: имя файла = id, коды и маршрут заданы', (id, fx) => {
     expect(fx.id).toBe(id);
     expect(Object.values(fx.codes).length).toBeGreaterThan(0);
-    expect(fx.route).toMatch(/^\/(home|map|match|result|coach|parent|club|museum|start|path|shop|pack|locker|school|school\/tour|school\/waits|school\/kicks|base|base\/[a-z]+)$/);
+    expect(fx.route).toMatch(/^\/(home|map|match|result|coach|cup|parent|club|museum|start|path|shop|pack|locker|school|school\/tour|school\/waits|school\/kicks|base|base\/[a-z]+)$/);
     expect(Number.isInteger(fx.seed)).toBe(true);
   });
 
@@ -81,6 +81,19 @@ describe('К13: матч каждой фикстуры стенда строит
     const lesson = courseLessons.find((l) => l.n === m.lesson);
     expect(lesson, `урок ${m.lesson}`).toBeDefined();
     expect(() => frameRun(buildStart(lesson!, m.seed, dictionary), m.spec)).not.toThrow();
+  });
+
+  it('К13 (068-Р100): перерыв Э1.15/.17 имеют состояние, а кадры «перерыв + микроразминка» стоят в перерыве с открытым окном', () => {
+    // Ловит: DECIDE-кадры перерыва без фикстуры (стенд — окно сбоя) и кадр разминки, который встаёт на вступление или не в перерыве.
+    const id = (k: string): FrameMatch => files[`../fixtures/accepted/${k}.json`]!.match as FrameMatch;
+    expect(id('match.break').spec.toBreak).toBe(true);
+    expect(id('match.break-after').after?.id).toBe('tab');
+    for (const [k, step] of [['match.break-warm', 'shake'], ['match.break-warm-2', 'far']] as const) {
+      const m = id(k);
+      expect([m.started, m.spec.toBreak, m.warm], k).toEqual([true, true, step]);
+      const run = frameRun(buildStart(courseLessons.find((l) => l.n === m.lesson)!, m.seed, dictionary), m.spec);
+      expect(run.state.phase, k).toBe('break');
+    }
   });
 });
 

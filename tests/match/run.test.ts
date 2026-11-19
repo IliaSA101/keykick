@@ -11,6 +11,8 @@ import { stadiumDef } from '../../src/engine/home/section';
 import { ruCourseDef } from '../../src/engine/course/section';
 import { walletDef } from '../../src/engine/rewards/section';
 import { schoolDef } from '../../src/engine/school/section';
+import { emptyStory, type Story } from '../../src/engine/story/section';
+import { addAcc, playedMatch } from '../../src/engine/day/section';
 import { coachDef } from '../../src/engine/coach/section';
 import type { MatchEvent, MatchSave, RunningMatch } from '../../src/engine/match';
 import { expectedHit } from '../../src/engine/typing/typing';
@@ -321,3 +323,92 @@ describe('ТЗ-2.11: урок после паузы ≥ 5 дней', () => {
   });
 });
 
+
+describe('068-Т8 доправка: свисток и ритм дня', () => {
+  const D = '2026-11-18';
+  /** Сеанс игрока: разделы и `story` живут между свистками. */
+  const session = () => {
+    let cur = empty();
+    let story: Story = emptyStory();
+    const saves: Record<string, unknown>[] = [];
+    const d: FinishDeps = {
+      read: () => cur,
+      readStory: () => story,
+      save: (patch) => {
+        saves.push(patch);
+        cur = { ...cur, ...(patch as Partial<MatchSave>), course: patch['course:ru'] as MatchSave['course'] };
+        if (patch.story !== undefined) story = patch.story as Story;
+        return { ok: true };
+      },
+      journal: { put: () => Promise.resolve() },
+    };
+    return { d, saves, story: () => story, set: (x: Partial<MatchSave>) => void (cur = { ...cur, ...x }) };
+  };
+  const c = (matchId: string, stage?: number) => ({ now: 1_000_000, day: D, lessonId: lesson.id, matchId, ...(stage === undefined ? {} : { stage }) });
+
+  it('К-ревью 4 (С5): свисток пишет отметку строки в story, второй матч в тот же день строки не даёт', () => {
+    // Ловит: отметка показанной строки не пишется со свистком (мутант «убрать запись story») — совет звучит на каждом матче.
+    const s = session();
+    const first = finishRun(playToWhistle(fresh()), c('m-r1', 1), s.d);
+    if (first.kind !== 'done' || first.rhythm === undefined) throw new Error('нужен ритм');
+    expect(first.rhythm.line).toBe('advice');
+    expect(s.saves[0]?.story).toBeDefined();
+    expect((s.saves[0]?.story as Story).adviceDay).toBe(1);
+    expect(s.story().adviceDay).toBe(1);
+    const second = finishRun(playToWhistle(fresh()), c('m-r2', 1), s.d);
+    if (second.kind !== 'done') throw new Error('матч не записан');
+    expect(second.rhythm?.line).toBeNull();
+    expect(s.saves[1]?.story).toBeUndefined();
+  });
+
+  it('К-ревью 3 068-Р64: «Застрял» (помощь) — строку не считаем и не помечаем', () => {
+    // Ловит: совет дня «сгорает» на карточке «Застрял», где строки нет.
+    const s = session();
+    s.set({ course: { ...ruCourseDef.empty(), lessons: { [lesson.id]: { stars: 0, best: 0, tries: 9, fails: 9, back: false } } } });
+    const whistled = playToWhistle(fresh());
+    const lost = { ...whistled, state: { ...typing(whistled), result: { ...typing(whistled).result!, counted: false } } } as Run;
+    const done = finishRun(lost, c('m-r3', 1), s.d);
+    if (done.kind !== 'done') throw new Error('матч не записан');
+    expect(done.view.help).toBe('coach');
+    expect(done.rhythm?.line).toBeNull();
+    expect(s.saves[0]?.story).toBeUndefined();
+    expect(s.story().adviceDay).toBe(0);
+    // не-«Застрял» в тот же день строку получил бы
+    const ok = finishRun(playToWhistle(fresh()), c('m-r5', 1), s.d);
+    expect(ok.kind === 'done' && ok.rhythm?.line).toBe('advice');
+  });
+
+  it('К-ревью 7 068-Р18: матч без урока (без ступени, как Кубок) рвёт серию урока', () => {
+    // Ловит: серия переживает матч Кубка — «устали» склеивает два матча урока через Кубок.
+    const s = session();
+    s.set({ day: addAcc(dayDef.empty(), D, lesson.id, 1, 700) });
+    const done = finishRun(playToWhistle(fresh()), c('m-r4'), s.d);
+    expect(done.kind).toBe('done');
+    expect((s.saves[0]?.day as MatchSave['day']).series).toBeNull();
+  });
+
+  it('К-ревью 3 068-Р70: 3-й матч дня пришёлся на «Застрял» — долг итога дня уходит в раздел day записи; следующий матч его снимает', () => {
+    // Ловит: `rhythm.day` не доходит до записи — итог дня теряется, хотя ребёнок его не видел.
+    const s = session();
+    s.set({ course: { ...ruCourseDef.empty(), lessons: { [lesson.id]: { stars: 0, best: 0, tries: 9, fails: 9, back: false } } }, day: playedMatch(playedMatch(dayDef.empty(), D, 1), D, 2) });
+    const whistled = playToWhistle(fresh());
+    const lost = { ...whistled, state: { ...typing(whistled), result: { ...typing(whistled).result!, counted: false } } } as Run;
+    const stuck = finishRun(lost, c('m-r6', 1), s.d);
+    expect(stuck.kind === 'done' && stuck.rhythm?.summary).toBe(true);
+    expect((s.saves[0]?.day as MatchSave['day']).summaryMissed).toBe(D);
+    const next = finishRun(playToWhistle(fresh()), c('m-r7', 1), s.d);
+    expect(next.kind === 'done' && next.rhythm?.summary).toBe(true);
+    expect((s.saves[1]?.day as MatchSave['day']).summaryMissed).toBeNull();
+  });
+  it('068-Р78 return: пауза ≥ 5 дней до свистка — rhythm.returned (журнал дня → «Капитан вернулся»); матч на следующий день — нет', () => {
+    // Ловит: `returned` не доходит из свистка (мутант «убрать isComeback») — событие 1 итога дня не наступает никогда.
+    const DAYMS = 24 * 60 * 60 * 1000;
+    const s = session();
+    s.set({ day: { ...dayDef.empty(), last: 1_000 } });
+    const back = finishRun(playToWhistle(fresh()), { ...c('m-r8', 1), now: 1_000 + 5 * DAYMS }, s.d);
+    expect(back.kind === 'done' && back.rhythm?.returned).toBe(true);
+    s.set({ day: { ...dayDef.empty(), last: 1_000 } });
+    const near = finishRun(playToWhistle(fresh()), { ...c('m-r9', 1), now: 1_000 + 5 * DAYMS - 1 }, s.d);
+    expect(near.kind === 'done' && near.rhythm?.returned).toBe(false);
+  });
+});

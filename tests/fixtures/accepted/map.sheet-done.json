@@ -89,7 +89,13 @@
    "days": 5,
    "today": "2026-11-18",
    "todayN": 0,
-   "last": 1794992400000
+   "last": 1794992400000,
+   "typedMs": 0,
+   "todayMs": 0,
+   "msDay": null,
+   "warmFrom": 0,
+   "acc": {},
+   "series": null
   },
   "stadium": {
    "fans": 4520,
@@ -110,6 +116,7 @@
   }
  },
  "dayGuess": true,
+ "mapWindow": "sheet",
  "home": {
   "cur": 9,
   "day": 5,

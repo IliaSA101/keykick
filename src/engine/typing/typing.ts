@@ -265,6 +265,11 @@ export function charsPerMinute(stats: TypingStats): number {
   return ms < 1000 ? 0 : Math.round((stats.correct * 60000) / ms);
 }
 
+/** Время печати по тем же промежуткам, что и скорость, мс: на него растёт «время ввода» дня (068 Т8, ТЗ-10.5). */
+export function typedMs(stats: TypingStats): number {
+  return sum(stats.intervals.map(countedInterval));
+}
+
 /**
  * Ровность темпа, 0…1: 1 − стандартное отклонение / среднее промежутков (длинные паузы усечены).
  * Меньше двух промежутков — 1: неровности ещё не видно.

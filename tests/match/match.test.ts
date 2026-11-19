@@ -215,6 +215,18 @@ describe('К27: исход атаки по ошибкам', () => {
     expect(r.result).toMatchObject({ verdict: 'win', score: { me: 1, opp: 0 }, extra: { me: 1, opp: 0 }, replay: null });
   });
 
+  it('К27: флаг extra: false (матч группы Кубка) — ничья кончается без доп. времени, по умолчанию доп. время есть', () => {
+    // Ловит: доп. время в группе (ТЗ-8.5, 068-Р3); флаг, который ломает обычный матч.
+    const group = new Bench({ ...startOf(serious), extra: false });
+    group.playAll(() => 1);
+    const g = running(group.state);
+    expect(g.log.filter((l) => l.phase === 'extra')).toHaveLength(0);
+    expect(g.result).toMatchObject({ verdict: 'draw', extra: { me: 0, opp: 0 } });
+    const normal = new Bench(startOf(serious));
+    normal.playAll(() => 1);
+    expect(running(normal.state).log.filter((l) => l.phase === 'extra')).toHaveLength(1);
+  });
+
   it('К27: доп. время без гола — переигровка: сейв — ничья, гол соперника — поражение; 1-й тайм не проигран → переигрывается 2-й', () => {
     // Ловит: победу или зачёт без гола в доп. время; «оба тайма» вместо «2-й» при не проигранном 1-м (ТЗ-2.8).
     const draw = new Bench(startOf(serious));

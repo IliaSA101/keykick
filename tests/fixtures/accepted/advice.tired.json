@@ -1,0 +1,367 @@
+{
+ "id": "advice.tired",
+ "codes": {
+  "1024": "Э6.42",
+  "1920": "Э6.41"
+ },
+ "screen": "advice",
+ "route": "/result",
+ "state": "«Пальцы устали»",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 244045,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.short-words",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-04",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-04",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-05",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-06",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-06",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-07",
+     "fails": 0
+    },
+    "ru.yard.yd-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-08",
+     "fails": 0
+    },
+    "ru.yard.six-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-08",
+     "fails": 0
+    },
+    "ru.yard.six-keys-review": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-09",
+     "fails": 0
+    },
+    "ru.yard.fzh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.fzh-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.fzh-again": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.eight-keys-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.test-eight": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.pr": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.pr-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.longer-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.row-no-eh": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.eh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.eh-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.test-row": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 74,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 42,
+   "days": 16,
+   "today": "2026-11-18",
+   "todayN": 2,
+   "last": 1794992400000,
+   "typedMs": 0,
+   "todayMs": 0,
+   "msDay": null,
+   "warmFrom": 0,
+   "acc": {
+    "2": [
+     850,
+     850,
+     860,
+     800,
+     790
+    ]
+   },
+   "series": {
+    "lessonId": "ru.yard.longer-words",
+    "day": "2026-11-18",
+    "n": 2
+   }
+  },
+  "stadium": {
+   "fans": 14680,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "story": {
+   "comics": {
+    "intro": 1
+   },
+   "papers": {
+    "1": {
+     "day": 3,
+     "shown": true,
+     "facts": {
+      "played": 9,
+      "goals": 20,
+      "fans": 2680,
+      "speed": 14,
+      "tasks": 9,
+      "tours": 1,
+      "title": false
+     }
+    },
+    "2": {
+     "day": 6,
+     "shown": true,
+     "facts": {
+      "played": 16,
+      "goals": 36,
+      "fans": 5180,
+      "speed": 18,
+      "tasks": 19,
+      "tours": 1,
+      "title": false
+     }
+    },
+    "3": {
+     "day": 6,
+     "shown": true,
+     "facts": {
+      "played": 19,
+      "goals": 43,
+      "fans": 6520,
+      "speed": 19,
+      "tasks": 24,
+      "tours": 2,
+      "title": false
+     }
+    },
+    "4": {
+     "day": 8,
+     "shown": true,
+     "facts": {
+      "played": 24,
+      "goals": 54,
+      "fans": 8680,
+      "speed": 21,
+      "tasks": 47,
+      "tours": 5,
+      "title": false
+     }
+    }
+   },
+   "adviceDay": 0,
+   "tiredDay": 0
+  },
+  "cup": {
+   "tours": [
+    {
+     "me": 1,
+     "opp": 1,
+     "tries": 0
+    },
+    {
+     "me": 0,
+     "opp": 0,
+     "tries": 0
+    },
+    {
+     "me": 1,
+     "opp": 1,
+     "tries": 0
+    }
+   ],
+   "ko": {
+    "r16": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "qf": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "sf": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "f": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    }
+   },
+   "first": {
+    "me": 1,
+    "opp": 1
+   },
+   "packs": [
+    "g1",
+    "g2",
+    "g3"
+   ],
+   "title": null,
+   "titleDay": null,
+   "replays": 0
+  }
+ },
+ "story": {
+  "window": {
+   "tired": true
+  }
+ },
+ "cupFrame": {
+  "round": "r16",
+  "step": "result",
+  "after": false,
+  "score": [
+   1,
+   2
+  ],
+  "correct": 960,
+  "rhythm": {
+   "line": "tired",
+   "summary": false,
+   "tired": {
+    "acc": 87,
+    "norm": 91
+   }
+  }
+ }
+}

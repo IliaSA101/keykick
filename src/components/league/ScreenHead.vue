@@ -4,7 +4,7 @@ import { plural } from '../../i18n/plural';
 import { ru } from '../../i18n/ru';
 import KitChip from '../kit/KitChip.vue';
 
-const props = defineProps<{ title: string; city: string; stars?: string; fans?: number; coins?: number; dreamText?: string; dreamPct?: number; chips?: string[]; coinsLink?: boolean }>();
+const props = defineProps<{ title: string; city: string; stars?: string; fans?: number; coins?: number; dreamText?: string; dreamPct?: number; chips?: string[]; coinsLink?: boolean; /** Ярлык, чьё окно открыто (золотой). */ open?: string | undefined }>();
 defineEmits<{ chip: [name: string]; coins: [] }>();
 const NB = String.fromCharCode(160);
 const num = (n: number): string => n.toLocaleString('ru-RU').replace(/\s/g, NB);
@@ -54,6 +54,8 @@ const fansLine = (): string => `${num(props.fans ?? 0)}${NB}${plural(props.fans 
       <KitChip
         v-for="c in chips ?? []"
         :key="c"
+        :class="{ over: c === open }"
+        :on="c === open"
         @click="$emit('chip', c)"
       >
         {{ c }}
@@ -69,5 +71,10 @@ const fansLine = (): string => `${num(props.fans ?? 0)}${NB}${plural(props.fans 
 .fan-ic {
   vertical-align: -2px;
   margin-right: 4px;
+}
+/* ярлык открытого окна — над затемнением, золотой (Э2.30) */
+.over {
+  position: relative;
+  z-index: 11;
 }
 </style>

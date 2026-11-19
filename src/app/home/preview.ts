@@ -4,6 +4,7 @@
  * и не пишется (чистая функция: порядок уроков и «сегодня» приходят снаружи).
  */
 import type { ClubKit } from '../../engine/club/section';
+import { emptyDay } from '../../engine/day/section';
 import type { HomeInput } from '../../engine/home';
 import { homeInputOf, type HomeSections } from './input';
 import { providedExtras } from './provide';
@@ -27,7 +28,7 @@ export function previewSections(order: readonly string[], lesson: number, today:
   if (current !== '') lessons[current] = { stars: 0, best: BEST, tries: 1, fails: 0 };
   return {
     course: { current, lessons, archive: {}, leaguesDone: {} },
-    day: { played: 31, days: 9, today, todayN: 1, last: Date.parse(`${today}T12:00:00Z`) - HOUR_MS },
+    day: { ...emptyDay(), played: 31, days: 9, today, todayN: 1, last: Date.parse(`${today}T12:00:00Z`) - HOUR_MS },
     wallet: { coins: 89, rest: 0, paid: [] },
     stadium: { fans: 11780, goals: 0 },
   };

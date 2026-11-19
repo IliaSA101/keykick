@@ -4,12 +4,18 @@
  * Рядом лежит, чей это матч (`takeMeta`): id урока для «переиграть» и номер урока для имени соперника.
  */
 import { shallowRef } from 'vue';
-import type { Finished } from './finish';
+import type { CupFinished } from '../cup/run';
+import type { Finished as MatchFinished } from './finish';
+
+/** Итог обычного матча или матча Кубка (068 Т6): экран итога различает по `kind`. */
+export type Finished = MatchFinished | CupFinished;
 
 /** Чей матч: id урока (для «переиграть» — `/match?lesson=<id>`) и его номер в курсе Двора (улица соперника). */
 export interface FinishedMeta {
   lesson: string;
   no: number;
+  /** Новые буквы урока (`newKeys`) — событие «В составе новенькие» итога дня; нет — матч не про буквы (Кубок). */
+  letters?: string;
 }
 
 export const finished = shallowRef<Finished>({ kind: 'none' });

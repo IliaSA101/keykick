@@ -140,7 +140,7 @@ describe('К2: отметка урока, день, форма', () => {
     // Ловит: день за каждый матч, день без матча, потерю времени последнего матча.
     const a = finishMatch(empty(), result(3, 0, 40), ctx('m1'));
     const b = finishMatch(a.save, result(3, 0, 40), ctx('m2', { now: 2_000_000 }));
-    expect(b.save.day).toEqual({ played: 2, days: 1, today: '2026-11-18', todayN: 2, last: 2_000_000 });
+    expect(b.save.day).toEqual({ ...dayDef.empty(), played: 2, days: 1, today: '2026-11-18', todayN: 2, last: 2_000_000, typedMs: 120_000, todayMs: 120_000, msDay: '2026-11-18' }); // 068 Т8: свисток пишет и время печати (по 60 с на матч)
     const c = finishMatch(b.save, result(3, 0, 40), ctx('m3', { day: '2026-11-25' }));
     expect(c.save.day).toMatchObject({ played: 3, days: 2, today: '2026-11-25', todayN: 1 });
   });
@@ -353,5 +353,17 @@ describe('К6: пак за первый проход урока (ТЗ-5.1)', () 
     // Ловит: пак 40+ (формы нет), рост `packs` за пределы альбома.
     const full = { ...empty(), album: { ...albumDef.empty(), packs: 39, shown: 39 } };
     expect(finishMatch(full, result(3, 0, 45), ctx('m1')).save.album.packs).toBe(39);
+  });
+});
+
+describe('068-Т8: общий свисток пишет ритм дня', () => {
+  it('068-Т8-К5: матч с ступенью кладёт точность в окно ступени и серию урока; без ступени — только время печати', () => {
+    // Ловит: матч, не попавший в окно «пальцы устали», и потерянное время печати для разминки.
+    const done = finishMatch(empty(), result(3, 0, 45), ctx('r1', { stage: 2 }));
+    expect(done.save.day.acc?.['2']).toHaveLength(1);
+    expect(done.save.day.series).toMatchObject({ lessonId: 'ru.yard.ao', day: '2026-11-18', n: 1 });
+    const plain = finishMatch(empty(), result(3, 0, 45), ctx('r2'));
+    expect(plain.save.day.acc).toEqual({});
+    expect(plain.save.day.typedMs).toBe(done.save.day.typedMs);
   });
 });

@@ -7,8 +7,8 @@
 import cup from '../../content/cup-yard.json';
 import { hue, hexToRgb, lightness } from '../club/paint';
 import type { ClubKit } from '../club/section';
-import { streetName, streetOf } from '../home/yard';
-import type { Team } from './types';
+import { ROUNDS, streetName, streetOf } from '../home/yard';
+import type { KoRound, Team } from './types';
 
 /** Все 31 команда Кубка в порядке макета: группы A…H, внутри — посев. */
 export const TEAMS: readonly Team[] = cup.teams;
@@ -25,6 +25,11 @@ export function rivalOf(lesson: number): Team {
   if (team === undefined) throw new Error(`rivalOf: no cup team on street "${street}" (lesson ${lesson})`);
   return team;
 }
+
+/** Соперник каждого нашего раунда плей-офф — команда двора Карты на якоре раунда (21 Заречной, 24 Фонтанной, 28 Сосновой, 32 Яблоневой; 023-Р35а). */
+export const KO_RIVALS: Record<KoRound, string> = { r16: rivalOf(ROUNDS[3]!).id, qf: rivalOf(ROUNDS[4]!).id, sf: rivalOf(ROUNDS[5]!).id, f: rivalOf(ROUNDS[6]!).id };
+/** Группы этих соперников: при нашем 1-м месте они выходят 2-ми, при 2-м — 1-ми (подгонка чужих, `group.ts`). */
+export const KO_RIVAL_GROUPS: ReadonlySet<string> = new Set(Object.values(KO_RIVALS).map((id) => TEAMS.find((t) => t.id === id)!.group));
 
 /** Зелёный ли цвет (оттенок 80–170°, насыщенность > 0,3): путается с зелёной формой клуба (036-Р50). Правило макета `greenish`, `tools/mock-games/data.mjs`.
  * Не `hue` из `club/paint`: там свои пороги (насыщенность и яркость), а у тёмно-зелёного Флагмана #0b5345 `hue` даёт null —

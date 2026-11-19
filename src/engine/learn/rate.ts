@@ -1,7 +1,8 @@
 /** Ставка учебной игры (ТЗ-3.3): медиана скорости последних матчей × 0,8 × норма игры в минутах / 20, в пределах 1–6. */
 import cfg from '../../content/learn.json';
 
-const median = (xs: readonly number[]): number => {
+/** Медиана чисел (чётное число — среднее двух средних); общая для ставки игры и нормы «пальцы устали» (`engine/day/advice`). */
+export const median = (xs: readonly number[]): number => {
   const s = [...xs].sort((a, b) => a - b);
   const m = Math.floor(s.length / 2);
   return s.length % 2 === 1 ? s[m]! : (s[m - 1]! + s[m]!) / 2;

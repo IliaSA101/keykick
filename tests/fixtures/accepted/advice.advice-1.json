@@ -1,0 +1,201 @@
+{
+ "id": "advice.advice-1",
+ "codes": {
+  "1920": "Э6.38"
+ },
+ "screen": "advice",
+ "route": "/result",
+ "state": "Совет, день 2, 1-й матч",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 688235,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.vl-combos",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 47,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 5,
+   "days": 2,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000,
+   "typedMs": 0,
+   "todayMs": 0,
+   "msDay": null,
+   "warmFrom": 0,
+   "acc": {
+    "1": [
+     880
+    ]
+   },
+   "series": {
+    "lessonId": "ru.yard.the-row",
+    "day": "2026-11-18",
+    "n": 1
+   }
+  },
+  "stadium": {
+   "fans": 1540,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "story": {
+   "comics": {
+    "intro": 1
+   },
+   "papers": {},
+   "adviceDay": 0,
+   "tiredDay": 0
+  },
+  "cup": {
+   "tours": [
+    {
+     "me": null,
+     "opp": null,
+     "tries": 0
+    },
+    {
+     "me": null,
+     "opp": null,
+     "tries": 0
+    },
+    {
+     "me": null,
+     "opp": null,
+     "tries": 0
+    }
+   ],
+   "ko": {
+    "r16": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "qf": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "sf": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "f": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    }
+   },
+   "first": null,
+   "packs": [],
+   "title": null,
+   "titleDay": null,
+   "replays": 0
+  }
+ },
+ "story": {
+  "window": {
+   "advice": 1
+  }
+ },
+ "result": {
+  "view": {
+   "starsAll": 2,
+   "back": false,
+   "knower": false,
+   "grew": [],
+   "replay": null,
+   "help": "none",
+   "rest": false,
+   "passed": true,
+   "verdict": "win",
+   "total": {
+    "me": 3,
+    "opp": 0
+   },
+   "stars": 2,
+   "newStars": 2,
+   "record": {
+    "kind": "beaten",
+    "delta": 1,
+    "best": {
+     "cpm": 13,
+     "permille": 950
+    }
+   },
+   "permille": 950,
+   "cpm": 13,
+   "correct": 540,
+   "coins": 27,
+   "fans": 540,
+   "missing": {
+    "kind": "accuracy",
+    "permille": 970
+   }
+  },
+  "lessonNo": 3,
+  "street": "Водопроводной",
+  "rhythm": {
+   "line": "advice",
+   "summary": false,
+   "tired": null
+  }
+ }
+}

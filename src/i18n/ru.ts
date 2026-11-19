@@ -10,6 +10,7 @@ import { album } from './ru/album';
 import { base } from './ru/base';
 import { club } from './ru/club';
 import { coach } from './ru/coach';
+import { cup } from './ru/cup';
 import { home } from './ru/home';
 import { keyboard, handsHelp } from './ru/keyboard';
 import { kit } from './ru/kit';
@@ -20,6 +21,7 @@ import { match } from './ru/match';
 import { museum } from './ru/museum';
 import { paper } from './ru/paper';
 import { parent } from './ru/parent';
+import { support } from './ru/support';
 import { path } from './ru/path';
 import { phone } from './ru/phone';
 import { result } from './ru/result';
@@ -27,6 +29,8 @@ import { school } from './ru/school';
 import { frame, shell } from './ru/shell';
 import { shop } from './ru/shop';
 import { start } from './ru/start';
+import { day } from './ru/day';
+import { story } from './ru/story';
 import { system } from './ru/system';
 
 export const ru = {
@@ -37,6 +41,7 @@ export const ru = {
   shell,
   frame,
   kit,
+  support,
   system,
   keyboard,
   handsHelp,
@@ -47,7 +52,10 @@ export const ru = {
   path,
   club,
   coach,
+  cup,
   museum,
+  story,
+  day,
   shop,
   album,
   school,

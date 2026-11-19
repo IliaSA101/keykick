@@ -1,5 +1,6 @@
 /** Подсистема `home` (065-Т5): правила Дома, стадион, раздел `stadium`. Вход — `HomeInput`, выход — ключи и числа. */
-export { cupCard, dreamOf, goldHint, houseState, mainAction, paperFresh, systemOpen } from './rules';
+export { cupCard, dreamOf, goldHint, houseState, mainAction, paperFresh, paperFreshMark, paperMarkOnHome, regionSignShown, systemOpen } from './rules';
+export { EDGE, MAIN_BOTTOM, MAIN_TALL_H, STAGE_H, TAG_GAP, TAG_H, mainWidth, placeHalf, placeX, standTop } from './layout';
 export { hasSector, headFans, headStars, seatsOf, stadiumView } from './stadium';
 export type { StadiumView } from './stadium';
 export { addGoals, emptyStadium, stadiumDef } from './section';

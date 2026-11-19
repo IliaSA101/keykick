@@ -1,0 +1,303 @@
+{
+ "id": "cup-group.mid",
+ "codes": {
+  "1024": "Э5.05",
+  "1920": "Э5.04"
+ },
+ "screen": "cup-group",
+ "route": "/cup",
+ "state": "Урок 17: 2-е из 4, хватит ничьей",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 327715,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.longer-words",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.yd-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.six-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.six-keys-review": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.fzh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.fzh-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.fzh-again": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.eight-keys-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.test-eight": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.pr": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.pr-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    },
+    "ru.yard.longer-words": {
+     "stars": 0,
+     "best": 24,
+     "tries": 1,
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 89,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 31,
+   "days": 9,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000,
+   "typedMs": 0,
+   "todayMs": 0,
+   "msDay": null,
+   "warmFrom": 0,
+   "acc": {},
+   "series": null
+  },
+  "stadium": {
+   "fans": 11780,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "cup": {
+   "tours": [
+    {
+     "me": 2,
+     "opp": 1,
+     "tries": 0
+    },
+    {
+     "me": 1,
+     "opp": 1,
+     "tries": 0
+    },
+    {
+     "me": null,
+     "opp": null,
+     "tries": 0
+    }
+   ],
+   "ko": {
+    "r16": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "qf": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "sf": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    },
+    "f": {
+     "tries": 0,
+     "won": false,
+     "me": null,
+     "opp": null,
+     "series": null
+    }
+   },
+   "first": {
+    "me": 2,
+    "opp": 1
+   },
+   "packs": [
+    "g1",
+    "g2"
+   ],
+   "title": null,
+   "titleDay": null,
+   "replays": 0
+  }
+ },
+ "tab": "group",
+ "home": {
+  "cur": 17,
+  "day": 9,
+  "matchesToday": 1,
+  "played": 31,
+  "stars": {
+   "1": 3,
+   "2": 3,
+   "3": 2,
+   "4": 1,
+   "5": 2,
+   "6": 1,
+   "7": 2,
+   "8": 1,
+   "9": 0,
+   "10": 1,
+   "11": 2,
+   "12": 1,
+   "13": 0,
+   "14": 1,
+   "15": 2,
+   "16": 1
+  },
+  "best": 24,
+  "coins": 89,
+  "fans": 11780,
+  "bought": [
+   "gate-sticker",
+   "center-circle",
+   "seats-club",
+   "boots-yard",
+   "net-flags",
+   "graffiti"
+  ],
+  "friendly": false,
+  "round": null,
+  "end": false,
+  "region": false,
+  "pause5": false,
+  "extras": {
+   "cup": {
+    "key": "группа C: 2-е место · 4 очка",
+    "params": {
+     "sub": "3-й матч с Полевой, после урока 18"
+    }
+   },
+   "events": {
+    "base": {
+     "key": "минута тренера: Ы Ж"
+    },
+    "locker": {
+     "key": "полоска на форме"
+    }
+   },
+   "papers": 4,
+   "paperDay": 7,
+   "emblemN": 5,
+   "tourWaits": true,
+   "silver": false
+  }
+ }
+}

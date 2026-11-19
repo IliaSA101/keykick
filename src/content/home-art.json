@@ -1091,7 +1091,7 @@
      1446,
      777
     ],
-    "z": "under"
+    "z": "over"
    },
    "garland": {
     "file": "art/home/item-garland.webp",
@@ -1250,7 +1250,25 @@
      436
     ]
    }
-  ]
+  ],
+  "sign": {
+   "file": "art/home/sign.webp",
+   "box": [
+    908,
+    430,
+    1014,
+    489
+   ]
+  },
+  "sector": {
+   "file": "art/home/sector-banner.webp",
+   "box": [
+    918,
+    643,
+    1003,
+    687
+   ]
+  }
  },
  "sprites": {
   "fans": [

@@ -16,7 +16,7 @@ import { useStageWidth } from '../../components/home/useStageWidth';
 import { isNarrowStage } from '../../components/shell/stageScale';
 import ScreenHead from '../../components/league/ScreenHead.vue';
 import MedalMark from '../../components/school/MedalMark.vue';
-import type { Day } from '../../engine/day/section';
+import { emptyDay, type Day } from '../../engine/day/section';
 import { homeView } from '../../engine/home';
 import { dreamText } from '../../app/home/texts';
 import { plural } from '../../i18n/plural';
@@ -44,7 +44,7 @@ const ask = computed(() => needsGrade(school.value));
 /** Сеанс не `ok` (вторая вкладка, сбой записи): тур не начинаем — итог некуда записать; причина — в нижней строке. */
 const blocked = computed(() => blockText(session.status.value));
 /** Тур открывается после первого матча дня (ТЗ-6.1, Ш-З4) и только при записи сеанса — тем же путём, что и экран тура (`tourGate` по разделу `day`). */
-const open = computed(() => tourGate(session.status.value, matchPlayed(data<Day>('day', { today: null, todayN: 0, days: 0, played: 0, last: null }), today())).kind === 'open');
+const open = computed(() => tourGate(session.status.value, matchPlayed(data<Day>('day', emptyDay()), today())).kind === 'open');
 /** Пустой журнал (Э3.13): десять строк и «ещё 2 тура ниже»; дальше — как есть, после сыгранных туров журнал листается. */
 const shown = computed(() => view.value.rows.slice(0, view.value.shown));
 const below = computed(() => view.value.below);

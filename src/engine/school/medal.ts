@@ -2,7 +2,8 @@
  * Медаль тура по верным с первой попытки (ТЗ-6.4) и эмблема из 10 частей (ТЗ-6.7). Пороги — `content/school.json`.
  */
 import cfg from '../../content/school.json';
-import { KINDS } from './order';
+import { KINDS, REPEAT_KIND } from './order';
+import type { School } from './section';
 
 /** Медаль 0…3: 0 — «тур сыгран» без медали, 1 бронза, 2 серебро, 3 золото. */
 export type Medal = 0 | 1 | 2 | 3;
@@ -40,4 +41,10 @@ export function addPart(mask: number, kind: string, medal: Medal): { mask: numbe
   const bit = partOf(kind);
   if (bit < 0 || medal < 1 || (mask & (1 << bit)) !== 0) return { mask, added: false };
   return { mask: mask | (1 << bit), added: true };
+}
+
+/** Номер тура «Школы» с медалью (бронза и выше), сданного в игровой день `day` (последний по журналу); нет — `null`. Тур-повтор не считается: номера у него нет. */
+export function medalTourOn(school: School, day: string): number | null {
+  const hit = school.tours.filter((t) => t.day === day && t.medal >= 1 && t.kind !== REPEAT_KIND).pop();
+  return hit === undefined ? null : hit.n;
 }

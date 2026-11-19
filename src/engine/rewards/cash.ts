@@ -18,7 +18,7 @@ export interface Purse {
   stadium: Stadium;
 }
 
-/** Кошелёк с альбомом: нужен только награде `lesson-pack` (`packs`), остальным источникам альбом не нужен. */
+/** Кошелёк с альбомом: нужен только наградам `lesson-pack` и `cup-pack` (`packs`), остальным источникам альбом не нужен. */
 export type AlbumPurse = Purse & { album: Album };
 
 /** Идентификатор в список оплаченных (последние `PAID_KEEP`); пустой — не запоминаем. */
@@ -26,19 +26,19 @@ const remember = (w: Wallet, ref: string): string[] => (ref === '' ? w.paid : [.
 
 /**
  * Начисление за `n` единиц события. Болельщики (`match-fans`): `n` — верные нажатия матча, по болельщику за нажатие, остатка нет. Монеты (`match-coins`, `minute-coins`): `n` — верные нажатия, 1 монета за `coinPer`,
- * остаток копится; `ref` — идентификатор матча или минуты, его запоминает кошелёк. `penalty-knower`, `tour-knower`: `n` — верные задачи. `kicks-knower`: то же, `ref` — тур «штрафных», его запоминает кошелёк (повтор не платит). `learn-coins`: `n` — готовые монеты (ставку считает игра, ТЗ-3.3). `lesson-pack`: `n` — паки.
+ * остаток копится; `ref` — идентификатор матча или минуты, его запоминает кошелёк. `penalty-knower`, `tour-knower`: `n` — верные задачи. `kicks-knower`: то же, `ref` — тур «штрафных», его запоминает кошелёк (повтор не платит). `learn-coins`: `n` — готовые монеты (ставку считает игра, ТЗ-3.3). `lesson-pack`, `cup-pack`: `n` — паки (урок и раунд Кубка).
  * Возвращает новый кошелёк и сколько целых единиц получено сейчас.
  */
-export function credit<P extends AlbumPurse>(purse: P, id: 'lesson-pack', n: number, ref?: string): { purse: P; gain: number };
-export function credit<P extends Purse>(purse: P, id: Exclude<RewardId, 'lesson-pack'>, n: number, ref?: string): { purse: P; gain: number };
+export function credit<P extends AlbumPurse>(purse: P, id: 'lesson-pack' | 'cup-pack', n: number, ref?: string): { purse: P; gain: number };
+export function credit<P extends Purse>(purse: P, id: Exclude<RewardId, 'lesson-pack' | 'cup-pack'>, n: number, ref?: string): { purse: P; gain: number };
 export function credit(purse: Purse & { album?: Album }, id: RewardId, n: number, ref = ''): { purse: Purse & { album?: Album }; gain: number } {
   const count = Math.max(0, Math.floor(n));
   if (id === 'match-fans') return { purse: { ...purse, stadium: { ...purse.stadium, fans: purse.stadium.fans + count } }, gain: count };
   if (id === 'penalty-knower') return { purse: { ...purse, school: { ...purse.school, knower: purse.school.knower + count } }, gain: count };
   if (id === 'kicks-knower') return { purse: { ...purse, wallet: { ...purse.wallet, paid: remember(purse.wallet, ref) }, school: { ...purse.school, knower: purse.school.knower + count } }, gain: count };
   if (id === 'tour-knower') return { purse: { ...purse, school: { ...purse.school, knower: purse.school.knower + count } }, gain: count };
-  if (id === 'lesson-pack') {
-    if (purse.album === undefined) throw new Error('lesson-pack needs album');
+  if (id === 'lesson-pack' || id === 'cup-pack') {
+    if (purse.album === undefined) throw new Error(`${id} needs album`);
     return { purse: { ...purse, album: { ...purse.album, packs: purse.album.packs + count } }, gain: count };
   }
   if (id === 'learn-coins') return { purse: { ...purse, wallet: { ...purse.wallet, coins: purse.wallet.coins + count, paid: remember(purse.wallet, ref) } }, gain: count };

@@ -5,6 +5,7 @@
  * Наведение — подсказка, не выбор (054-Р1). Туман и «следующий» двор не нажимаются (К1).
  */
 import { computed } from 'vue';
+import MapFestive from './MapFestive.vue';
 import cfg from '../../content/map-yard.json';
 import { fill } from '../../app/home/texts';
 import YardGround from '../../components/home/YardGround.vue';
@@ -16,7 +17,7 @@ import { gateOf, gateX as gateXOf, H, pointOf } from '../../components/home/yard
 import { alongPath, joinRoute, legOf, smooth, yardAt } from './geometry';
 
 /** `travel` — идёт переезд (Э2.08): двор-цель и кто едет (`away` — наш автобус к ним, `incoming` — соперника к нам). */
-const props = defineProps<{ view: MapView; width: number; built: number; end: boolean; region: boolean; kitBody: string; hover: number | null; travel?: { stage: number; bus: 'away' | 'incoming' } | null }>();
+const props = defineProps<{ view: MapView; width: number; built: number; end: boolean; region: boolean; festive?: boolean; kitBody: string; hover: number | null; travel?: { stage: number; bus: 'away' | 'incoming' } | null; /** Открыто окно: «Ты здесь» и флаг клуба скрыты (Э2.11, Э2.30, Э2.31). */ hideHere?: boolean }>();
 const emit = defineEmits<{ pick: [stage: number]; hover: [stage: number | null] }>();
 const t = ru.map;
 const base = import.meta.env.BASE_URL;
@@ -54,11 +55,15 @@ const tip = computed(() => {
   if (!q || !open(q.n)) return null;
   return { at: q.at, lines: [...(q.n.passed ? [fill(t.hoverStars, { k: q.n.full, n: q.n.lessons.length })] : []), ...t.hover] };
 });
-const hereAt = computed(() => yards.value.find((q) => q.n.here)?.at ?? null);
+const hereAt = computed(() => (props.hideHere ? null : (yards.value.find((q) => q.n.here)?.at ?? null)));
 </script>
 
 <template>
   <div class="board">
+    <MapFestive
+      v-if="festive"
+      :width="width"
+    />
     <YardGround
       :width="width"
       :yard="yard"
@@ -141,14 +146,14 @@ const hereAt = computed(() => yards.value.find((q) => q.n.here)?.at ?? null);
       <PlaceTag
         v-else
         class="mid"
-        :class="{ picked: view.sel.stage === q.n.stage }"
+        :class="{ picked: view.sel.stage === q.n.stage, fest: festive && q.n.state === 'done' }"
         :kind="q.n.state"
         :go="open(q.n)"
         no-arrow
         :x="q.at[0]"
         :y="q.at[1]"
         :name="name(q.n)"
-        :mark="q.n.here ? t.here : ''"
+        :mark="q.n.here && !hideHere ? t.here : ''"
         @click="emit('pick', q.n.stage)"
         @mouseenter="emit('hover', q.n.stage)"
         @mouseleave="emit('hover', null)"

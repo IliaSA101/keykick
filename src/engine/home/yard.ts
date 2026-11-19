@@ -24,6 +24,9 @@ export const isHomeRound = (flag: number): boolean => cfg.homeRounds.includes(fl
 
 export const isControl = (lesson: number): boolean => cfg.control.includes(lesson);
 
+/** Ступень стадиона (id из `yard.json`), которая достраивается, когда пройден урок `lesson`; нет — `null`. Ключ — тот же `after`, что у `builtOf`. */
+export const stepAfter = (lesson: number): string | null => cfg.steps.find((s) => s.after === lesson)?.id ?? null;
+
 /** Урок-флажок раунда Кубка (ТЗ-1.5). */
 export const ROUNDS: readonly number[] = cfg.rounds;
 

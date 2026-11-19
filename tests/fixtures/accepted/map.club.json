@@ -152,11 +152,17 @@
    "days": 9,
    "today": "2026-11-18",
    "todayN": 1,
-   "last": 1794992400000
+   "last": 1794992400000,
+   "typedMs": 0,
+   "todayMs": 0,
+   "msDay": null,
+   "warmFrom": 0,
+   "acc": {},
+   "series": null
   },
   "stadium": {
    "fans": 11780,
-   "goals": 0
+   "goals": 70
   },
   "club": {
    "name": "Прогресс",
@@ -170,7 +176,92 @@
     "sleeves": "#ffffff",
     "trim": "#ffffff"
    }
+  },
+  "school": {
+   "knower": 0,
+   "grade": null,
+   "tours": [],
+   "emblem": 0,
+   "solved": [
+    "frame.task.1",
+    "frame.task.2",
+    "frame.task.3",
+    "frame.task.4",
+    "frame.task.5",
+    "frame.task.6",
+    "frame.task.7",
+    "frame.task.8",
+    "frame.task.9",
+    "frame.task.10",
+    "frame.task.11",
+    "frame.task.12",
+    "frame.task.13",
+    "frame.task.14",
+    "frame.task.15",
+    "frame.task.16",
+    "frame.task.17",
+    "frame.task.18",
+    "frame.task.19",
+    "frame.task.20",
+    "frame.task.21",
+    "frame.task.22",
+    "frame.task.23",
+    "frame.task.24",
+    "frame.task.25",
+    "frame.task.26",
+    "frame.task.27",
+    "frame.task.28",
+    "frame.task.29",
+    "frame.task.30",
+    "frame.task.31",
+    "frame.task.32",
+    "frame.task.33",
+    "frame.task.34",
+    "frame.task.35",
+    "frame.task.36",
+    "frame.task.37",
+    "frame.task.38",
+    "frame.task.39",
+    "frame.task.40",
+    "frame.task.41",
+    "frame.task.42",
+    "frame.task.43",
+    "frame.task.44",
+    "frame.task.45",
+    "frame.task.46",
+    "frame.task.47",
+    "frame.task.48",
+    "frame.task.49",
+    "frame.task.50",
+    "frame.task.51",
+    "frame.task.52",
+    "frame.task.53",
+    "frame.task.54",
+    "frame.task.55",
+    "frame.task.56",
+    "frame.task.57",
+    "frame.task.58",
+    "frame.task.59",
+    "frame.task.60",
+    "frame.task.61",
+    "frame.task.62",
+    "frame.task.63",
+    "frame.task.64",
+    "frame.task.65",
+    "frame.task.66",
+    "frame.task.67"
+   ],
+   "level": {},
+   "trainerSkip": []
   }
+ },
+ "mapWindow": "club",
+ "club": {
+  "hardKeys": [
+   "Ы",
+   "Ж",
+   "Д"
+  ]
  },
  "home": {
   "cur": 17,
@@ -215,7 +306,7 @@
    "cup": {
     "key": "группа C: 2-е место · 4 очка",
     "params": {
-     "sub": "3-й матч с Полевой, <span class=\"nb\">после урока 18</span>"
+     "sub": "3-й матч с Полевой, после урока 18"
     }
    },
    "events": {

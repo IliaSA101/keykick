@@ -6,7 +6,7 @@
 import art from '../../content/home-art.json';
 import { artFiles, artPathEager, artPathLazy, screenArt, type ArtKey } from '../../art/assets';
 import { builtOf } from '../../engine/home/stadium';
-import { baseOf } from '../home/scene';
+import { baseOf, ITEM_OF, seatsKind } from '../home/scene';
 import { teamOf } from '../home/team';
 import { reach, type PreloadScreen } from './graph';
 import type { Plan } from './queue';
@@ -24,9 +24,10 @@ export function homeArtFiles(cur: number, bought: readonly string[]): string[] {
   const built = builtOf(cur);
   const ofStage = (list: readonly { n: number; file: string }[]): string[] => list.filter((x) => x.n === built).map((x) => x.file);
   const items = art.overlays.items as unknown as Record<string, { file: string }>;
-  const boughtFiles = Object.entries({ 'gate-sticker': 'sticker', 'center-circle': 'circle', 'net-flags': 'bunting', graffiti: 'graffiti', drum: 'drum', garland: 'garland', banner: 'banner' })
+  const boughtFiles = Object.entries(ITEM_OF)
     .filter(([id]) => bought.includes(id))
     .map(([, key]) => items[key]?.file ?? '');
+  const kind = bought.includes('seats-club') ? seatsKind(cur, built) : null;
   return uniq([
     baseOf(built),
     ...ofStage(art.ghosts),
@@ -37,6 +38,8 @@ export function homeArtFiles(cur: number, bought: readonly string[]): string[] {
     art.overlays.museum.closed.file,
     art.overlays.museum.open.file,
     ...boughtFiles,
+    ...(kind ? [art.overlays.seats[kind].file] : []),
+    ...(cur > 18 ? [art.overlays.sector.file, art.overlays.sign.file] : []), // растяжка и вывеска — по условиям вида, которых догрузка не знает: файлы по 2 КБ
     ...teamOf(cur, bought, built).map((p) => p.file),
   ]).filter((f) => f !== '');
 }

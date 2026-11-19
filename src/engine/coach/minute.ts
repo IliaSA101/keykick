@@ -8,7 +8,8 @@ import type { Effect, KeyEvent, Press } from '../match/types';
 import { makeCourseHalf } from '../plan/attack';
 import type { CourseLesson, Dictionary } from '../plan/lesson';
 import { findChar, type Keymap, type Layout } from '../typing/keymap';
-import { emptyStats, isDone, startLine, step as typeStep, type KeyPress, type TypingState, type TypingStats } from '../typing/typing';
+import { emptyStats, isDone, startLine, type TypingState, type TypingStats } from '../typing/typing';
+import { typeKey } from '../typing/keystep';
 
 export interface MinuteStart {
   type: 'start';
@@ -84,20 +85,15 @@ function begin(e: MinuteStart): RunningMinute {
   return { phase: 'run', ...base, layout: e.lesson.layout, ms: e.ms ?? cfg.coach.ms, rows: 0, typing: startLine(lineOf(base, 0), e.lesson.layout), stats: emptyStats, presses: [] };
 }
 
-const press = (e: Pick<KeyEvent, 'code' | 'key' | 't' | 'repeat' | 'mod' | 'caps'>): KeyPress => ({ code: e.code, key: e.key, repeat: e.repeat ?? false, mod: e.mod ?? false, caps: e.caps ?? false, time: e.t });
 
 /** Один шаг минуты. До `start` и после конца события игнорируются. */
 export function minuteStep(state: MinuteState, event: MinuteEvent): { state: MinuteState; effects: Effect[] } {
   if (event.type === 'start') return { state: begin(event), effects: [] };
   if (state.phase !== 'run' || state.typing === null) return { state, effects: [] };
   const before = state.typing;
-  const typed = typeStep(state.keymap, before, press(event));
-  const effects: Effect[] = [];
-  if (typed.last === 'ok') effects.push({ kind: 'sound', sound: 'key' });
-  if (typed.last === 'error') effects.push({ kind: 'sound', sound: 'miss' });
-  if (typed.hint !== null && typed.hint !== before.hint) effects.push({ kind: 'hint', hint: typed.hint });
-  const counted = typed.last === 'ok' || typed.last === 'error';
-  const presses = counted ? [...state.presses, { ch: (before.text[before.pos] ?? '').toLowerCase(), ok: typed.last === 'ok' }] : state.presses;
+  const keyed = typeKey(state.keymap, before, event, state.presses);
+  const { typed, presses } = keyed;
+  const effects: Effect[] = [...keyed.effects];
   if (!isDone(typed)) return { state: { ...state, typing: typed, stats: typed.stats, presses }, effects };
   const rows = state.rows + 1;
   // Минута кончается на конце строки: время — от первого засчитанного нажатия.

@@ -5,6 +5,10 @@
  */
 import cfg from '../../content/yard.json';
 import type { HomeExtras, HomeInput } from '../../engine/home';
+import { emptyCup, type Cup } from '../../engine/cup';
+import { emptyStory, storyExtras, type Story } from '../../engine/story';
+import { cupHome } from '../cup/input';
+import { titleFestive } from '../cup/title';
 import type { CourseProgress } from '../../engine/course/reconcile';
 import type { Day } from '../../engine/day/section';
 import type { Stadium } from '../../engine/home/section';
@@ -18,6 +22,11 @@ export interface HomeSections {
   stadium: Stadium;
   /** Купленное в Лавке (067 Т12); нет раздела — ничего не куплено. */
   shop?: Shop;
+  /** Кубок Двора (068 Т5) и сюжет (выпуски газеты для замка Музея и метки «свежая»); нет раздела — пустой. */
+  cup?: Cup;
+  story?: Story;
+  /** Семя Кубка — хэш id игрока (068-Р4); чужие матчи группы от него не зависят от входа Дома, но раунд соперника — да. */
+  seed?: number;
 }
 
 /** Что Дому нужно от пакета: порядок уроков и товарищеские. */
@@ -54,9 +63,12 @@ export function homeInputOf(s: HomeSections, facts: PackFacts, extras: HomeExtra
     if (m !== undefined && m.stars > 0) stars[i + 1] = m.stars;
   });
   const curId = facts.order[cur - 1];
+  const day = gameDay(s.day, today);
+  const pause5 = pausedLong(s.day, today);
+  const cupIn = cupHome(s.cup ?? emptyCup(), { cur, day: today, dayN: day, pause5, seed: s.seed ?? 0 });
   return {
     cur,
-    day: gameDay(s.day, today),
+    day,
     matchesToday: s.day.today === today ? s.day.todayN : 0,
     played: s.day.played,
     stars,
@@ -65,10 +77,12 @@ export function homeInputOf(s: HomeSections, facts: PackFacts, extras: HomeExtra
     fans: s.stadium.fans,
     bought: s.shop?.bought ?? [],
     friendly: curId !== undefined && facts.friendly.has(curId),
-    round: null,
-    end: false,
+    round: cupIn.round,
+    end: cupIn.end,
+    // Района в Э1 нет (068-Р8): после титула главная — «За звёздами», а не «В Район»
     region: false,
-    pause5: pausedLong(s.day, today),
-    extras,
+    festive: titleFestive(s.cup ?? emptyCup(), today),
+    pause5,
+    extras: { ...storyExtras(s.story ?? emptyStory()), ...(cupIn.card === null ? {} : { cup: cupIn.card }), silver: cupIn.silver, ...extras },
   };
 }

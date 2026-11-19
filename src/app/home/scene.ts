@@ -8,6 +8,7 @@ import yard from '../../content/home-yard.json';
 import type { HomeInput } from '../../engine/home';
 import { createRandom } from '../../engine/random';
 import type { HomeView } from '../../engine/home/view';
+import { scoreboardBuilt } from '../../engine/home/stadium';
 import { teamOf } from './team';
 
 export type Box = [number, number, number, number];
@@ -32,9 +33,13 @@ export interface Scene {
   team: Piece[];
 }
 
-const ITEM_OF: Record<string, string> = { 'gate-sticker': 'sticker', 'center-circle': 'circle', 'net-flags': 'bunting', graffiti: 'graffiti', drum: 'drum', garland: 'garland', banner: 'banner' };
+/** Вещь каталога Двора → ключ слоя печи (`overlays.items`); одно место для сцены и догрузки графики. */
+export const ITEM_OF: Record<string, string> = { 'gate-sticker': 'sticker', 'center-circle': 'circle', 'net-flags': 'bunting', graffiti: 'graffiti', drum: 'drum', garland: 'garland', banner: 'banner' };
 type ItemArt = { file: string; box: Box; z: string };
 const ITEMS = art.overlays.items as unknown as Record<string, ItemArt>;
+
+/** Вид сидений в цвет клуба (`seats-club`): трибуна с урока 19, скамейки уроков 10–18 — по ступени (compose_layers.bench_stage); иначе нет. */
+export const seatsKind = (cur: number, built: number): 'trib' | 'mid' | 'cup' | null => (cur > 18 ? 'trib' : cur > 9 ? (built <= 3 ? 'cup' : 'mid') : null);
 
 const piece = (key: string, file: string, box: Box, flip = false): Piece => ({ key, file, x: box[0], y: box[1], w: box[2] - box[0], h: box[3] - box[1], ...(flip ? { flip } : {}) });
 
@@ -108,15 +113,23 @@ export function sceneOf(i: HomeInput, v: HomeView, seed: number): Scene {
   const under: Piece[] = [];
   const over: Piece[] = [];
   const put = (z: string, p: Piece): void => void (z === 'under' ? under : over).push(p);
-  for (const g of art.golds) if (g.n === built && v.stadium.golds.includes(g.k)) put(g.z, piece(`gold${g.k}`, g.file, g.box as Box));
+  // порядок — как в макете (`compose_layers.compose`, 068-Р87): сиденья — в основу, под всё; накладки ступени (угловые флажки, арка, флаги клуба)
+  // — до золота, чтобы золотые флажки и звезда на флагах легли поверх белых и синих; арка (на ней — синий флаг основы) ниже флагов клуба
+  // (023-Р30, макет `h-done`, 068 Т9-4); растяжка звёздного сектора — после золота
+  const kind = i.bought.includes('seats-club') ? seatsKind(i.cur, built) : null;
+  if (kind) under.push(piece('seats', art.overlays.seats[kind].file, art.overlays.seats[kind].box as Box));
   const corner = art.overlays.corner.find((c) => c.n === built);
   if (corner) over.push(piece('corner', corner.file, corner.box as Box));
-  const flags = art.overlays.flags.find((f) => f.n === built);
-  if (flags) over.push(piece('flags', flags.file, flags.box as Box));
   const arch = art.overlays.arch.find((a) => a.lesson === Math.min(i.cur, 33));
   if (arch) over.push(piece('arch', arch.file, arch.box as Box));
+  const flags = art.overlays.flags.find((f) => f.n === built);
+  if (flags) over.push(piece('flags', flags.file, flags.box as Box));
+  for (const g of art.golds) if (g.n === built && v.stadium.golds.includes(g.k)) put(g.z, piece(`gold${g.k}`, g.file, g.box as Box));
+  if (i.cur > 18 && v.stadium.sector) over.push(piece('sector', art.overlays.sector.file, art.overlays.sector.box as Box));
   const shield = shieldOf(i.cur, i.extras.emblemN ?? 0);
   if (shield) over.push(shield);
+  // 10 из 10 и табло построено: герб — и на вывеске над табло (023-Р10; 068-Р91: иначе вывеска висела бы над пустым местом)
+  if ((i.extras.emblemN ?? 0) >= art.shield.files.length - 1 && scoreboardBuilt(built)) over.push(piece('sign', art.overlays.sign.file, art.overlays.sign.box as Box));
   const museum = v.houses.museum;
   const mu = museum.lock ? art.overlays.museum.closed : museum.sub?.key === 'goldAward' ? art.overlays.museum.gold : art.overlays.museum.open;
   over.push(piece('museum', mu.file, mu.box as Box));

@@ -23,6 +23,8 @@ const whereOf = (home: boolean, street: number): string => fill(home ? t.homeGam
 export interface MainText {
   /** Лента над кнопкой; вторая строка — метка вида урока. */
   lead: string;
+  /** Вторая строка ленты без метки (конец Двора): отдельная часть, а не перенос по ширине. */
+  lead2?: string;
   tag: { text: string; kind: '' | 'nt' } | null;
   action: string;
   where: string;
@@ -40,6 +42,7 @@ export function mainText(v: HomeView, lessonName: (n: number) => string): MainTe
     return { ...none, lead: fill(t.cupLead, { flag }), action: t.go, where: m.nextLesson === null ? where : `${where}${NB}·${NB}${fill(t.thenLesson, { n: m.nextLesson })}` };
   }
   if (m.kind === 'region') return { ...none, lead: fill(t.regionLead, { cup: m.cup === 'ours' ? '' : m.cup === 'silver' ? t.cupSilver : t.cupWaits }), action: t.region, where: t.regionWhere };
+  if (m.kind === 'done') return { ...none, lead: t.doneLead, lead2: t.doneLead2, action: t.doneAction, where: t.doneWhere };
   if (m.kind === 'stars') return { ...none, lead: t.starsLead, action: t.stars2, where: fill(t.starsWhere, { missing: m.missing, from: m.from, to: m.to }) };
   const where = whereOf(m.home, m.street);
   const record = m.best > 0 ? fill(t.record, { n: m.best, signs: plural(m.best, t.signs) }) : '';

@@ -12,6 +12,9 @@ import { newStepId, rng, sceneOf, seatsOf, shieldOf, stepGrew } from '../../src/
 import { feetOf, keeperFile, nextGroupFrom, teamOf } from '../../src/app/home/team';
 import cfg from '../../src/content/yard.json';
 import { homeView } from '../../src/engine/home';
+import type { HomeInput } from '../../src/engine/home/input';
+import { emptyCup } from '../../src/engine/cup';
+import { emptyDay } from '../../src/engine/day/section';
 
 const dir = new URL('../fixtures/accepted/', import.meta.url);
 const lessons = JSON.parse(readFileSync(new URL('../../src/content/packs/ru.yard/lessons.json', import.meta.url), 'utf8')) as { order: string[]; lessons: Record<string, { friendly?: boolean }> };
@@ -51,13 +54,25 @@ describe('вход Дома из разделов', () => {
     expect(homeInputOf(sections, facts, {}, fx.clock.day).bought).toEqual([]);
   });
 
+  it('068-Т9-К18 праздник Дома и Карты — в игровой день титула; назавтра гаснет; серебро и без титула — нет', () => {
+    // Ловит: вход Дома без `festive` (плашка и свет Карты не загорятся); праздник, не гаснущий назавтра; праздник у серебра.
+    const [, fx] = fixtures[0]!;
+    const s = fx.sections as never as { 'course:ru': never; day: never; wallet: never; stadium: never };
+    const base = { course: s['course:ru'], day: s.day, wallet: s.wallet, stadium: s.stadium };
+    const cup = (title: 'gold' | 'silver' | null) => ({ ...emptyCup(), title, titleDay: title === null ? null : '2026-11-20' });
+    expect(homeInputOf({ ...base, cup: cup('gold') }, facts, {}, '2026-11-20').festive).toBe(true);
+    expect(homeInputOf({ ...base, cup: cup('gold') }, facts, {}, '2026-11-21').festive).toBe(false);
+    expect(homeInputOf({ ...base, cup: cup('silver') }, facts, {}, '2026-11-20').festive).toBe(false);
+    expect(homeInputOf(base, facts, {}, '2026-11-20').festive).toBe(false);
+  });
+
   it('К7 край: день по счёту и пауза ≥ 5 дней', () => {
-    const d = { played: 4, days: 3, today: '2026-11-10', todayN: 1, last: Date.parse('2026-11-10T12:00:00Z') };
+    const d = { ...emptyDay(), played: 4, days: 3, today: '2026-11-10', todayN: 1, last: Date.parse('2026-11-10T12:00:00Z') };
     expect(gameDay(d, '2026-11-10')).toBe(3);
     expect(gameDay(d, '2026-11-11')).toBe(4);
     expect(pausedLong(d, '2026-11-14')).toBe(false);
     expect(pausedLong(d, '2026-11-15')).toBe(true);
-    expect(pausedLong({ played: 0, days: 0, today: null, todayN: 0, last: null }, '2026-11-15')).toBe(false);
+    expect(pausedLong(emptyDay(), '2026-11-15')).toBe(false);
   });
 });
 
@@ -73,6 +88,59 @@ describe('сцена Дома', () => {
     expect(sceneOf(i, v, 7)).toEqual(a);
     const none = input(19, 0);
     expect(sceneOf(none, homeView(none), 7).people).toHaveLength(0);
+  });
+
+  // Убранство Дома из макета (068 Т9-6б, Р86–Р89). Ловит: возврат старого порядка (флаги и белые флажки закрывают золото),
+  // флажки на сетке под золотом забора, пропавшие вывеска, растяжка или сиденья клуба.
+  const BOUGHT = ['gate-sticker', 'center-circle', 'seats-club', 'net-flags', 'graffiti', 'drum', 'goal-anim', 'banner', 'garland'];
+  const full = (cur: number, over: Partial<HomeInput> = {}) => {
+    const stars = Object.fromEntries(Array.from({ length: 32 }, (_, k) => [k + 1, 3]));
+    return { ...input(cur, 37300), stars, bought: BOUGHT, extras: { emblemN: 10 }, ...over };
+  };
+  const keys = (cur: number, over: Partial<HomeInput> = {}) => {
+    const i = full(cur, over);
+    const sc = sceneOf(i, homeView(i), 7);
+    return { under: sc.under.map((p) => p.key), over: sc.over.map((p) => p.key) };
+  };
+
+  it('Т9-6б Ловит: конец Двора — вывеска, растяжка ★★★, сиденья и флажки на сетке есть', () => {
+    const k = keys(33);
+    expect(k.over).toEqual(expect.arrayContaining(['sign', 'sector', 'item-bunting']));
+    expect(k.under).toContain('seats');
+  });
+
+  it('К91 вывеска с гербом — при эмблеме 10/10 И построенном табло (урок 22+), без табло — нет (068-Р91)', () => {
+    // Ловит: вывеска только по эмблеме — у слабого ребёнка 10/10 приходит раньше табло, и вывеска висит над пустым местом.
+    expect(keys(21).over).not.toContain('sign');
+    expect(keys(22).over).toContain('sign');
+    expect(keys(33).over).toContain('sign');
+    expect(keys(22, { extras: { emblemN: 9 } }).over).not.toContain('sign');
+  });
+
+  it('Т9-6б Ловит: накладки ступени (угловые, флаги) лежат до золота, золото 2 и 8 — после; флажки на сетке — после золота забора; арка ниже флагов', () => {
+    const o = keys(33).over;
+    expect(o.indexOf('gold8')).toBeGreaterThan(o.indexOf('flags'));
+    expect(o.indexOf('gold2')).toBeGreaterThan(o.indexOf('corner'));
+    expect(o.indexOf('item-bunting')).toBeGreaterThan(o.indexOf('gold4'));
+    expect(o.indexOf('arch')).toBeLessThan(o.indexOf('flags'));
+    expect(o.indexOf('sector')).toBeGreaterThan(o.indexOf('gold8'));
+  });
+
+  it('Т9-6б край: эмблема 9 из 10 — вывески нет; урок 18 — растяжки нет; без сидений клуба — их слоя нет', () => {
+    expect(keys(33, { extras: { emblemN: 9 } }).over).not.toContain('sign');
+    expect(keys(18).over).not.toContain('sector');
+    expect(keys(33, { bought: BOUGHT.filter((b) => b !== 'seats-club') }).under).not.toContain('seats');
+  });
+
+  it('Т9-6б край: сиденья клуба — скамейки «чаша»/«середина» по ступени на уроках 10–18, трибуна с 19, до 10 — нет', () => {
+    const file = (cur: number) => {
+      const i = full(cur);
+      return sceneOf(i, homeView(i), 7).under.find((p) => p.key === 'seats')?.file;
+    };
+    expect(file(9)).toBeUndefined();
+    expect(file(10)).toBe('art/home/seats-cup.webp');
+    expect(file(15)).toBe('art/home/seats-mid.webp');
+    expect(file(19)).toBe('art/home/seats-trib.webp');
   });
 
   // Команда на поле (Т7д, Р180). Ловит: игрок появился не с тем уроком / не на своём месте; контур показан не той группе или остался

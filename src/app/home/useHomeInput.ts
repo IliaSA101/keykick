@@ -4,7 +4,7 @@
  */
 import { computed, inject } from 'vue';
 import type { CourseProgress } from '../../engine/course/reconcile';
-import type { Day } from '../../engine/day/section';
+import { emptyDay, type Day } from '../../engine/day/section';
 import type { HomeInput } from '../../engine/home';
 import type { Stadium } from '../../engine/home/section';
 import type { Wallet } from '../../engine/rewards/section';
@@ -17,6 +17,8 @@ import { trainersDone } from '../../engine/school/order';
 import { emptySchool, type School } from '../../engine/school/section';
 import { schoolExtras } from '../school/journal';
 import { providedExtras } from './provide';
+import { cupDef, seedOf, type Cup } from '../../engine/cup';
+import { storyDef, type Story } from '../../engine/story';
 
 /**
  * `over` — подмена полей входа стендом кадров (065-Р64); в игре её нет.
@@ -39,11 +41,14 @@ export function useHomeInput(over?: Partial<HomeInput>) {
   const input = computed<HomeInput | null>(() => {
     if (!facts.value || !player.value) return null;
     const course = data<CourseProgress>('course:ru', { current: facts.value.order[0] ?? '', lessons: {}, archive: {}, leaguesDone: {} });
-    const day = data<Day>('day', { played: 0, days: 0, today: null, todayN: 0, last: null });
+    const day = data<Day>('day', emptyDay());
     const wallet = data<Wallet>('wallet', { coins: 0, rest: 0, paid: [] });
     const stadium = data<Stadium>('stadium', { fans: 0, goals: 0 });
     const shop = data<Shop>(shopDef.name, shopDef.empty());
-    return { ...homeInputOf({ course, day, wallet, stadium, shop }, facts.value, { ...providedExtras(), ...schoolExtras(data<School>('school', emptySchool()), day, today(), trainers()) }, today()), ...over };
+    const cup = data<Cup>(cupDef.name, cupDef.empty());
+    const story = data<Story>(storyDef.name, storyDef.empty());
+    const seed = seedOf(player.value?.pid ?? '');
+    return { ...homeInputOf({ course, day, wallet, stadium, shop, cup, story, seed }, facts.value, { ...providedExtras(), ...schoolExtras(data<School>('school', emptySchool()), day, today(), trainers()) }, today()), ...over };
   });
   const lessonName = (n: number): string => {
     const id = pack.pack.value?.lessons.order[n - 1];

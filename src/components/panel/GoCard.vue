@@ -8,7 +8,7 @@ import { ru } from '../../i18n/ru';
 import KeyButton from '../kit/KeyButton.vue';
 
 withDefaults(
-  defineProps<{ lead: string; lead2?: string; chip?: string; chipKind?: '' | 'nt'; where?: string; record?: string; cup?: boolean; action?: string; variant?: 'home' | 'map' }>(),
+  defineProps<{ lead: string; lead2?: string; chip?: string; chipKind?: '' | 'nt'; where?: string; record?: string; cup?: boolean; noAction?: boolean; action?: string; variant?: 'home' | 'map' }>(),
   { lead2: '', chip: '', chipKind: '', where: '', record: '', cup: false, action: ru.kit.go, variant: 'home' },
 );
 defineEmits<{ go: [] }>();
@@ -31,6 +31,7 @@ defineEmits<{ go: [] }>();
       >{{ lead2 }}</span>
     </p>
     <KeyButton
+      v-if="!noAction"
       primary
       md
       :sub="ru.kit.enter"

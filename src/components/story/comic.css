@@ -1,0 +1,309 @@
+/* Комикс Двора в игре (068 Т7): стили панели и окна по макету Э6 `docs/mockups/story/comics.css` (перенос без доски .04 и таблички клуба).
+   Окно — KitModal (`.kb-modal`), здесь только его наполнение. Портрет тренера — игровой `coachPortrait` (вырезка по плечи 24 %/61 %, 068-Р25).
+   Бумага табло — девять частей `kk-newsprint`, адреса — переменными `--u-*` из компонента. Золота и жёлтого в слоях нет (ТАБУ). */
+.kk-newsprint {
+  --np-c: 60px;
+  --np-h: calc(var(--np-c) / 2);
+  background:
+    var(--u-fold) 50% 0 / 50px 100% no-repeat,
+    var(--u-tl) 0 0 / var(--np-c) var(--np-c) no-repeat,
+    var(--u-tr) 100% 0 / var(--np-c) var(--np-c) no-repeat,
+    var(--u-bl) 0 100% / var(--np-c) var(--np-c) no-repeat,
+    var(--u-br) 100% 100% / var(--np-c) var(--np-c) no-repeat,
+    var(--u-t) calc(var(--np-c) - 1px) 0 / calc(100% - 2 * var(--np-c) + 2px) var(--np-c) no-repeat,
+    var(--u-b) calc(var(--np-c) - 1px) 100% / calc(100% - 2 * var(--np-c) + 2px) var(--np-c) no-repeat,
+    var(--u-l) 0 calc(var(--np-c) - 1px) / var(--np-c) calc(100% - 2 * var(--np-c) + 2px) no-repeat,
+    var(--u-r) 100% calc(var(--np-c) - 1px) / var(--np-c) calc(100% - 2 * var(--np-c) + 2px) no-repeat,
+    var(--u-mid) var(--np-h) var(--np-h) / calc(100% - var(--np-c)) calc(100% - var(--np-c)) no-repeat;
+  box-shadow: none;
+  filter: drop-shadow(0 5px 9px rgb(0 0 0 / 0.5));
+}
+/* окно комикса: заголовок меньше 30 px ЭБ — под ним три панели в ряд и полоска таймера */
+.st-cwin h2 {
+  font-size: 22px;
+}
+.st-strip {
+  display: grid;
+  grid-template-columns: 1fr 1.7fr;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #fff;
+}
+/* ключевая панель (вторая) — 16:9 (кадр NB 2K, он же «фото» выпуска и кадр ролика): одно соотношение на 1024 и 1920; боковая тянется по высоте ряда (≈1:1, кадр 924×882) */
+.st-strip > :nth-child(2) {
+  aspect-ratio: 16 / 9;
+}
+/* панель: чёрная рамка вокруг картинки на белой полосе; высота — от ключевой панели ряда */
+.st-pan {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  border: 4px solid #1a1a1a;
+  border-radius: 4px;
+  background: #fff;
+  overflow: hidden;
+}
+.st-pan .st-art {
+  flex: 1;
+  min-width: 0;
+}
+/* закрытая панель (перелист не дошёл): та же чёрная рамка 4 px, заливка #1a1a1a, без цифры (050-Р42) */
+.st-pan.empty {
+  background: #1a1a1a;
+}
+.st-dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.st-cwin .kb-modal {
+  gap: 10px;
+}
+.st-dots i {
+  width: 12px;
+  height: 12px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+.st-dots i.on {
+  background: #fff;
+}
+
+/* пузырь: белый, контур и текст — краска #1a1a1a (как рамка панели, но 3 px: пузырь мельче панели); хвост — два треугольника (контур и белая заливка поверх
+   стыка), контур хвоста того же размера, что у пузыря */
+.st-bub {
+  --ink: #1a1a1a;
+  --bw: 3px;
+  position: absolute;
+  z-index: 2;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 6px 10px;
+  border: var(--bw) solid var(--ink);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 700;
+  text-align: left;
+}
+.st-bub::before,
+.st-bub::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-color: transparent;
+}
+/* вниз: контурный треугольник 20×16 от внутренней кромки пузыря (его вершина — на 13 px ниже линии) и белый 14,2×11,4 внутри него: уже на толщину контура,
+   начинается на 1 px выше кромки и закрывает линию пузыря на стыке; наклон бока 10:16, поэтому белый уже на 2×3,5 px */
+.st-bub.down::before {
+  left: 18px;
+  top: 100%;
+  border-width: 16px 10px 0;
+  border-top-color: var(--ink);
+}
+.st-bub.down::after {
+  left: 20.9px;
+  top: calc(100% - 1px);
+  border-width: 11.4px 7.1px 0;
+  border-top-color: #fff;
+}
+/* влево: то же, остриём влево от левой кромки */
+.st-bub.left::before {
+  left: -16px;
+  top: 12px;
+  border-width: 10px 16px 10px 0;
+  border-right-color: var(--ink);
+}
+.st-bub.left::after {
+  left: -10.4px;
+  top: 14.9px;
+  border-width: 7.1px 11.4px 7.1px 0;
+  border-right-color: #fff;
+}
+/* хвост — точкой на голове говорящего (050-Р42, r2 п. 3): --tx — x вершины (cqw панели), низ пузыря — на 14 px выше вершины (bottom задан в стиле); --sh сдвигает пузырь
+   относительно хвоста; --bl — левый край пузыря, зажат в панели; хвост (контурный и белый) стоит на --tx независимо от пузыря */
+.st-bub.at {
+  --bl: clamp(8px, calc(var(--tx) - 28px + var(--sh, 0px)), calc(100cqw - var(--w) - 8px));
+  --tl: clamp(12px, calc(var(--tx) - var(--bl) - 13px), calc(var(--w) - 44px));
+  left: var(--bl);
+  width: var(--w);
+}
+.st-bub.at.down::before {
+  left: var(--tl);
+}
+.st-bub.at.down::after {
+  left: calc(var(--tl) + 2.9px);
+}
+/* плашка рассказчика поверх ключевой панели (050-Р42 б): белая, контур 3 px краской, круглый портрет тренера из Дома слева (как аватар ЭБ), до 3 строк, ничего не срезает */
+.st-nar {
+  position: absolute;
+  z-index: 2;
+  left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  max-width: calc(100% - 16px);
+  padding: 4px 12px 4px 4px;
+  border: 3px solid #1a1a1a;
+  border-radius: 28px;
+  background: #fff;
+  color: #1a1a1a;
+}
+.st-nar.top {
+  top: 8px;
+}
+.st-nar.bottom {
+  bottom: 8px;
+}
+.st-nar p {
+  margin: 0;
+  max-width: 330px;
+  font-size: 13px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+/* Э6 r4 (kk-art r3 п. 2–3): портрет по плечи — вырезка из полного роста (1792×2400) квадратом 935 px, голова ≈ 16 px при круге 34 px; текст плашки и пузырей — баланс строк */
+.st-nar-ava {
+  object-view-box: inset(0 24% 61% 24%);
+  object-position: 50% 50%;
+}
+/* верхняя плашка на 3 px выше: зазор до пузыря капитана ≥ 12 px и на 1920 (было 8 px — круг не меняем, плашка по кругу 48 px) */
+.st-nar.top {
+  top: 5px;
+}
+.st-nar p,
+.st-bub {
+  text-wrap: balance;
+}
+.st-nar-ava {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 15%;
+  background: #2b2a6a;
+  box-shadow: 0 0 0 2px #1a1a1a;
+}
+/* «САША 7» на пустой спине капитана К2 (белый шрифт формы, тёмный контур — спина в чёрно-белую полосу); центр блока 24,8 % × 66 % панели, размер — от ширины панели;
+   наклон по перспективе кадра — вид сзади чуть сверху: плечи шире пояса, плоскость спины откинута назад */
+.st-backprint {
+  position: absolute;
+  z-index: 1;
+  transform: translate(-50%, -50%) perspective(60cqw) rotateX(-8deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  font-weight: 900;
+  white-space: nowrap;
+  color: #fff;
+  -webkit-text-stroke: 0.55cqw #1a1a1a;
+  paint-order: stroke fill;
+}
+/* имя — на тёмной плашке, как на настоящей форме; шрифт не мельче 11 px на 1024 */
+.st-backprint b {
+  padding: 0.18em 0.45em 0.2em;
+  border-radius: 0.3em;
+  background: #1a1a1a;
+  -webkit-text-stroke: 0;
+  font-size: max(11px, 4.4cqw);
+  letter-spacing: 0.06em;
+}
+.st-backprint i {
+  margin-top: 0.1cqw;
+  font-size: 11.5cqw;
+  font-style: normal;
+}
+/* ключевой кадр «Завязки»: «САША 7» — печатью на майке (без плашек и рамок); размер — от ширины панели, имя не мельче 11 px */
+.st-shirt {
+  position: absolute;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  font-weight: 900;
+  white-space: nowrap;
+  color: var(--c1);
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.25);
+}
+.st-shirt b {
+  font-size: max(11px, 3cqw);
+  letter-spacing: 0.02em;
+}
+.st-shirt i {
+  font-size: 6.4cqw;
+  font-style: normal;
+}
+/* картинка панели (печёт comics_img.py) вместо серой полосы */
+.st-art {
+  /* опора для картинки и пузырей (position: absolute): без неё картинка панели растягивалась на всю сцену поверх окна */
+  position: relative;
+  container-type: inline-size;
+}
+.st-art.photo {
+  background: #2b2630;
+}
+.st-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* табло группы — лист газетной бумаги Г1 (kit, .kk-newsprint) с таблицей кодом на размытом фоне раздевалки К1; текст — краска, строка клуба — зелёный (ТАБУ: ни синего, ни золота) */
+.st-tabloart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.st-tablo {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 86%;
+  padding: 22px 20px 20px;
+  color: #1a1a1a;
+}
+.st-tablo h4 {
+  margin: 0 0 6px;
+  font-family: 'DejaVu Serif', Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+  line-height: 1.2;
+  text-align: center;
+}
+.st-tablo ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 2px solid #1a1a1a;
+}
+.st-tablo li {
+  display: flex;
+  gap: 8px;
+  padding: 4px 6px;
+  border-bottom: 1px solid rgb(26 26 26 / 0.4);
+  font-size: 14px;
+}
+.st-tablo li span {
+  width: 14px;
+  opacity: 0.7;
+}
+.st-tablo li b {
+  flex: 1;
+}
+.st-tablo li.our {
+  background: #1f8a4c;
+  color: #fff;
+}
+

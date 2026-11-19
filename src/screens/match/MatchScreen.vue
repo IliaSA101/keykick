@@ -11,6 +11,8 @@ import { comebackLesson, dictionaryOf, buildStart, feed, hold, isWhistle, releas
 import { quiet, shownOf, type Shown } from '../../app/match/effects';
 import { frameRun, type FrameMatch } from '../../app/match/frame';
 import { finishRun, matchRead } from '../../app/match/finish';
+import { stageOf } from '../../engine/home/yard';
+import { emptyStory, storyDef, type Story } from '../../engine/story/section';
 import { openPenalty, skipPenalty, submitPenalty, typeInto, type PenaltyFlow } from '../../app/match/penaltyFlow';
 import { rivalName } from '../../app/home/texts';
 import { tasks } from '../../app/school/tasks';
@@ -26,9 +28,17 @@ import { soundOn } from '../../components/shell/sound';
 import { stageScale } from '../../components/shell/stageScale';
 import { rivalKitOf } from '../../engine/club/rival';
 import { rivalOf } from '../../engine/cup/teams';
+import { emblemKey } from '../../app/cup/groupView';
+import { roundOf } from '../../app/cup/run';
+import { useCupMatch } from '../../app/cup/useCupMatch';
+import CupIntro from '../../components/cup/CupIntro.vue';
+import type { RoundKey } from '../../engine/cup';
 import { clubDef, type Club } from '../../engine/club/section';
 import { ruCourseDef } from '../../engine/course/section';
 import { dayDef } from '../../engine/day/section';
+import { typedMs } from '../../engine/typing/typing';
+import { useMatchWarmup } from '../../app/day/useMatchWarmup';
+import Warmup from '../../components/day/Warmup.vue';
 import { matchIdOf } from '../../engine/journal';
 import { isComeback, type MatchSave, type RunningMatch } from '../../engine/match';
 import { pickPenaltyTask, parseTasks, type Task } from '../../engine/school/tasks';
@@ -39,6 +49,7 @@ import ComebackBanner from './ComebackBanner.vue';
 import MatchScene from './MatchScene.vue';
 import MatchWindows from './MatchWindows.vue';
 import PenaltyWindow from './PenaltyWindow.vue';
+import { seriesView } from './seriesView';
 import { litCodes, viewOf, withPenaltySheet, withShow } from './view';
 import leagues from '../../content/courses/ru/leagues.json';
 
@@ -85,6 +96,8 @@ function begin(): void {
   const picked = frameLesson ?? lessons.find((l) => l.id === want) ?? lessons.find((l) => l.id === cur) ?? lessons[0];
   if (!picked) return;
   const t0 = now();
+  const round = props.frame?.cup?.round ?? roundOf(router.currentRoute.value.query.cup);
+  if (round !== null) return void beginCup(round, lessons, t0);
   comeback.value = props.frame ? props.frame.banner === 'comeback' : isComeback(sec(dayDef).last, t0);
   const lesson = comeback.value && !props.frame ? comebackLesson(lessons, picked) : picked; // ТЗ-2.11: не строже пройденного
   lessonNo.value = lesson.n;
@@ -100,6 +113,23 @@ function begin(): void {
   lessonId = lesson.id;
 }
 let lessonId = '';
+
+/** Матч Кубка (068 Т6): подготовка и свисток — `app/cup/useCupMatch.ts`; здесь только перенос готового в состояние экрана. */
+const cup = useCupMatch({ session, router, player, frame: props.frame, today });
+const cupInfo = cup.info;
+/** Серия ударов после ничьей в плей-офф (Э5.30–.35): сцена показывает её, пока серия не кончилась. */
+const seriesUi = cup.series;
+function beginCup(round: RoundKey, lessons: ReturnType<typeof lessonsOf>, t0: number): void {
+  const prepared = cup.prepare(round, lessons, t0);
+  if (prepared === null) return;
+  lessonNo.value = prepared.lesson.n;
+  newKeys.value = '';
+  lessonKeys.value = prepared.lesson.keys;
+  matchId.value = prepared.matchId;
+  run.value = prepared.run;
+  if (props.frame) started.value = props.frame.started;
+  lessonId = prepared.lesson.id;
+}
 /** Лист пенальти на экране: пока он открыт, печати нет, а Enter, Esc и Пробел — его. */
 const flow = ref<PenaltyFlow | null>(null);
 /** Кадр стенда: лист из фикстуры (задача — id или своя целиком); `verdict` — лист уже после ответа. */
@@ -114,9 +144,16 @@ function frameFlow(show: NonNullable<FrameMatch['show']>): PenaltyFlow {
 watch([pack.state, player], begin, { immediate: true });
 
 const state = computed<RunningMatch | null>(() => (run.value && run.value.state.phase !== 'idle' ? run.value.state : null));
+const sv = computed(() => (seriesUi.value === null || state.value === null ? null : seriesView(seriesUi.value, viewOf(state.value).score)));
 const view = computed(() => {
   if (!state.value) return null;
-  const v = withShow(viewOf(state.value), props.frame?.show, state.value.keymap);
+  const base = withShow(viewOf(state.value), props.frame?.show, state.value.keymap);
+  if (sv.value !== null) return { ...sv.value.view, score: base.score };
+  // табло матча Кубка: во вступлении справа — чей матч (Э5.23), в доп. времени — раунд (Э5.29)
+  const info = cupInfo.value;
+  // окно микроразминки перед матчем: табло «Микроразминка · перед матчем» (Э6.43), а не «Разминка · без счёта» матча
+  if (!started.value && (warm.open.value || props.frame?.warm !== undefined)) return { ...base, phase: ru.day.act.warmup, detail: ru.day.warm.boardWhen };
+  const v = info === null ? base : !started.value ? { ...base, detail: info.board } : state.value.phase === 'extra' ? { ...base, detail: info.boardExtra } : base;
   return flow.value === null ? v : withPenaltySheet(v);
 });
 const phase = computed(() => state.value?.phase ?? 'idle');
@@ -175,12 +212,14 @@ const typeAnswer = (v: AnswerInput): void => void (flow.value && (flow.value = t
 
 function finish(r: Run): void {
   finished.value = true;
-  const done = finishRun(r, { now: now(), day: today(), lessonId, matchId: matchId.value }, {
+  if (cup.whistle(r, { now: now(), matchId: matchId.value, lessonId, lessonNo: lessonNo.value })) return;
+  const done = finishRun(r, { now: now(), day: today(), lessonId, matchId: matchId.value, stage: stageOf(lessonNo.value) }, {
     read: (): MatchSave => matchRead(player.value?.env.sections),
+    readStory: (): Story => (player.value?.env.sections[storyDef.name]?.data as Story | undefined) ?? emptyStory(),
     save: (patch) => session.save(patch),
     journal: matchJournal(),
   });
-  putFinished(done, { lesson: lessonId, no: lessonNo.value });
+  putFinished(done, { lesson: lessonId, no: lessonNo.value, letters: newKeys.value });
   void router.push('/result');
 }
 
@@ -201,7 +240,14 @@ const secondHalf = (): void => {
 };
 /** Перерыв с учебной игрой и «Права на компьютер» (067 Т17, Т18): состояние и «Второй тайм» — `app/match/breakFlow.ts`. */
 const { learn, learnOpen, learnSecond, rightsClosed, ownerLine } = useMatchBreak(session, { frame: props.frame, phase, lessonNo, lessonKeys, club, now, day: today, secondHalf });
-const start = (): void => void (started.value = true);
+/** Микроразминка (068-Р69): после «На матч» и в перерыве, если набралось ≈ 20 мин печати; пока окно открыто, матч стоит и клавиши молчат. */
+const warm = useMatchWarmup(
+  { day: () => sec(dayDef), today, saveDay: (d) => void session.save({ day: d }), halfMs: () => (state.value ? typedMs(state.value.stats) : 0) },
+  (spot) => void (spot === 'start' && (started.value = true)),
+);
+/** «На матч»: пора размяться — окно разминки, матч начнётся после него. */
+const start = (): void => void (!warm.offerStart() && (started.value = true));
+watch(phase, (p) => void (p === 'break' && !props.frame && warm.offerBreak()));
 
 /** Клавиши листа: Enter — ответить (после ответа — дальше), Пробел после ответа — дальше, Esc — пауза, как во всём матче (065-Р122 «а», ТЗ-2.21); «Не бить» — кнопкой; печать не идёт. */
 function penaltyKey(e: KeyboardEvent, f: PenaltyFlow): void {
@@ -224,9 +270,27 @@ function penaltyKey(e: KeyboardEvent, f: PenaltyFlow): void {
   }
 }
 
+/** Клавиши серии: печать слова удара идёт в машину серии; Esc — пауза, как во всём матче; запись и выход на итог — в `useCupMatch`. */
+function seriesKeyDown(e: KeyboardEvent, r: Run): void {
+  if (e.defaultPrevented) return;
+  if (e.key === 'Escape') {
+    if (r.overlay === 'none') {
+      e.preventDefault();
+      act('esc');
+    }
+    return;
+  }
+  if (r.overlay !== 'none') return;
+  const ev = keyEventOf({ code: e.code, key: e.key, repeat: e.repeat, ctrlKey: e.ctrlKey, altKey: e.altKey, metaKey: e.metaKey, caps: e.getModifierState('CapsLock') }, now());
+  if (!ev || ev.type !== 'key') return;
+  e.preventDefault();
+  play(cup.seriesPress(ev, !soundOn.value));
+}
+
 function onKey(e: KeyboardEvent): void {
   const r = run.value;
-  if (e.defaultPrevented || !r || finished.value || learn.entry.value !== null || learn.rights.value !== null) return; // клавиши окна учебной игры и «Прав» — их собственные
+  if (r && seriesUi.value !== null) return seriesKeyDown(e, r);
+  if (e.defaultPrevented || !r || finished.value || warm.open.value || learn.entry.value !== null || learn.rights.value !== null) return; // клавиши окна учебной игры и «Прав» — их собственные
   if (flow.value !== null && r.overlay === 'none') {
     penaltyKey(e, flow.value);
     return;
@@ -262,7 +326,7 @@ function onKey(e: KeyboardEvent): void {
 
 function tick(): void {
   const r = run.value;
-  if (!r || !started.value || r.overlay !== 'none' || finished.value || phase.value === 'break' || flow.value !== null) return;
+  if (!r || !started.value || warm.open.value || r.overlay !== 'none' || finished.value || phase.value === 'break' || flow.value !== null) return;
   apply(feed(r, { type: 'tick', t: now() }));
 }
 
@@ -285,11 +349,13 @@ const lessonInfo = computed(() => {
   const text = pack.pack.value?.text.ru?.lessons[s?.lessonId ?? ''];
   return { name: text?.name ?? '', keys: newKeys.value, tip: (text as { tip?: string[] } | undefined)?.tip?.[0] ?? '' };
 });
-const rival = computed(() => rivalOf(lessonNo.value));
+const rival = computed(() => cupInfo.value?.team ?? rivalOf(lessonNo.value));
 const rivalTitle = computed(() => {
   const s = rivalName(props.frame?.show?.street ?? rival.value.street);
   return s.charAt(0).toUpperCase() + s.slice(1);
 });
+/** «двор на Заречной» под именем соперника Кубка (как на макете Э5.25). */
+const cupCity = computed(() => rivalName(rival.value.street));
 const overlay = computed(() => run.value?.overlay ?? 'none');
 </script>
 
@@ -301,10 +367,13 @@ const overlay = computed(() => run.value?.overlay ?? 'none');
         :kit="club.kit"
         :rival-kit="rivalKitOf(rival, club.kit)"
         :us="{ name: club.name || t.sides.us, backName: club.backName, backNumber: club.backNumber }"
-        :rival="{ name: rivalTitle, city: club.city }"
+        :rival="cupInfo ? { name: cupInfo.team.name, city: cupCity } : { name: rivalTitle, city: club.city }"
+        :cup="cupInfo ? { ours: emblemKey('our'), rival: emblemKey(cupInfo.team.id), rivalShort: cupInfo.team.name } : undefined"
+        :series="sv?.board"
+        :night="cupInfo?.round === 'f'"
         :width="width"
-        :layout="flow || learnOpen ? undefined : state.layout"
-        :shout="shown.shout"
+        :layout="flow || learnOpen || (cupInfo && !started) || (!started && (warm.open.value || frame?.warm !== undefined)) ? undefined : state.layout"
+        :shout="seriesUi ? seriesUi.shout : shown.shout"
         :bump="shown.bump"
         :lit="started ? [] : litCodes(newKeys, state.keymap, state.layout)"
         :ball="shown.shout === null && !flow"
@@ -313,7 +382,7 @@ const overlay = computed(() => run.value?.overlay ?? 'none');
       />
       <ShellHeader
         match
-        :pause="overlay === 'none' && !learnOpen"
+        :pause="overlay === 'none' && !learnOpen && !warm.open.value && frame?.warm === undefined"
         @pause="act('pause')"
       />
 
@@ -328,13 +397,36 @@ const overlay = computed(() => run.value?.overlay ?? 'none');
         @next="afterPenalty"
       />
       <ComebackBanner v-if="comeback && !started && overlay === 'none'" />
+      <CupIntro
+        v-if="cupInfo && !started && overlay === 'none'"
+        :info="cupInfo"
+        :club="club.name || t.sides.us"
+        @start="start"
+        @help="act('help')"
+        @home="router.push('/home')"
+      />
+      <p
+        v-if="cupInfo && started"
+        class="cupban"
+      >
+        <template v-if="sv">
+          {{ cupInfo.title }}<small>{{ sv.board.ban }}</small>
+        </template>
+        <template v-else-if="state.phase === 'extra'">
+          {{ ru.match.banner.extra }}<small>{{ ru.cup.match.extraNote }}</small>
+        </template>
+        <template v-else>
+          {{ cupInfo.title }}
+        </template>
+      </p>
       <MatchWindows
         :state="state"
         :overlay="overlay"
-        :started="started"
+        :started="started || cupInfo !== null || warm.open.value || frame?.warm !== undefined"
         :info="lessonInfo"
         :plan="learn.plan.value"
         :after="learn.after.value"
+        :covered="warm.open.value || frame?.warm !== undefined"
         @act="act"
         @start="start"
         @second="secondHalf"
@@ -356,6 +448,13 @@ const overlay = computed(() => run.value?.overlay ?? 'none');
         @next="(id) => void learn.open(id)"
         @again="void learn.again()"
         @done="learn.done"
+      />
+      <Warmup
+        v-if="warm.open.value || frame?.warm !== undefined"
+        :step="frame?.warm"
+        :frozen="frame !== undefined"
+        @done="warm.close()"
+        @skip="warm.close()"
       />
       <RightsCard
         v-if="learn.rights.value && learn.entry.value === null"
@@ -388,5 +487,7 @@ const overlay = computed(() => run.value?.overlay ?? 'none');
 
 <style scoped>
 .match { position: absolute; inset: 0; color: var(--text); }
+.cupban { position: absolute; left: 50%; transform: translateX(-50%); top: 92px; margin: 0; font-size: 24px; font-weight: 800; white-space: nowrap; color: #fff; text-shadow: 0 2px 6px rgb(0 0 0 / 0.85); pointer-events: none; }
+.cupban small { margin-left: 12px; font-size: 18px; font-weight: 700; }
 .msg { position: absolute; inset: 0; display: grid; place-content: center; gap: 12px; text-align: center; font-size: 20px; }
 </style>

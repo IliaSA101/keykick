@@ -1,34 +1,53 @@
 <script setup lang="ts">
 /**
- * Музей клуба (067 Т11, ТЗ-5.10; кадр Э2К.26 без газет и кубка — их данные 068 Т7): белый павильон изнутри, на стенах — стенд «Стадион «Коробка»»
- * с Двором целиком и «Кубки лиг» (силуэты), на скамье — телевизор «Видео · N из 4». Места — по картинке сцены 1920×1072 через `geometry` Дома.
- * Esc или «Дом · Esc» — домой. Данные — поставщик `app/museum/provide.ts` (пока пуст), покупки — раздел `stadium` через вход Дома.
+ * Музей клуба (067 Т11, 068 Т11; ТЗ-5.10; Э2К.26–30, .39/.40): белый павильон изнутри — стенд газет 2×4 (`MuseumPapers`), кубок на тумбе (`MuseumCup`), стенд «Стадион
+ * «Коробка»» с Двором целиком, «Кубки лиг» и на скамье телевизор «Видео · N из 4». Места — по картинке сцены 1920×1072 через `geometry` Дома.
+ * Выпуск с полки открывает окно архива (`NewsWindow`, Э6.11): Esc или Enter возвращают в Музей, флаг «показан» не трогаем. Телевизор после титула
+ * проигрывает ролик Двора. Esc или «Дом · Esc» — домой. Данные — разделы `story`, `cup`, `stadium` через вход Дома (`app/museum/provide.ts`).
  */
-import { computed, inject, onMounted, onUnmounted } from 'vue';
+import { computed, inject, onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { artUrl } from '../../art/assets';
 import { useHomeInput } from '../../app/home/useHomeInput';
-import { dreamText, fill } from '../../app/home/texts';
+import { cupText, dreamText, fill } from '../../app/home/texts';
 import { sceneOf } from '../../app/home/scene';
-import { providedMuseum } from '../../app/museum/provide';
+import { cupWonOf, museumDataOf } from '../../app/museum/provide';
+import { useNewsView, useNewsViews } from '../../app/story/useNewsView';
 import { K, offOf, sxOf, syOf } from '../../components/home/geometry';
 import { useStageWidth } from '../../components/home/useStageWidth';
 import ScreenHead from '../../components/league/ScreenHead.vue';
 import { clubDef, type Club } from '../../engine/club/section';
-import { homeView } from '../../engine/home';
-import { museumView } from '../../engine/museum';
+import NewsWindow from '../../components/story/NewsWindow.vue';
+import { emptyCup, type Cup } from '../../engine/cup';
+import { homeView, paperFreshMark, paperMarkOnHome } from '../../engine/home';
+import { museumView, papersShelf } from '../../engine/museum';
+import { emptyStory, releasedPapers, type Story } from '../../engine/story';
+import MuseumCup from './MuseumCup.vue';
+import MuseumPapers from './MuseumPapers.vue';
+import MuseumVideo from './MuseumVideo.vue';
 import { ru } from '../../i18n/ru';
 
 const t = ru.museum;
 const router = useRouter();
-/** Стенд кадров: покупки и ролики кадра (в игре их даст 068 Т7); в игре — null. */
-const stand = inject<(() => { bought?: string[]; videos?: number }) | null>('kk-museum-stand', null)?.() ?? null;
+/** Стенд кадров: покупки кадра; в игре — null. */
+const stand = inject<(() => { bought?: string[] }) | null>('kk-museum-stand', null)?.() ?? null;
 const { input, data } = useHomeInput();
 const width = useStageWidth();
 const club = computed<Club>(() => data<Club>('club', clubDef.empty()));
 const view = computed(() => (input.value ? homeView(input.value) : null));
 const head = computed(() => (view.value ? dreamText(view.value) : null));
-const shelves = computed(() => museumView(stand?.bought ?? input.value?.bought ?? [], { ...providedMuseum(), ...(stand?.videos === undefined ? {} : { videos: stand.videos }) }));
+const story = computed(() => data<Story>('story', emptyStory()));
+const cup = computed(() => data<Cup>('cup', emptyCup()));
+const cupWon = computed(() => cupWonOf(cup.value));
+const shelves = computed(() => museumView(stand?.bought ?? input.value?.bought ?? [], museumDataOf(cup.value, input.value?.cur ?? 0)));
+const released = computed(() => releasedPapers(story.value));
+/** Свежий — последний вышедший выпуск, пока он день выхода и до урока 31 (с 31 — метка на Стенгазете Дома, 049-Р37). */
+const fresh = computed(() => (input.value && paperFreshMark(input.value) ? (released.value.at(-1) ?? null) : null));
+const papers = computed(() => papersShelf(released.value, fresh.value));
+const minis = useNewsViews(() => released.value);
+const openN = ref<number | null>(null);
+const news = useNewsView(() => (openN.value === null ? null : { n: openN.value, archive: true }));
+const videoOn = ref(false);
 const base = import.meta.env.BASE_URL;
 /** Двор для стенда: тот же кадр ступени, что на Доме; врезка — стадион (593…1479 × 418…928 px кадра, как в макете). */
 const yardImg = computed(() => (input.value && view.value ? `${base}${sceneOf(input.value, view.value, 1).base}` : ''));
@@ -45,6 +64,10 @@ function board(x0: number, y0: number, x1: number): { box: Record<string, string
   };
 }
 const stadium = computed(() => board(1106, 316, 1522));
+const paperBoard = computed(() => board(150, 316, 780));
+/** Ширина миниатюры: доска минус поля 2×9, рамка 2×2 и три зазора по 4 — на четыре колонки. */
+const cell = computed(() => (sx(780) - sx(150) - 18 - 4 - 12) / 4);
+const cupStage = computed(() => (view.value ? cupText(view.value).state : ''));
 const leagues = computed(() => board(1546, 286, 1808));
 /** Телевизор: ширина 150 px сцены, ножки на верху скамьи (низ — y 792, центр x 1600); картинка 360×317, экран — тёмный прямоугольник в долях. */
 const TV = { w: 360, h: 317, screen: [9.2, 14.5, 65.8, 57.1] as const };
@@ -57,7 +80,7 @@ const caption = computed(() => ({ left: `${sx(1600)}px`, top: `${syOf(838)}px` }
 const sceneBox = computed(() => ({ left: `${offOf(width.value)}px`, width: `${1920 * K}px` }));
 
 function onKey(e: KeyboardEvent): void {
-  if (e.key === 'Escape') void router.push('/home');
+  if (e.key === 'Escape' && openN.value === null && !videoOn.value) void router.push('/home');
 }
 onMounted(() => globalThis.addEventListener('keydown', onKey));
 onUnmounted(() => globalThis.removeEventListener('keydown', onKey));
@@ -68,7 +91,7 @@ onUnmounted(() => globalThis.removeEventListener('keydown', onKey));
     <img
       class="scene"
       :style="sceneBox"
-      :src="artUrl('albumMuseumIn')"
+      :src="artUrl(cupWon ? 'albumMuseumGold' : 'albumMuseumIn')"
       alt=""
     >
     <div class="scrim" />
@@ -86,6 +109,33 @@ onUnmounted(() => globalThis.removeEventListener('keydown', onKey));
     />
 
     <template v-if="input">
+      <i
+        v-for="(r, i) in paperBoard.ropes"
+        :key="`p${i}`"
+        class="rope"
+        :style="r"
+      />
+      <section
+        class="board papers"
+        :style="paperBoard.box"
+      >
+        <MuseumPapers
+          v-if="minis"
+          :shelf="papers"
+          :views="minis.views"
+          :color="minis.color"
+          :cell="cell"
+          :note="paperMarkOnHome(input)"
+          @open="openN = $event"
+        />
+      </section>
+
+      <MuseumCup
+        :won="cupWon"
+        :stage="cupStage"
+        :width="width"
+      />
+
       <i
         v-for="(r, i) in stadium.ropes"
         :key="`s${i}`"
@@ -133,10 +183,13 @@ onUnmounted(() => globalThis.removeEventListener('keydown', onKey));
         </div>
       </section>
 
-      <div
+      <button
+        type="button"
         class="tv"
         :class="{ off: shelves.videos === 0 }"
         :style="tv"
+        :disabled="!cupWon"
+        @click="videoOn = true"
       >
         <img
           :src="artUrl('albumTvWhite')"
@@ -144,9 +197,9 @@ onUnmounted(() => globalThis.removeEventListener('keydown', onKey));
         >
         <span
           class="tvs"
-          :style="screenBox"
+          :style="shelves.videos > 0 ? { ...screenBox, backgroundImage: `url('${yardImg}')` } : screenBox"
         ><i /></span>
-      </div>
+      </button>
       <div
         class="cap"
         :style="caption"
@@ -154,6 +207,18 @@ onUnmounted(() => globalThis.removeEventListener('keydown', onKey));
         <b>{{ fill(t.video, { n: String(shelves.videos), of: String(shelves.videosOf) }) }}</b>
       </div>
     </template>
+    <NewsWindow
+      v-if="news"
+      :view="news.view"
+      :color="news.color"
+      back="museum"
+      archive
+      @close="openN = null"
+    />
+    <MuseumVideo
+      v-if="videoOn"
+      @close="videoOn = false"
+    />
   </main>
 </template>
 
@@ -274,6 +339,17 @@ onUnmounted(() => globalThis.removeEventListener('keydown', onKey));
 .tv {
   position: absolute;
   z-index: 5;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: default;
+}
+.tv:not(:disabled) {
+  cursor: pointer;
+}
+.tv:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 .tv > img {
   display: block;

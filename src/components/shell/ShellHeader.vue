@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * Шапка — `topbar` из kit.mjs, одна на всю игру: логотип, пять пунктов меню (063-Р17), справа звук.
+ * Шапка — `topbar` из kit.mjs, одна на всю игру: логотип, пять пунктов меню (063-Р17), справа меню игрока (068-Р82; в матче его нет) и звук.
  * page — id активного пункта (`home`, `map`…; другой — никакого); match — состояние «матч»: меню приглушено и не нажимается,
  * справа «Пауза Esc»; pause=false — без паузы (матч окончен, окно поверх держит Esc само, запрос Сюжета 050 №21).
  */
@@ -9,6 +9,7 @@ import { artUrl } from '../../art/assets';
 import { isScreen } from '../../engine/nav';
 import { ru } from '../../i18n/ru';
 import PauseButton from './PauseButton.vue';
+import PlayerMenu from './PlayerMenu.vue';
 import SoundButton from './SoundButton.vue';
 
 const props = withDefaults(defineProps<{ page?: string; match?: boolean; pause?: boolean }>(), { page: '', match: false, pause: true });
@@ -49,6 +50,7 @@ function go(e: MouseEvent, id: string): void {
         v-if="match && pause"
         @pause="$emit('pause')"
       />
+      <PlayerMenu v-if="!match" />
       <SoundButton />
     </div>
   </header>

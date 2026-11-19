@@ -1,0 +1,19 @@
+{
+  "comment": "Сюжет Двора (068 Т3, story.md §1–2): вехи выпусков и комиксов, `next` — урок «Дальше» на день выхода (строка модели «перед уроком», story.md §2; null — после Двора), «фото» и панели — только ключи; тексты — src/i18n/ru/story.ts (Т7)",
+  "papers": [
+    { "n": 1, "next": 6, "trigger": { "lesson": 5 }, "photo": "lay-day1" },
+    { "n": 2, "next": 10, "trigger": { "lesson": 9 }, "photo": "lay-cup" },
+    { "n": 3, "next": 11, "trigger": { "cup": "first" }, "photo": "m-group" },
+    { "n": 4, "next": 15, "trigger": { "lesson": 14 }, "photo": "lay-s6" },
+    { "n": 5, "next": 19, "trigger": { "cup": "group" }, "photo": "lay-s19" },
+    { "n": 6, "next": 22, "trigger": { "lesson": 21 }, "photo": "lay-s22" },
+    { "n": 7, "next": 29, "trigger": { "cup": "semi" }, "photo": "bg-b" },
+    { "n": 8, "next": null, "trigger": { "cup": "final" }, "photo": "title-key" }
+  ],
+  "comics": [
+    { "id": "intro", "panels": 3 },
+    { "id": "group", "panels": 3 },
+    { "id": "final", "panels": 3 },
+    { "id": "silver", "panels": 3 }
+  ]
+}

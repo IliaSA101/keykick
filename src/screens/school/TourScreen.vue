@@ -23,7 +23,7 @@ import TaskAnswer from '../../components/school/TaskAnswer.vue';
 import NumberStrip, { type StripMark } from '../../components/paper/NumberStrip.vue';
 import { keysOf } from '../../components/paper/paper';
 import { seedFromText } from '../../engine/school/answers';
-import type { Day } from '../../engine/day/section';
+import { emptyDay, type Day } from '../../engine/day/section';
 import type { Wallet } from '../../engine/rewards/section';
 import { emptyStadium, type Stadium } from '../../engine/home/section';
 import { emptySchool, type School } from '../../engine/school/section';
@@ -42,7 +42,7 @@ const router = useRouter();
 const { session, data, pack, input, today, trainers } = useHomeInput();
 // кадр стенда (только в разработке): на каком шаге открыт тур; в игре поставщика нет
 const stand = inject<() => SchoolStand>('kk-school-stand', () => ({}));
-const day = (): Day => data<Day>('day', { today: null, todayN: 0, days: 0, played: 0, last: null });
+const day = (): Day => data<Day>('day', emptyDay());
 const school = (): School => data<School>('school', emptySchool());
 /** Номер тура для «Реванша» из журнала (`?fix=n`); обычный тур — null. */
 const fixN = route.query.fix === undefined ? null : Number(route.query.fix);

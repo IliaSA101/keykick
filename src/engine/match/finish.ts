@@ -8,14 +8,14 @@ import { PACKS_YARD } from '../album/order';
 import type { Album } from '../album/section';
 import type { CourseProgress, LessonMark } from '../course/reconcile';
 import { ruCourseDef } from '../course/section';
-import { playedMatch, type Day } from '../day/section';
+import { addAcc, addTyped, playedMatch, type Day } from '../day/section';
 import { applyKeys, keyTile, type KeyTile } from '../coach/keys';
 import type { CoachKeys } from '../coach/section';
 import { addGoals, type Stadium } from '../home/section';
 import { applyPresses, type FormGrowth, type FormState } from '../form/rank';
 import { credit, isPaid, type Wallet } from '../rewards/cash';
 import type { School } from '../school/section';
-import { charsPerMinute } from '../typing/typing';
+import { charsPerMinute, typedMs } from '../typing/typing';
 import type { MinuteResult } from '../coach/minute';
 import { assistOf, backAfter, failsAfter, helpOf, restOffered, type Help } from './help';
 import { recordOf, type RecordView } from './record';
@@ -58,6 +58,8 @@ export interface FinishCtx {
   pays?: boolean;
   /** Урок, на который переходит игрок после первого прохода текущего урока; нет — `current` не трогаем. */
   next?: string;
+  /** Ступень урока: матч идёт в ритм дня (окно точностей); нет — только время печати. */
+  stage?: number;
 }
 
 /** Чего не хватило до следующей награды (ТЗ-2.12): голов до победы, чистой игры до ★★ или точности до ★★★. */
@@ -105,6 +107,45 @@ function missingOf(result: MatchResult, passed: boolean): Missing {
   return permille(result.play) < need ? { kind: 'accuracy', permille: need } : null;
 }
 
+/** Откуда ритм дня берёт матч (068 Т8, ТЗ-10.4, 10.5): урок и его ступень — для окна точностей и серии «пальцы устали». Нет — день без ритма. */
+export interface Rhythm {
+  lessonId: string;
+  stage: number;
+}
+
+/** Разделы, которые меняет общий свисток: касса, игровой день, форма клавиш, голы стадиона (без курса). */
+export type WhistleSave = Pick<MatchSave, 'wallet' | 'school' | 'day' | 'form' | 'coach' | 'stadium' | 'album'>;
+
+/** День после матча: время печати матча (разминка, итог дня) и его точность в окно ступени («пальцы устали»); матч без урока (Кубок) рвёт серию урока (068-Р18). */
+function rhythmDay(d: Day, result: MatchResult, ctx: { day: string; rhythm?: Rhythm }): Day {
+  const typed = addTyped(d, ctx.day, typedMs(result.stats));
+  return ctx.rhythm === undefined ? { ...typed, series: null } : addAcc(typed, ctx.day, ctx.rhythm.lessonId, ctx.rhythm.stage, permille(result.play));
+}
+
+/**
+ * Общий свисток (065 К-Б, 068 К-Б): всё, что платит и пишет любой засчитанный матч — монеты и болельщики за верные нажатия, «Знаток» за гол
+ * пенальти, игровой день, окна формы и трудных клавиш, голы стадиона. Курс, звёзды и пак тут не трогаются: их решает вызывающий
+ * (`finishMatch` — урок, `finishCup` — раунд Кубка).
+ */
+export function whistle(
+  save: WhistleSave,
+  result: MatchResult,
+  ctx: { now: number; day: string; matchId: string; pays: boolean; rhythm?: Rhythm },
+): { save: WhistleSave; correct: number; coins: number; fans: number; grew: FormGrowth[] } {
+  const correct = ctx.pays ? result.stats.correct : 0;
+  const coin = credit({ wallet: save.wallet, school: save.school, stadium: save.stadium, album: save.album }, 'match-coins', correct, ctx.matchId);
+  let purse = coin.purse;
+  const fan = credit(purse, 'match-fans', correct);
+  purse = fan.purse;
+  const fans = fan.gain;
+  if (result.penalty.scored) purse = credit(purse, 'penalty-knower', 1).purse;
+  purse = { ...purse, stadium: addGoals(purse.stadium, result.total.me) };
+  const formed = applyPresses(save.form, result.presses);
+  const coach = applyKeys(save.coach, result.presses);
+  const out: WhistleSave = { wallet: purse.wallet, school: purse.school, stadium: purse.stadium, album: purse.album, day: rhythmDay(playedMatch(save.day, ctx.day, ctx.now), result, ctx), form: formed.form, coach };
+  return { save: out, correct, coins: coin.gain, fans, grew: formed.grew };
+}
+
 export function finishMatch(save: MatchSave, result: MatchResult, ctx: FinishCtx): { save: MatchSave; facts: Fact[]; view: ResultView | null } {
   if (isPaid(save.wallet, ctx.matchId)) return { save, facts: [], view: null };
   const mark: LessonMark | undefined = save.course.lessons[ctx.lessonId];
@@ -131,16 +172,10 @@ export function finishMatch(save: MatchSave, result: MatchResult, ctx: FinishCtx
   const course: CourseProgress = { ...save.course, current: moves ? ctx.next! : save.course.current, lessons: { ...save.course.lessons, [ctx.lessonId]: next } };
 
   const pays = ctx.pays ?? true;
-  const correct = pays ? result.stats.correct : 0;
-  let purse = { wallet: save.wallet, school: save.school, stadium: save.stadium, album: save.album };
-  const coin = credit(purse, 'match-coins', correct, ctx.matchId);
-  const fan = credit(coin.purse, 'match-fans', correct);
-  purse = fan.purse;
-  if (result.penalty.scored) purse = credit(purse, 'penalty-knower', 1).purse;
+  const paid = whistle(save, result, { now: ctx.now, day: ctx.day, matchId: ctx.matchId, pays, ...(ctx.stage === undefined ? {} : { rhythm: { lessonId: ctx.lessonId, stage: ctx.stage } }) });
+  let purse = { wallet: paid.save.wallet, school: paid.save.school, stadium: paid.save.stadium, album: paid.save.album };
   // Пак — за первый проход урока (ТЗ-5.1); повтор и поражение — нет; Двор даёт 39 паков, дальше пака нет.
   if (passed && !wasDone && !(ctx.championship ?? false) && purse.album.packs < PACKS_YARD) purse = credit(purse, 'lesson-pack', 1).purse;
-  const formed = applyPresses(save.form, result.presses);
-  const coach = applyKeys(save.coach, result.presses);
 
   const view: ResultView = {
     verdict: result.verdict,
@@ -151,10 +186,10 @@ export function finishMatch(save: MatchSave, result: MatchResult, ctx: FinishCtx
     record,
     permille: acc,
     cpm,
-    correct,
-    coins: coin.gain,
-    fans: fan.gain,
-    grew: formed.grew,
+    correct: paid.correct,
+    coins: paid.coins,
+    fans: paid.fans,
+    grew: paid.grew,
     missing: missingOf(result, passed),
     replay: result.replay,
     passed,
@@ -163,7 +198,7 @@ export function finishMatch(save: MatchSave, result: MatchResult, ctx: FinishCtx
     back,
     knower: result.penalty.scored,
   };
-  const out: MatchSave = { course, wallet: purse.wallet, day: playedMatch(save.day, ctx.day, ctx.now), school: purse.school, form: formed.form, coach, stadium: addGoals(purse.stadium, result.total.me), album: purse.album };
+  const out: MatchSave = { ...paid.save, course, wallet: purse.wallet, school: purse.school, stadium: purse.stadium, album: purse.album };
   return { save: out, facts: [{ fact: 'match', verdict: result.verdict, replay: result.replay }], view };
 }
 

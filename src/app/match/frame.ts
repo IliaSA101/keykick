@@ -27,6 +27,19 @@ export interface FrameSpec {
    * первая атака первого тайма — гол, остальные — вратарь отбил; перерыв не доигрывается. Счёт перерыва — «1 : 0».
    */
   toBreak?: boolean;
+  /** Доиграть основное время вничью 1:1 и встать на начале доп. времени (Э5.29): разминка, гол, пропущенный, остальные атаки отбиты. `outcomes` игнорируется. */
+  toExtra?: boolean;
+  /** Встать после первого гола (1:0, Э5.25): столько разминочных атак, сколько их в плане урока, и гол. `outcomes` игнорируется. */
+  toLead?: boolean;
+  /** Основное время вничью 1:1 и стоять на атаке 2-го тайма после стольких сыгранных атак этого тайма (Э5.36, финал); `outcomes` игнорируется. */
+  toHalf2?: number;
+}
+
+/** Матч Кубка в кадре стенда (068 Т6): раунд; урок — по якорю раунда (`cupLesson`), соперник — команда раунда. */
+export interface FrameCup {
+  round: 'g1' | 'g2' | 'g3' | 'r16' | 'qf' | 'sf' | 'f';
+  /** Серия ударов (Э5.30–.33): на экране — удар `shot`, доигранный до нужного места; фон — матч 1:1 в начале доп. времени. */
+  series?: { shot: 1 | 2 | 3 };
 }
 
 /**
@@ -71,6 +84,10 @@ export interface FrameMatch {
   after?: AfterGame;
   /** «Права на компьютер» поверх перерыва (Э4.20): игра, давшая умение, отмечена «новое». */
   rights?: { fresh: string };
+  /** Микроразминка поверх вступления (068 Т8, Э6.43–.45) или перерыва (`started` и `toBreak`, 068-Р100): шаг окна; время кадра не тикает. */
+  warm?: 'far' | 'shake';
+  /** Матч Кубка (068 Т6): раунд; урок и соперник — по нему, а не по `lesson`. */
+  cup?: FrameCup;
 }
 
 const STEP = 300;
@@ -132,6 +149,14 @@ function settle(run: Run, t0: number, keep = false, stay = false): { run: Run; t
   return { run: r, t };
 }
 
+/** Исходы «основное время вничью 1:1» по плану: разминка, гол, пропущенный, остальное отбито; `half2` — сколько атак 2-го тайма доиграть (без поля — до доп. времени). */
+function toRegulation(plan: RunningMatch['plan'], half2: number | undefined): string {
+  const main = plan.filter((a) => a.phase !== 'extra');
+  const first = main.findIndex((x) => x.phase !== 'warmup');
+  const all = main.map((a, k) => (a.phase === 'warmup' ? 'k' : k === first ? 'g' : k === first + 1 ? 'c' : 's')).join('');
+  return half2 === undefined ? all : all.slice(0, main.filter((a) => a.phase !== 'half2').length + half2);
+}
+
 const reach = (s: RunningMatch): boolean => {
   const hit = s.typing === null ? null : expectedHit(s.keymap, s.typing);
   return hit !== null && hit.key.finger !== 'th' && !HOME.has(hit.key.code);
@@ -143,7 +168,13 @@ export function frameRun(start: StartEvent, spec: FrameSpec): Run {
   const { concedeMin } = running(startRun(start).run).rules;
   let r = startRun(start).run;
   let t = 1000;
-  for (const [i, o] of [...spec.outcomes].entries()) {
+  // `toExtra`: исходы — по плану урока до доп. времени: разминка, гол, пропущенный, остальные атаки отбиты (счёт 1:1)
+  const outcomes = spec.toExtra === true || spec.toHalf2 !== undefined
+    ? toRegulation(running(startRun(start).run).plan, spec.toHalf2)
+    : spec.toLead === true
+      ? `${'k'.repeat(running(startRun(start).run).plan.filter((a) => a.phase === 'warmup').length)}g`
+      : spec.outcomes;
+  for (const [i, o] of [...outcomes].entries()) {
     const s = running(r);
     if (s.phase === 'break') throw new Error(`frameRun: outcome ${i} after break`); // исходы за перерывом — не молча отбрасываем
     const warm = s.phase === 'warmup';

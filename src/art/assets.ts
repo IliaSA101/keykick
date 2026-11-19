@@ -23,6 +23,8 @@ export const artFiles = {
   // Руки «как в кадре матча» (065-Р73, Э1.03): согнутые пальцы, две картинки 900×900; подгонка — components/keyboard/typingHands.ts.
   // Экран матча (065 Т9, Э1.03): фон-стадион 2752×1536 (макет Б, bg-b-7) и перчатка вратаря для «Вратарь отбил!».
   matchBgB: 'art/match/bg-b.webp',
+  // Финал Кубка (068 Т6-2, Э5.36): тот же стадион ночью, белый салют (`docs/mockups/champ/img/bg-final.webp`, журнал графики 11.11).
+  matchBgFinal: 'art/match/bg-final.webp',
   savedGlove: 'art/match/saved-glove.webp',
   handsTypingL:'art/hands-typing/hands-l.webp',
   handsTypingR: 'art/hands-typing/hands-r.webp',
@@ -272,7 +274,7 @@ export const screenArt: Record<ScreenArtId, readonly ArtKey[]> = {
     // Форма на карточке (`ShirtView` в `LockerCard`): слои майки, шорт и гетр.
     'kitZones', 'kitShade', 'shortsZones', 'shortsShade', 'socksZones', 'socksShade',
   ],
-  museum: ['albumMuseumIn', 'albumCupYardGold', 'albumTvWhite'],
+  museum: ['albumMuseumIn', 'albumMuseumGold', 'albumCupYardGold', 'albumTvWhite'],
   // Лавка: вырезки всех вещей и бутс.
   shop: [
     'shopGateSticker', 'shopCenterCircle', 'shopSeatsClub', 'shopNetFlags', 'shopGraffiti', 'shopDrum', 'shopBanner',
@@ -286,7 +288,7 @@ export const screenArt: Record<ScreenArtId, readonly ArtKey[]> = {
   ],
   // Матч: стадион, перчатка, мяч, руки в позе печати, слои формы (майка, спина, шорты, гетры).
   match: [
-    'matchBgB', 'savedGlove', 'ball', 'handsTypingL', 'handsTypingR', 'kitZones', 'kitShade', 'kitBackZones', 'kitBackShade',
+    'matchBgB', 'baseKeeperReady', 'baseKeeperReadyKit', 'baseKeeperDive', 'baseKeeperDiveKit', 'savedGlove', 'ball', 'handsTypingL', 'handsTypingR', 'kitZones', 'kitShade', 'kitBackZones', 'kitBackShade',
     'shortsZones', 'shortsShade', 'socksZones', 'socksShade',
   ],
   // Клуб: портреты четырёх тренеров и слои формы.

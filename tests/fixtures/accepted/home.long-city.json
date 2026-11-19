@@ -165,7 +165,13 @@
    "days": 10,
    "today": "2026-11-18",
    "todayN": 0,
-   "last": 1794992400000
+   "last": 1794992400000,
+   "typedMs": 0,
+   "todayMs": 0,
+   "msDay": null,
+   "warmFrom": 0,
+   "acc": {},
+   "series": null
   },
   "stadium": {
    "fans": 14280,
@@ -231,7 +237,7 @@
    "cup": {
     "key": "группа пройдена · 2-е место",
     "params": {
-     "sub": "1/8 с Заречной, <span class=\"nb\">после урока 21</span>"
+     "sub": "1/8 с Заречной, после урока 21"
     }
    },
    "events": {

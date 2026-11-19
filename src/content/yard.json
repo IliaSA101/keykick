@@ -36,5 +36,6 @@
   "seats": { "stand": 40, "sector": 15, "figure": 400, "sectorFromStars": 45, "sectorAfterLesson": 18, "tabloFrom": 22 },
   "locks": { "school": { "day": 2, "matches": 4 }, "base": { "day": 3, "matches": 8 }, "newMarkDay": { "school": 2, "base": 3 } },
   "papers": { "firstCur": 6 },
-  "pause": { "days": 5 }
+  "pause": { "days": 5 },
+  "museum": { "lessonsPerVideo": 11 }
 }

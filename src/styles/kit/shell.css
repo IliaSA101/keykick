@@ -18,28 +18,6 @@ body {
   color: #e8ecff;
   text-shadow: 0 1px 3px rgb(0 0 0 / 0.8);
 }
-.cnote.who {
-  left: 12px;
-  bottom: 8px;
-  z-index: 6;
-  max-width: 310px;
-  font-size: 12px; /* в кадре Э2.01 подвал — 12 px (map.css: .cnote.who) */
-  white-space: nowrap;
-}
-.cnote.who.wide {
-  max-width: none; /* широкая сцена: одна строка (065-Р160) */
-}
-.cnote.who a {
-  color: inherit;
-  text-decoration: underline;
-}
-.cnote.who .pl {
-  display: inline-block;
-  max-width: 190px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: bottom;
-}
 /* ярлык-кнопка вместо `a` макета */
 button.kb-chip {
   border: 0;

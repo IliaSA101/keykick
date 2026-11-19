@@ -6,6 +6,7 @@ import type { CoachFrame } from '../../app/coach/frame';
 import type { SchoolStand } from '../../app/school/frame';
 import type { LearnFrame } from '../../app/learn/frame';
 import type { PathStand } from '../path/stand';
+import type { Rhythm } from '../../app/day/useResultDay';
 import { createBin } from '../../app/save/bin';
 import { createSession, type Session } from '../../app/save/session';
 import { createKeyValue, type Backend } from '../../app/save/storage';
@@ -40,6 +41,8 @@ export interface FrameFixture {
   travel?: boolean;
   /** Карта: кадр с выбранным двором — номер ступени, окно уроков открыто (Э2.11, Э2.36); в игре окно открывает клик или стрелка. */
   mapPick?: number;
+  /** Карта: окно поверх неё — «Лист лиги» (`sheet`) или «Карточка клуба» (`club`, Э2.30/.31/.37/.38); в игре его открывает чип или адрес `?win=`. */
+  mapWindow?: 'sheet' | 'club';
   /** Матч и итог: что кадр показывает сверх разделов (Т9/Т10 дописывают). */
   match?: unknown;
   /** «Минута тренера» (067 Т25): шаг кадра, ход минуты и итог. */
@@ -60,7 +63,7 @@ export interface FrameFixture {
   /** Окно «Клуб» (067 Т11): трудные клавиши кадра (в сохранении их нет) и открытое окно — «Твой клуб» (`edit`) или смена тренера (`swap`). */
   club?: { hardKeys?: string[]; win?: 'edit' | 'swap' };
   /** Музей (067 Т11): id купленных вещей каталога и открытые ролики кадра (в сохранении их пока нет). */
-  museum?: { bought?: string[]; videos?: number };
+  museum?: { bought?: string[] };
   /** Лавка (067 Т12): вещь, чьё подтверждение покупки открыто на кадре (Э2К.03). */
   shop?: { ask?: string };
   /** Стенд пака (067 Т12): фаза, с которой экран начинает; нет ключа — закрытый пак, как в игре. */
@@ -77,8 +80,24 @@ export interface FrameFixture {
   learnCtx?: { lesson: number; keys: string };
   /** База (067 Т19): кадр доски рекордов открывает вид с рекордами (`board`), `cup` — Кубок сыгран (Штрафной открыт, 067-Р18); в игре ключа нет. */
   base?: { board?: boolean; cup?: boolean; keepy?: KeepyStand; memo?: MemoStand; mini?: MiniStand; keeper?: KeeperStand; free?: FreeStand };
+  /** Кубок (068 Т5, `/cup`): открытая вкладка, команда под мышью (подсказка Э5.22) и праздничная доска титула (Э5.20). */
+  tab?: 'group' | 'bracket';
+  hover?: string;
+  festive?: boolean;
+  /** Матч Кубка (068 Т6, `/match` и `/result`): раунд, шаг вступления (`intro`, `play`, `extra`) и счёт кадра итога (`cup-frames.mjs`). */
+  cupFrame?: { round: 'g1' | 'g2' | 'g3' | 'r16' | 'qf' | 'sf' | 'f'; step?: string; score?: [number, number]; correct?: number; series?: 'w' | 'l'; award?: boolean; rhythm?: Rhythm; open?: 'summary' };
   /** Окно поверх экрана: «Игра обновилась» без списка или со списком «Что нового». */
   window?: { kind: 'updated' | 'news'; lines?: string[] };
+  /**
+   * Сюжет (068 Т7): окно поверх экрана — комикс (`comic`, `panel`, `coachBoard`), выпуск газеты (`paper`, `silver`, `archive` — из архива Музея),
+   * стенд на Доме (`stand`), доска выпусков (`board`), пузырь тренера (`bubble`), нижняя строка (`foot`); `longName` и `longCity` — длинные имя и город
+   * клуба для кадра края (в сохранении имя ≤ 20 знаков). Окна газеты рисует стенд поверх экрана кадра без записи в сеанс.
+   */
+  story?: {
+    window?: { comic?: string; panel?: number; coachBoard?: boolean; paper?: number; silver?: boolean; archive?: boolean; stand?: boolean; board?: string; bubble?: string; foot?: string };
+    longName?: string;
+    longCity?: string;
+  };
 }
 
 /** Хранилище в памяти. */

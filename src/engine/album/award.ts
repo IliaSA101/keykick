@@ -54,3 +54,15 @@ export function albumView(album: Album): AlbumView {
   }));
   return { kits, prize: PRIZE_IDS.map((id) => ({ id, have: album.prize.includes(id), worn: album.worn === id })), full: kits.filter((k) => k.full).length };
 }
+
+/** Выдача нескольких призовых за событие (Кубок, ТЗ-8.7): новые id по порядку; уже полученные и неизвестные не выдаются повторно. */
+export function grantPrizes(album: Album, ids: readonly string[]): { album: Album; fresh: string[] } {
+  let a = album;
+  const fresh: string[] = [];
+  for (const id of ids) {
+    const next = grantPrize(a, id);
+    if (next !== a) fresh.push(id);
+    a = next;
+  }
+  return { album: a, fresh };
+}

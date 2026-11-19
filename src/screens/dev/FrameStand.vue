@@ -5,17 +5,19 @@
  * Экрана ещё нет (маршрут — заглушка или нет вовсе) — показываем строку с id и маршрутом, не падаем.
  * Пометка «нет экрана» стоит только на заглушке: у настоящего экрана кадр чистый — его снимает `tools/accepted/shoot.mjs`.
  */
-import { provide, shallowRef, type Component } from 'vue';
+import { computed, provide, shallowRef, type Component } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { gameOfPath } from '../../app/base/run';
 import type { SchoolStand } from '../../app/school/frame';
-import { setSession, useSession } from '../../app/save/session';
-import FooterLine from '../../components/shell/FooterLine.vue';
+import { setSession } from '../../app/save/session';
 import ShellHeader from '../../components/shell/ShellHeader.vue';
 import LearnWindow from '../../components/learn/LearnWindow.vue';
+import StandComic from './StandComic.vue';
+import StandNews from './StandNews.vue';
 import UpdateWindow from '../system/UpdateWindow.vue';
 import { PARENT_STAND, type ParentStand } from '../parent/stand';
 import { PATH_STAND, type PathStand } from '../path/stand';
+import { cupMatchFrame } from '../../app/cup/frame';
 import { frameSession, type FrameFixture } from './frameSession';
 import { learnStandOf, type LearnStand } from './learnStand';
 
@@ -28,7 +30,6 @@ const view = shallowRef<Component | null>(null);
 const props = shallowRef<Record<string, unknown>>({});
 // оболочка (шапка и строка низа) — как у App.vue: только экранам без `meta.bare`
 const shell = shallowRef('');
-const playerName = shallowRef('');
 // часы кадра для Дома: «сегодня» берётся из фикстуры, а не из браузера (065 К-Г)
 const clock = shallowRef({ now: Date.now(), day: new Date().toLocaleDateString('sv-SE') });
 provide('kk-home-clock', () => clock.value);
@@ -62,16 +63,23 @@ provide('kk-school-stand', () => schoolStand.value);
 // База (067 Т19): открыта ли доска рекордов на кадре — из фикстуры; в игре поставщика нет
 const baseStand = shallowRef<FrameFixture['base']>({});
 provide('kk-base-stand', () => baseStand.value);
+// Кубок (068 Т5): вкладка, команда под мышью и праздничная доска кадра — из фикстуры; в игре вкладку держит адрес
+const cupStand = shallowRef<{ tab?: 'group' | 'bracket'; hover?: string; festive?: boolean }>({});
+provide('kk-cup-stand', () => cupStand.value);
+// Сюжет (068 Т7): окно газеты поверх экрана кадра — из фикстуры (`story.window.paper`); в игре его открывает вход на Дом или полка Музея
+const storyStand = shallowRef<FrameFixture['story']>({});
+provide('kk-story-stand', () => storyStand.value);
+const newsOpen = computed(() => storyStand.value?.window?.paper !== undefined);
+const comicOpen = computed(() => storyStand.value?.window?.comic !== undefined && storyStand.value.window.coachBoard !== true); // доска «плашка × 4 облика» — слой сборки макета, не экран (068-Р28)
+// Поля Дома, которых нет в фикстуре, не перекрывают сеанс: `bought: undefined` ронял Дом под окном газеты (кадры Э6)
+const defined = (o: Record<string, unknown>): Record<string, unknown> => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined));
 const win = shallowRef<FrameFixture['window']>();
 // учебная игра 1–4 (067 Т17): окно поверх перерыва или Базы; время кадра не тикает (`frozenNow`)
 const learn = shallowRef<LearnStand | null>(null);
 const learnNow = shallowRef(0);
 
 /** Кадры, где макет не рисует баннер «Новая ступень» (проверка длины имён, наведение на стенд): ступень на них та же, что на соседних (065-Р80). */
-const NO_BANNER = /^home\.(long|long-city|news)$/;
-
-/** Макет хранил подпись Кубка с разметкой (`<span class="nb">`); поставщик отдаёт чистый текст. */
-const plain = (x: unknown): unknown => JSON.parse(JSON.stringify(x ?? {}).replace(/<[^>]+>/g, ''));
+const NO_BANNER = /^(home\.(long|long-city|news)|paper\.stand)$/;
 
 async function open(): Promise<void> {
   const load = files[`../../../tests/fixtures/accepted/${id}.json`];
@@ -82,13 +90,14 @@ async function open(): Promise<void> {
   const fx = await load();
   clock.value = fx.clock;
   const h = (fx.home ?? {}) as Record<string, unknown>;
-  homeStand.value = { seed: fx.seed, over: { bought: h.bought, round: h.round, end: h.end, region: h.region, extras: plain(h.extras) }, peek: id === 'home.peek', coach: id === 'home.coach', noBanner: NO_BANNER.test(id), travel: fx.travel === true, pick: fx.mapPick };
+  homeStand.value = { seed: fx.seed, over: defined({ bought: h.bought, round: h.round, end: h.end, region: h.region, festive: /^(home\.(end|long-end)|map\.title)$/.test(id) ? true : undefined, extras: h.extras ?? {} }), peek: id === 'home.peek', coach: id === 'home.coach', noBanner: NO_BANNER.test(id), travel: fx.travel === true, pick: fx.mapPick, win: fx.mapWindow, hardKeys: fx.club?.hardKeys };
   setSession(await frameSession(fx));
   win.value = fx.window;
   learn.value = learnStandOf(fx);
   learnNow.value = fx.clock.now;
   clubStand.value = fx.club ?? {};
   museumStand.value = fx.museum ?? {};
+  storyStand.value = fx.story ?? {};
   shopStand.value = fx.shop ?? {};
   packStand.value = fx.pack ?? {};
   lockerStand.value = fx.locker ?? {};
@@ -96,6 +105,7 @@ async function open(): Promise<void> {
   pathStand.value = { ...fx.path };
   schoolStand.value = { ...fx.school };
   baseStand.value = fx.base ?? {};
+  cupStand.value = { ...(fx.tab ? { tab: fx.tab } : {}), ...(fx.hover ? { hover: fx.hover } : {}), ...(fx.festive ? { festive: true } : {}) };
   if (fx.file) {
     const [first] = fx.file.players;
     if (first) {
@@ -113,12 +123,11 @@ async function open(): Promise<void> {
   const comp = typeof loader === 'function' && !('__vccOpts' in loader) && !('setup' in loader) ? ((await (loader as () => Promise<{ default: Component }>)()).default) : (loader as Component);
   if ((comp as { __name?: string }).__name === 'ScreenStub') note.value = `${id} · ${fx.route} · stub screen`;
   view.value = comp;
-  const cur = useSession().player.value;
-  playerName.value = cur.kind === 'ok' ? cur.env.name : '';
-  shell.value = rec.meta.bare === true ? '' : typeof rec.meta.menu === 'string' ? rec.meta.menu : String(rec.name);
+  // карточка клуба поверх Карты: в шапке горит «Клуб», а не «Карта» (Э2.31)
+  shell.value = rec.meta.bare === true ? '' : fx.mapWindow === 'club' ? 'club' : typeof rec.meta.menu === 'string' ? rec.meta.menu : String(rec.name);
   props.value = (typeof rec.props === 'object' && rec.props !== null ? (rec.props as { default?: Record<string, unknown> }).default : undefined) ?? {};
   // экран матча (настоящий) получает состояние кадра из фикстуры; заглушкам оно не нужно (065 Т9г)
-  if (fx.route === '/match' && fx.match && note.value === '') props.value = { ...props.value, frame: fx.match };
+  if (fx.route === '/match' && (fx.match || fx.cupFrame) && note.value === '') props.value = { ...props.value, frame: fx.cupFrame ? cupMatchFrame(fx.cupFrame, fx.seed) : fx.match };
   // игра на Базе: адрес `/base/<игра>` на стенде не настоящий — игру в экран передаём свойством (067 Т19)
   if (note.value === '' && gameOfPath(fx.route) !== undefined) props.value = { ...props.value, game: gameOfPath(fx.route) };
   // первый запуск: шаг кадра (тренер, приветствие) — из фикстуры (067 Т11)
@@ -127,6 +136,8 @@ async function open(): Promise<void> {
   if (fx.route === '/coach' && fx.coach && note.value === '') props.value = { ...props.value, frame: fx.coach };
   // экран итога (065 Т10а): готовый вид итога из фикстуры, без записи и без клавиш
   if (fx.route === '/result' && fx.result && note.value === '') props.value = { ...props.value, frame: fx.result };
+  // итог матча Кубка (068 Т6): вид строит настоящий свисток по разделам фикстуры и счёту кадра
+  if (fx.route === '/result' && fx.cupFrame?.score && note.value === '') props.value = { ...props.value, cupFrame: { round: fx.cupFrame.round, score: fx.cupFrame.score, correct: fx.cupFrame.correct, series: fx.cupFrame.series, award: fx.cupFrame.award, rhythm: fx.cupFrame.rhythm, open: fx.cupFrame.open } };
 }
 void open();
 </script>
@@ -162,9 +173,13 @@ void open();
       :frozen-now="learnNow"
       :miss="learn.miss"
     />
-    <FooterLine
-      v-if="shell && playerName !== ''"
-      :name="playerName"
+    <StandNews
+      v-if="newsOpen && view && storyStand"
+      :story="storyStand"
+    />
+    <StandComic
+      v-if="comicOpen && view && storyStand"
+      :story="storyStand"
     />
     <p
       v-if="note"

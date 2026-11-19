@@ -6,7 +6,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { clampSel, defaultSel, enterLesson, mapView, navigate, pickYard, type MapInput, type MapKey, type MapSel } from '../../src/engine/map';
-import { busFacing, travelKey, travelOf } from '../../src/engine/map';
+import { busFacing, leagueSheet, SHEET_LEFT_FROM, travelKey, travelOf, type SheetInput } from '../../src/engine/map';
 import { alongPath } from '../../src/screens/map/geometry';
 import { isAway, lessonsOf, ROUNDS, stageOf } from '../../src/engine/home';
 import mapYard from '../../src/content/map-yard.json';
@@ -201,5 +201,27 @@ describe('содержимое карты и фикстуры стенда', () 
       expect(v.here).toBe(cur);
       expect(v.nodes.filter((n) => n.state === 'fog').length).toBe(Math.max(0, 10 - stageOf(cur) - 1));
     }
+  });
+});
+
+const SHEET: SheetInput['parts'] = { stars: { have: 23, total: 96 }, album: { have: 17, total: 39 }, emblem: { have: 5, total: 10 }, rights: { have: 6, total: 8 } };
+const sheetAt = (cur: number, parts: SheetInput['parts'] = SHEET) => leagueSheet({ cur, parts });
+
+describe('К30 · «Лист лиги» (068-Р17): сделано до урока 17, осталось с него', () => {
+  it('К30 · режим «осталось» начинается ровно с урока 17', () => {
+    expect(sheetAt(SHEET_LEFT_FROM - 1).left).toBe(false);
+    expect(sheetAt(SHEET_LEFT_FROM).left).toBe(true);
+    expect(SHEET_LEFT_FROM).toBe(17);
+  });
+  it('К30 · строки по порядку: звёзды, альбом, эмблема, права; «осталось» = всего − сделано (Э2.30: ещё 73 ★)', () => {
+    const rows = sheetAt(17).rows;
+    expect(rows.map((r) => r.key)).toEqual(['stars', 'album', 'emblem', 'rights']);
+    expect(rows.map((r) => r.left)).toEqual([73, 22, 5, 2]);
+    expect(rows[0]!.pct).toBeCloseTo((23 / 96) * 100);
+  });
+  it('К30 · край: сделано больше всего (битые данные) и отрицательное — не выходят за 0…всего', () => {
+    const over = sheetAt(20, { ...SHEET, album: { have: 50, total: 39 }, rights: { have: -1, total: 8 } });
+    expect(over.rows[1]).toMatchObject({ have: 39, left: 0, pct: 100 });
+    expect(over.rows[3]).toMatchObject({ have: 0, left: 8, pct: 0 });
   });
 });

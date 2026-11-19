@@ -60,6 +60,19 @@ describe('К1: минута тренера', () => {
     expect(r.list.filter((p) => !p.ok).length).toBe(r.presses - r.correct);
   });
 
+  it('К1: подсказка не дублируется — одна и та же подсказка на серии ошибок приходит один раз (keystep)', () => {
+    // Ловит: эффект подсказки на каждое нажатие, пока подсказка та же (мигание и повторный показ).
+    let state = minuteStep(idleMinute, { type: 'start', seed: 3, lesson, keys: 'ап', dict: dictionary, keymap, ms: 60000 }).state;
+    const hints: string[] = [];
+    for (let i = 0; i < 8; i++) {
+      const r = minuteStep(state, { type: 'key', code: '', key: '§', t: 100 * (i + 1) });
+      state = r.state;
+      for (const e of r.effects) if (e.kind === 'hint') hints.push(e.hint);
+    }
+    expect(hints.length).toBeGreaterThan(0);
+    expect(hints.every((h, i) => i === 0 || h !== hints[i - 1])).toBe(true);
+  });
+
   it('К1: до start и после конца события игнорируются; один шаг — одно состояние', () => {
     const done = playMinute(500, 100);
     expect(minuteStep(idleMinute, { type: 'key', code: 'KeyA', key: 'а', t: 1 }).state).toBe(idleMinute);

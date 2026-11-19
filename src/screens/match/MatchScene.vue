@@ -11,8 +11,15 @@ import KeyboardHands from '../../components/keyboard/KeyboardHands.vue';
 import type { ClubKit } from '../../engine/club/section';
 import type { Layout } from '../../engine/typing/keymap';
 import type { Shown } from '../../app/match/effects';
+import { storyArtUrl } from '../../app/art/storyArt';
+import type { StoryArtKey } from '../../app/art/storyArt';
 import { confetti } from '../../app/result/confetti';
 import { ru } from '../../i18n/ru';
+import KitSprite from '../fun/KitSprite.vue';
+import { KEEPER_SPRITES } from '../keeper/keeperGeo';
+import SeriesMarks from './SeriesMarks.vue';
+import SeriesStatus from './SeriesStatus.vue';
+import type { SeriesBoard } from './seriesView';
 import type { MatchView } from './view';
 
 const props = defineProps<{
@@ -21,6 +28,8 @@ const props = defineProps<{
   rivalKit: ClubKit;
   us: { name: string; backName: string; backNumber: number };
   rival: { name: string; city: string };
+  /** Матч Кубка (068 Т6): эмблемы двух команд на табло и у сторон, короткое имя соперника на табло. */
+  cup?: { ours: StoryArtKey; rival: StoryArtKey; rivalShort: string } | undefined;
   width: number;
   /** Раскладка клавиатуры; без неё (итог матча) клавиатуры и кнопки «Как держать руки?» нет. */
   layout?: Layout | undefined;
@@ -31,8 +40,16 @@ const props = defineProps<{
   ball?: boolean;
   /** Вступление (окно «Начать» поверх): строки набора, статуса и цели нет — как в кадре Э1.01 (065 Т9е). */
   intro?: boolean;
+  /** Серия ударов Кубка (068 Т6-2, Э5.30–.33): отметки в табло, вратарь в воротах и статус серии вместо запаса ошибок. */
+  series?: SeriesBoard | undefined;
+  /** Финал Кубка (Э5.36): тот же стадион ночью. */
+  night?: boolean;
   /** Победа (итог, Э1.22/.32): конфетти над сеткой и мяч в сетке; без движения — статичный вид кадра. */
   win?: boolean;
+  /** Итог со строкой тренера (068 Т8в-3, Э6.38–.42): карточка выше на столько px — фон поднят так же, мяч в сетке убран (макет: `ball: false`). */
+  lift?: number;
+  /** Без табло «Матч окончен · 3:1» — полоса «Итог дня» (Э6.36/.37). */
+  noBoard?: boolean;
 }>();
 defineEmits<{ help: [] }>();
 
@@ -42,10 +59,10 @@ const shirtW = computed(() => (big.value ? 100 : 84));
 // фон: линия ворот на 57,5 % высоты картинки стоит на 324 (макет, LINE_AT)
 const BG_W = 1900;
 const BG_H = Math.round(BG_W * (1536 / 2752));
-const bg = computed(() => ({ left: `${Math.round((props.width - BG_W) / 2)}px`, top: `${Math.round(324 - 0.575 * BG_H)}px`, width: `${BG_W}px`, height: `${BG_H}px`, backgroundImage: `url('${artUrl('matchBgB')}')` }));
+const bg = computed(() => ({ left: `${Math.round((props.width - BG_W) / 2)}px`, top: `${Math.round(324 - 0.575 * BG_H) - (props.lift ?? 0)}px`, width: `${BG_W}px`, height: `${BG_H}px`, backgroundImage: `url('${artUrl(props.night === true ? 'matchBgFinal' : 'matchBgB')}')` }));
 const sideW = computed(() => `calc(50% - 380px)`);
 const cells = (text: string): { ch: string; sp: boolean }[] => [...text.toUpperCase()].map((ch) => ({ ch, sp: ch === ' ' }));
-const shoutText = computed(() => (props.shout === null ? '' : t.shout[props.shout]));
+const shoutText = computed(() => (props.shout === null ? '' : props.shout === 'save' && props.series !== undefined ? t.shoutSeriesSave : t.shout[props.shout]));
 const reserve = computed(() => t.status.reserve);
 const finger = computed(() => (props.view.target === null ? '' : props.view.target.finger));
 const pieces = confetti();
@@ -59,6 +76,14 @@ const warm = computed(() => props.view.phase === t.phase.warmup);
       :style="bg"
     />
     <div class="shade" />
+    <KitSprite
+      v-if="series"
+      v-bind="KEEPER_SPRITES[series.keeper.pose]"
+      :color="rivalKit.body"
+      :height="series.keeper.h"
+      :x="width / 2 + series.keeper.dx"
+      :bottom="series.keeper.bottom"
+    />
     <img
       v-if="ball"
       class="ball"
@@ -67,12 +92,38 @@ const warm = computed(() => props.view.phase === t.phase.warmup);
       style="left: 50%; margin-left: -14px; top: 286px; width: 28px; height: 28px"
     >
 
-    <div class="board">
+    <div
+      v-if="!noBoard"
+      class="board"
+    >
       <span class="cap l">{{ view.phase }}</span>
-      <span class="team"><span class="mini"><ShirtView :kit="kit" /></span>{{ us.name }}</span>
+      <span class="team"><span class="mini"><img
+        v-if="cup"
+        class="em"
+        :src="storyArtUrl(cup.ours)"
+        alt=""
+      ><ShirtView
+        v-else
+        :kit="kit"
+      /></span>{{ us.name }}</span>
       <span class="score"><span :class="{ bump: bump === 'us' }">{{ view.score.me }}</span> : <span :class="{ bump: bump === 'rival' }">{{ view.score.opp }}</span></span>
-      <span class="team r">{{ t.board.rivalShort }}<span class="mini"><ShirtView :kit="rivalKit" /></span></span>
-      <span class="cap r">{{ view.detail }}</span>
+      <span class="team r">{{ cup ? cup.rivalShort : t.board.rivalShort }}<span class="mini"><img
+        v-if="cup"
+        class="em"
+        :src="storyArtUrl(cup.rival)"
+        alt=""
+      ><ShirtView
+        v-else
+        :kit="rivalKit"
+      /></span></span>
+      <SeriesMarks
+        v-if="series && cup"
+        :rows="[{ em: cup.ours, list: series.us }, { em: cup.rival, list: series.them }]"
+      />
+      <span
+        v-else
+        class="cap r"
+      >{{ view.detail }}</span>
     </div>
 
     <figure
@@ -108,7 +159,12 @@ const warm = computed(() => props.view.phase === t.phase.warmup);
         </div>
       </div>
       <figcaption>
-        <span class="role">{{ t.sides.us }}</span><br><b class="name">{{ us.name }}</b>
+        <img
+          v-if="cup"
+          class="em side-em"
+          :src="storyArtUrl(cup.ours)"
+          alt=""
+        ><br v-if="cup"><span class="role">{{ t.sides.us }}</span><br><b class="name">{{ us.name }}</b>
         <slot name="us" />
       </figcaption>
     </figure>
@@ -144,7 +200,12 @@ const warm = computed(() => props.view.phase === t.phase.warmup);
         </div>
       </div>
       <figcaption>
-        <span class="role">{{ t.sides.foe }}</span><br><b class="name">{{ rival.name }}</b>
+        <img
+          v-if="cup"
+          class="em side-em"
+          :src="storyArtUrl(cup.rival)"
+          alt=""
+        ><br v-if="cup"><span class="role">{{ t.sides.foe }}</span><br><b class="name">{{ rival.name }}</b>
         <template v-if="rival.city">
           <br><span class="city">{{ rival.city }}</span>
         </template>
@@ -162,6 +223,7 @@ const warm = computed(() => props.view.phase === t.phase.warmup);
         :style="{ left: `${p.left}px`, top: `${p.top}px`, background: p.color, transform: `rotate(${p.rot}deg)` }"
       />
       <img
+        v-if="!lift"
         class="ball"
         :src="artUrl('ball')"
         alt=""
@@ -174,7 +236,7 @@ const warm = computed(() => props.view.phase === t.phase.warmup);
       :class="shout"
     >
       <img
-        v-if="shout === 'save'"
+        v-if="shout === 'save' && series === undefined"
         class="glove"
         :src="artUrl('savedGlove')"
         alt=""
@@ -216,7 +278,7 @@ const warm = computed(() => props.view.phase === t.phase.warmup);
     >
       <div
         class="row cur"
-        style="font-size: 30px"
+        :style="{ fontSize: series ? '56px' : '30px' }"
       >
         <span
           v-for="(c, i) in cells(view.typed.text)"
@@ -245,8 +307,14 @@ const warm = computed(() => props.view.phase === t.phase.warmup);
       </div>
     </div>
 
+    <SeriesStatus
+      v-if="series && view.typed && !intro && layout"
+      :left="series.left"
+      :centre="series.centre"
+      :finger="finger"
+    />
     <div
-      v-if="view.typed && !intro && layout"
+      v-else-if="view.typed && !intro && layout"
       class="status"
     >
       <span
@@ -313,6 +381,8 @@ const warm = computed(() => props.view.phase === t.phase.warmup);
 .team { display: flex; align-items: center; gap: 6px; font-size: 17px; font-weight: 800; justify-self: end; }
 .team.r { justify-self: start; }
 .mini { display: block; width: 26px; }
+.em { display: block; width: 100%; height: auto; }
+.side-em { width: 26px; margin: 0 auto 2px; }
 .score { font-size: 30px; font-weight: 900; color: var(--accent); line-height: 1; letter-spacing: 1px; text-shadow: 0 2px 0 rgb(0 0 0 / 0.4); }
 .score .bump { display: inline-block; transform: scale(1.3); transform-origin: 50% 70%; color: #fff; text-shadow: 0 0 14px rgb(255 255 255 / 0.85), 0 2px 0 rgb(0 0 0 / 0.4); }
 .cap { font-size: 15px; color: var(--text-muted); }

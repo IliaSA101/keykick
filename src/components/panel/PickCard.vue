@@ -22,13 +22,15 @@ export interface PickRow {
  * Выбор из списка — `.panel.pop.tail.pickcard` (карточка уроков двора на карте): шапка с названием и «Закрыть Esc»,
  * строки двух колонок (название | звёзды), выбранная стрелками — с белой рамкой, внизу подсказка клавиш. Место — style снаружи.
  */
+import { computed } from 'vue';
 import { ru } from '../../i18n/ru';
 import KeyButton from '../kit/KeyButton.vue';
 import KitChip from '../kit/KitChip.vue';
 import KitTag from '../kit/KitTag.vue';
 
-defineProps<{ title: string; sub: string; rows: PickRow[]; hint: string }>();
+const props = defineProps<{ title: string; sub: string; rows: PickRow[]; hint: string; /** Итог пройденного двора («на ★★★: 0 из 3 уроков»): ★★★ — на светлой плашке (ТАБУ 11.11). */ sum?: string }>();
 defineEmits<{ close: [] }>();
+const sumParts = computed(() => (props.sum ?? '').split(/(★+)/).filter((p) => p !== ''));
 </script>
 
 <template>
@@ -37,6 +39,16 @@ defineEmits<{ close: [] }>();
       <p class="lk">
         <span class="line">{{ title }}</span>
         <span class="line sub">{{ sub }}</span>
+        <span
+          v-if="sum"
+          class="line"
+        ><span class="ysum"><template
+          v-for="(p, i) in sumParts"
+          :key="i"
+        ><span
+          v-if="p.startsWith('★')"
+          class="sp"
+        >{{ p }}</span><template v-else>{{ p }}</template></template></span></span>
       </p>
       <KeyButton
         quiet

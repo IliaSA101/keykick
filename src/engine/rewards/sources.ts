@@ -4,7 +4,7 @@
  * реестр с исходниками: файлы существуют, вызов кассы мимо реестра — красное.
  */
 
-export type RewardId = 'match-coins' | 'minute-coins' | 'penalty-knower' | 'match-fans' | 'learn-coins' | 'tour-knower' | 'kicks-knower' | 'lesson-pack';
+export type RewardId = 'match-coins' | 'minute-coins' | 'penalty-knower' | 'match-fans' | 'learn-coins' | 'tour-knower' | 'kicks-knower' | 'lesson-pack' | 'cup-pack';
 
 export interface RewardSource {
   id: RewardId;
@@ -26,6 +26,7 @@ export const REWARD_SOURCES: readonly RewardSource[] = [
   { id: 'penalty-knower', event: 'match-penalty-goal', pays: 'school.knower', callers: ['src/engine/match/finish.ts'] },
   { id: 'learn-coins', event: 'learn-finish', pays: 'wallet.coins', callers: ['src/engine/learn/finish.ts'] },
   { id: 'lesson-pack', event: 'lesson-first-pass', pays: 'album.packs', callers: ['src/engine/match/finish.ts'] },
+  { id: 'cup-pack', event: 'cup-round-first-win', pays: 'album.packs', callers: ['src/engine/cup/finish.ts'] },
   { id: 'tour-knower', event: 'tour-finish', pays: 'school.knower', callers: ['src/engine/school/finish.ts'] },
   { id: 'kicks-knower', event: 'kicks-finish', pays: 'school.knower', callers: ['src/engine/school/finish.ts'] },
 ];

@@ -4,13 +4,15 @@
  * `cardOf` (`app/result/card.ts`): ничего не считает и экранов не знает — кнопки сообщают наружу, куда идти. Общая с Кубком.
  * Единицы — базовые px сцены (как у карточек матча); золото — цвет звёзд и «главного», синюю плашку им не обводим (ТАБУ).
  */
-import { artUrl } from '../../art/assets';
 import type { ResultCardModel } from '../../app/result/card';
 import { ru } from '../../i18n/ru';
+import CoachLine from '../day/CoachLine.vue';
 import KeyButton from '../kit/KeyButton.vue';
 import FansIcon from './FansIcon.vue';
+import ResultGrew from './ResultGrew.vue';
+import ResultStats from './ResultStats.vue';
 
-defineProps<{ card: ResultCardModel }>();
+defineProps<{ card: ResultCardModel; coach?: { text: string; name: string } | undefined }>();
 defineEmits<{ primary: []; home: []; minute: [] }>();
 const t = ru.result;
 const coins = [0, 1, 2];
@@ -19,7 +21,7 @@ const coins = [0, 1, 2];
 <template>
   <section
     class="rc panel"
-    :class="[card.kind, { loss: card.kind === 'loss' }]"
+    :class="[card.kind, { loss: card.kind === 'loss', coached: coach !== undefined && !card.stuck }]"
   >
     <div class="head">
       <h2>{{ card.title }}</h2>
@@ -92,19 +94,10 @@ const coins = [0, 1, 2];
 
     <template v-else>
       <div class="mid">
-        <dl v-if="card.stats">
-          <div>
-            <dt>{{ t.acc }}</dt>
-            <dd>{{ card.stats.acc }}</dd>
-          </div>
-          <div>
-            <dt>{{ t.speed }}</dt>
-            <dd>{{ card.stats.cpm }}</dd>
-            <dt class="unit">
-              {{ t.perMinute }}
-            </dt>
-          </div>
-        </dl>
+        <ResultStats
+          v-if="card.stats"
+          :stats="card.stats"
+        />
         <div
           v-if="card.record"
           class="rec"
@@ -127,6 +120,11 @@ const coins = [0, 1, 2];
         </div>
       </div>
 
+      <CoachLine
+        v-if="coach"
+        :text="coach.text"
+        :name="coach.name"
+      />
       <div
         v-if="card.purse"
         class="purse"
@@ -140,19 +138,12 @@ const coins = [0, 1, 2];
           /></span>
           <span class="fans"><FansIcon />{{ card.purse.fans }}</span>
         </template>
-        <template v-else>
-          <b class="grew-title">{{ t.purse.grewTitle }}</b>
-          <span class="fans"><FansIcon />{{ card.purse.fans }}</span>
-          <span class="coin-line">{{ card.purse.coins }} <img
-            :src="artUrl('iconCoin')"
-            alt=""
-          ></span>
-          <span
-            v-for="g in card.purse.grew"
-            :key="g"
-            class="grew"
-          >{{ g }}</span>
-        </template>
+        <ResultGrew
+          v-else
+          :fans="card.purse.fans"
+          :coins="card.purse.coins"
+          :grew="card.purse.grew"
+        />
       </div>
 
       <p
@@ -190,6 +181,7 @@ const coins = [0, 1, 2];
 <style scoped>
 /* как в кадре Э1.22 (kit.css .kb-result): верх 330, высота 302, пять рядов с равными промежутками */
 .rc { position: absolute; left: 50%; margin-left: -370px; width: 740px; top: 330px; height: 302px; box-sizing: border-box; padding: 12px 18px; display: flex; flex-direction: column; justify-content: space-between; font-weight: 700; color: var(--text); background: linear-gradient(160deg, rgb(58 63 134), rgb(31 33 82)); }
+.rc.coached { top: 290px; height: 342px; } /* строка тренера поднимает карточку на 40 px (kit result, coach) */
 .head { display: flex; justify-content: space-between; align-items: center; }
 h2 { margin: 0; font-size: 40px; line-height: 1.2; font-weight: 800; }
 .stuck h2 { font-size: 36px; }
@@ -199,10 +191,6 @@ h2 { margin: 0; font-size: 40px; line-height: 1.2; font-weight: 800; }
 .stars span.on { color: #c98a00; }
 .loss .stars span.on { color: var(--accent); }
 .mid { display: grid; grid-template-columns: repeat(2, 170px) 1fr; align-items: start; padding-right: 40px; }
-dl { display: contents; margin: 0; }
-dl > div { display: flex; flex-direction: column; gap: 1px; }
-dt { font-size: 14px; color: var(--text-muted); }
-dd { margin: 0; font-size: 28px; font-weight: 700; line-height: 1.1; }
 .rec { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
 .mid:has(dl) .rec { grid-column: 3; }
 .badge { padding: 3px 12px; border-radius: 14px; background: var(--award-plate); box-shadow: inset 0 0 0 1.5px var(--award-plate-edge); color: #3a2a00; font-size: 17px; font-weight: 900; }
@@ -214,11 +202,6 @@ dd { margin: 0; font-size: 28px; font-weight: 700; line-height: 1.1; }
 .fans { display: inline-flex; align-items: center; gap: 6px; margin-left: 51px; font-size: 22px; }
 .fans svg { width: 22px; height: 22px; fill: var(--text-muted); }
 .purse.loss { font-size: 22px; gap: 20px; }
-.purse.loss .grew-title { font-size: 22px; }
-.purse.loss .fans { margin-left: 0; }
-.coin-line { display: inline-flex; align-items: center; gap: 6px; }
-.coin-line img { width: 22px; height: 22px; }
-.grew { color: #fff; }
 .note { margin: 0; font-size: 16px; font-weight: 700; color: var(--text-muted); }
 .note b { color: var(--zone-middle); font-weight: 700; }
 .btns { display: flex; justify-content: space-between; align-items: center; gap: 14px; }

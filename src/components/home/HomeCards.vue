@@ -23,7 +23,7 @@ const t = ru.home;
     :style="{ left: `${width / 2 - (narrow ? 170 : 200)}px`, bottom: '8px', width: `${narrow ? 340 : 400}px` }"
   >
     <p class="lk">
-      {{ main.lead }}<br v-if="main.tag">
+      {{ main.lead }}<br v-if="main.tag || main.lead2">{{ main.lead2 }}
       <KitTag
         v-if="main.tag?.kind === 'nt'"
         kind="nt"

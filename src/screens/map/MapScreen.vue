@@ -10,6 +10,8 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { PREVIEW_KIT } from '../../app/home/preview';
 import { dreamText, fill } from '../../app/home/texts';
+import { clubCardOf } from '../../app/club/cardData';
+import { sheetOf, windowOf, type MapWindow } from '../../app/map/windows';
 import { useNav } from '../../app/nav/useNav';
 import { stageScale } from '../../components/shell/stageScale';
 import KeyButton from '../../components/kit/KeyButton.vue';
@@ -22,7 +24,10 @@ import { homeView } from '../../engine/home';
 import { enterLesson, mapView, navigate, pickYard, travelKey, travelOf, type MapKey, type MapSel, type TravelPhase } from '../../engine/map';
 import { ru } from '../../i18n/ru';
 import { yardAt } from './geometry';
+import ClubCardWindow from './ClubCardWindow.vue';
+import LeagueSheet from './LeagueSheet.vue';
 import MapBoard from './MapBoard.vue';
+import YardLegend from './YardLegend.vue';
 import { useMapInput } from './useMapInput';
 
 const t = ru.map;
@@ -34,13 +39,19 @@ interface PickRow {
   state: 'done' | 'ring' | 'cur';
   sel?: boolean;
   tag?: string;
+  mode?: string;
   today?: string;
   play?: string;
 }
 const router = useRouter();
 const nav = useNav();
 const route = useRoute();
-const { session, stand, pack, player, home, map, club, lessonId, lessonName } = useMapInput();
+const { session, stand, pack, player, home, map, club, lessonId, lessonName, data } = useMapInput();
+/** Окно поверх Карты (068-Р17): «Лист лиги» или «Карточка клуба»; живёт в адресе `?win=`, стенд кадра ставит его сам. Пока открыто — ввод Карты молчит. */
+const mapWin = computed<MapWindow | null>(() => windowOf(stand?.win ?? route.query.win));
+function closeWin(): void {
+  void router.replace({ path: '/map', query: { ...route.query, win: undefined } });
+}
 
 const win = ref({ w: globalThis.innerWidth, h: globalThis.innerHeight });
 const onResize = (): void => void (win.value = { w: globalThis.innerWidth, h: globalThis.innerHeight });
@@ -68,6 +79,13 @@ watch(
   { immediate: true },
 );
 const hv = computed(() => (home.value ? homeView(home.value) : null));
+const sheet = computed(() => (mapWin.value === 'sheet' && home.value && hv.value ? sheetOf(data, home.value.cur, hv.value.stars) : null));
+const clubData = computed(() => (mapWin.value === 'club' ? clubCardOf(data, stand?.hardKeys) : null));
+/** Итог пройденного двора в шапке окна уроков: «на ★★★: k из n уроков» (ТЗ-1.4). */
+const pickSum = computed(() => {
+  const node = view.value?.nodes[(view.value?.sel.stage ?? 1) - 1];
+  return node?.passed ? fill(t.pickSum, { stars: '★★★', k: node.full, n: node.lessons.length, unit: ru.path.lessonForms.many }) : '';
+});
 const head = computed(() => (hv.value ? dreamText(hv.value) : null));
 const canPlay = computed(() => session.status.value === 'ok' && !going.value);
 const trip = computed(() => (view.value ? travelOf(view.value.selLesson.n) : null));
@@ -90,6 +108,7 @@ const rows = computed<PickRow[]>(() => {
       state: l.state === 'near' ? 'cur' : l.state,
       sel: l.n === v.sel.lesson,
       ...(l.control || l.friendly ? { tag: l.control ? t.control : t.friendly } : {}),
+      ...(l.state === 'ring' && l.n === v.sel.lesson ? { mode: ru.kit.sheet.pick.rows[1].mode } : {}),
       ...(l.state === 'cur' ? { today: t.today } : {}),
       ...(l.n === v.sel.lesson ? { play: t.play } : {}),
     }));
@@ -135,6 +154,7 @@ function go(): void {
 }
 const ARROWS: Record<string, MapKey> = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' };
 function key(e: KeyboardEvent): void {
+  if (mapWin.value) return; // окно держит Esc, Tab и Enter само (KitModal)
   const arrow = ARROWS[e.key];
   if (going.value) return;
   if (phase.value === 'travel') {
@@ -174,9 +194,11 @@ onUnmounted(() => {
       :built="hv.stadium.built"
       :end="home.end"
       :region="home.region"
+      :festive="home.festive === true"
       :kit-body="club.kit?.body ?? PREVIEW_KIT.body"
       :hover="hover"
       :travel="busOn"
+      :hide-here="opened || mapWin !== null"
       @pick="onPick"
       @hover="hover = $event"
     />
@@ -190,6 +212,8 @@ onUnmounted(() => {
       :dream-text="head.text"
       :dream-pct="head.pct"
       :chips="[t.leagueSheet]"
+      :open="mapWin === 'sheet' ? t.leagueSheet : undefined"
+      @chip="router.push({ path: '/map', query: { ...route.query, win: 'sheet' } })"
     />
 
     <PickCard
@@ -200,6 +224,7 @@ onUnmounted(() => {
       :sub="fill(t.pickStep, { n: pick.stage })"
       :rows="rows"
       :hint="t.pickHint"
+      :sum="pickSum"
       @close="opened = false"
     />
 
@@ -229,16 +254,31 @@ onUnmounted(() => {
       </template>
     </EventPlate>
     <GoCard
-      v-else
+      v-else-if="!opened"
       :style="{ position: 'absolute', zIndex: 3, right: '12px', bottom: '12px', width: W > 1100 ? '360px' : '300px' }"
       variant="map"
-      :lead="goLead"
-      :lead2="goRival"
-      :chip="goKind"
+      :lead="home.festive === true ? ru.cup.champion.head : goLead"
+      :lead2="home.festive === true ? t.festiveSub : goRival"
+      :chip="home.festive === true ? '' : goKind"
+      :no-action="home.festive === true"
       :chip-kind="view.selLesson.control ? '' : 'nt'"
       :where="goCup"
       cup
       @go="go"
+    />
+    <YardLegend v-if="opened && !mapWin" />
+    <LeagueSheet
+      v-if="sheet"
+      :sheet="sheet"
+      @close="closeWin"
+    />
+    <ClubCardWindow
+      v-if="clubData"
+      :card="clubData"
+      :name="club.name"
+      :city="club.city || t.defaultCity"
+      @close="closeWin"
+      @edit="router.push({ path: '/club', query: { edit: '1' } })"
     />
   </main>
   <main

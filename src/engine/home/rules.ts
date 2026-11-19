@@ -31,7 +31,8 @@ export function mainAction(i: HomeInput): MainAction {
   }
   if (n > YARD_LESSONS) {
     if (i.region) return { kind: 'region', cup: i.end ? 'ours' : i.extras.silver === true ? 'silver' : 'waits' };
-    return { kind: 'stars', ...goldHint(i) };
+    const hint = goldHint(i);
+    return hint.missing === 0 ? { kind: 'done' } : { kind: 'stars', ...hint };
   }
   return {
     kind: 'lesson',
@@ -59,6 +60,16 @@ export function dreamOf(i: HomeInput): Dream {
 /** Свежий выпуск газеты — «вышел сегодня» (023-Р35а): живёт до конца дня вехи и после первого матча дня. */
 export const paperFresh = (i: HomeInput): boolean => i.extras.paperDay != null && i.extras.paperDay === i.day && i.matchesToday >= 1;
 
+/** С этого урока метка свежего выпуска живёт на Стенгазете Дома, а не в Музее (049-Р37) — порог стенда, одно место. */
+export const PAPER_MARK_HOME_CUR = 31;
+/** Метка «свежий» в Музее: выпуск свежий и урок до порога (с него метка — на Стенгазете Дома). */
+export const paperFreshMark = (i: HomeInput): boolean => paperFresh(i) && i.cur < PAPER_MARK_HOME_CUR;
+/** Музей уже отсылает к Стенгазете Дома (подпись «свежий — на Стенгазете»). */
+export const paperMarkOnHome = (i: HomeInput): boolean => i.cur >= PAPER_MARK_HOME_CUR;
+
+/** Табличка «Район строится» над аркой: с урока 25; в конце Двора (главная — «На карту», 068-Р9) её нет — то же сообщает нижняя карточка. */
+export const regionSignShown = (i: HomeInput, main: MainAction): boolean => i.cur >= 25 && main.kind !== 'done';
+
 /** Табличка здания (Б3, 35, 41, 42): замок ТЗ-1.9, «после матча», событие дня, эмблема, метка. */
 export function houseState(id: HouseId, i: HomeInput): HouseView {
   const none: HouseView = { lock: null, sub: null, mark: '' };
@@ -79,7 +90,7 @@ export function houseState(id: HouseId, i: HomeInput): HouseView {
   }
   if (i.end) return { ...none, sub: { key: 'goldAward' } };
   if ((i.extras.papers ?? 0) < 1) return { ...none, lock: { key: 'firstPaper', n: cfg.papers.firstCur - 1, alt: null } };
-  return { ...none, sub: ev ? { key: 'event', event: ev } : null, mark: paperFresh(i) && i.cur < 31 ? 'freshPaper' : '' };
+  return { ...none, sub: ev ? { key: 'event', event: ev } : null, mark: paperFreshMark(i) ? 'freshPaper' : '' };
 }
 
 /** Замок ТЗ-1.9 одной функцией: «Школа» и «База» открыты. */
