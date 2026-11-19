@@ -1,0 +1,221 @@
+{
+ "id": "game-free.end",
+ "codes": {
+  "1024": "Э4.46",
+  "1920": "Э4.36"
+ },
+ "screen": "game-free",
+ "route": "/base/free",
+ "state": "Итог: 4 из 5, новый рекорд",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 660973,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.fzh-words",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.yd-combos": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.six-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.six-keys-review": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.fzh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 96,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 19,
+   "days": 5,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 6520,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "base": {
+   "day": null,
+   "today": 0,
+   "records": {
+    "keepy": {
+     "n": 33,
+     "day": "2026-11-16"
+    },
+    "mini": {
+     "n": 2,
+     "day": "2026-11-17"
+    }
+   },
+   "lastN": {
+    "keepy": {
+     "n": 33
+    },
+    "mini": {
+     "n": 2
+    }
+   },
+   "played": [],
+   "last": null,
+   "seen": [
+    "keepy",
+    "mini",
+    "free"
+   ]
+  },
+  "learn": {
+   "games": {
+    "arrows": {
+     "step": 3,
+     "plays": 3,
+     "best": 29000,
+     "last": "2026-11-17"
+    },
+    "mouse": {
+     "step": 2,
+     "plays": 3,
+     "best": 40000,
+     "last": "2026-11-17"
+    },
+    "tab": {
+     "step": 2,
+     "plays": 3,
+     "best": 40000,
+     "last": "2026-11-17"
+    },
+    "keyboard": {
+     "step": 2,
+     "plays": 3,
+     "best": 40000,
+     "last": "2026-11-17"
+    },
+    "squad": {
+     "step": 1,
+     "plays": 3,
+     "best": 40000,
+     "last": "2026-11-17"
+    }
+   },
+   "recent": []
+  },
+  "seen": {
+   "news": "2.0.0",
+   "firsts": {
+    "base": "2026-11-17"
+   }
+  }
+ },
+ "base": {
+  "cup": true,
+  "free": {
+   "phase": "end",
+   "results": [
+    true,
+    false,
+    true,
+    false,
+    false
+   ],
+   "end": {
+    "score": 2,
+    "record": "first",
+    "best": 2,
+    "prev": 0,
+    "left": 1,
+    "unsaved": false,
+    "t": 48,
+    "bestT": 48,
+    "prevT": 0
+   }
+  }
+ }
+}

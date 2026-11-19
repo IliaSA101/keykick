@@ -1,0 +1,278 @@
+{
+ "id": "game-mini.play-fence",
+ "codes": {
+  "1920": "Э4.43"
+ },
+ "screen": "game-mini",
+ "route": "/base/mini",
+ "state": "Игра 4×4, урок 16: ограда, газон подлатан",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 450747,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.pr-words",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.yd-combos": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.six-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.six-keys-review": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.fzh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.fzh-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.fzh-again": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.eight-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.test-eight": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.pr": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 204,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 29,
+   "days": 9,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 8680,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "base": {
+   "day": null,
+   "today": 0,
+   "records": {
+    "keepy": {
+     "n": 34,
+     "day": "2026-11-13"
+    },
+    "mini": {
+     "n": 2,
+     "day": "2026-11-11"
+    },
+    "free": {
+     "n": 2,
+     "t": 48,
+     "day": "2026-11-12"
+    }
+   },
+   "lastN": {
+    "keepy": {
+     "n": 34
+    },
+    "mini": {
+     "n": 2
+    },
+    "free": {
+     "n": 2,
+     "t": 48
+    }
+   },
+   "played": [],
+   "last": null,
+   "seen": [
+    "keepy",
+    "mini"
+   ]
+  },
+  "learn": {
+   "games": {
+    "arrows": {
+     "step": 3,
+     "plays": 3,
+     "best": 29000,
+     "last": "2026-11-17"
+    },
+    "mouse": {
+     "step": 2,
+     "plays": 3,
+     "best": 40000,
+     "last": "2026-11-17"
+    },
+    "tab": {
+     "step": 2,
+     "plays": 3,
+     "best": 40000,
+     "last": "2026-11-17"
+    },
+    "keyboard": {
+     "step": 2,
+     "plays": 3,
+     "best": 40000,
+     "last": "2026-11-17"
+    },
+    "squad": {
+     "step": 1,
+     "plays": 3,
+     "best": 40000,
+     "last": "2026-11-17"
+    },
+    "board": {
+     "step": 1,
+     "plays": 3,
+     "best": 40000,
+     "last": "2026-11-17"
+    }
+   },
+   "recent": []
+  },
+  "seen": {
+   "news": "2.0.0",
+   "firsts": {
+    "base": "2026-11-17"
+   }
+  }
+ },
+ "base": {
+  "mini": {
+   "phase": "play",
+   "now": 52000,
+   "state": {
+    "team": [
+     "ф",
+     "ы",
+     "в",
+     "а"
+    ],
+    "power": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "seed": 1,
+    "holder": 3,
+    "passes": 1,
+    "us": 2,
+    "them": 1,
+    "steals": 0,
+    "shots": 0,
+    "startedAt": 0,
+    "since": 0,
+    "foeAt": 90000,
+    "streak": 0,
+    "tactic": null,
+    "over": false
+   }
+  }
+ }
+}

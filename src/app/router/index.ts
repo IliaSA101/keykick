@@ -2,6 +2,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import { isParentRoute } from '../../engine/players/entry';
 import { crash } from '../crash/boot';
+import { onRoute } from '../preload/browser';
 import { phoneNow, watchPhone } from '../phone/device';
 import { useSession } from '../save/session';
 import { guardRoute } from './guard';
@@ -32,4 +33,11 @@ watchPhone(() => {
     const to = await guardRoute(here, useSession(), () => crash.crashed(), phoneNow);
     if (typeof to === 'string') await router.replace(to);
   })().catch((e: unknown) => crash.report('vue', e));
+});
+
+/** Фоновая догрузка графики соседних экранов (067 Т23): после перехода; сбой подготовки — не сбой игры. */
+router.afterEach((to) => {
+  void onRoute(String(to.name ?? ''), to.params, to.path).catch((e: unknown) => {
+    if (import.meta.env.DEV) console.warn('art preload', e);
+  });
 });

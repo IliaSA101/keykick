@@ -1,0 +1,7 @@
+{
+  "$comment": "Альбом Двора (067 Т8, ТЗ-5.2): 13 форм × 3 части = 39 паков. Порядок — навсегда (059): порядок паков — порядок списка `kits` (первая половина 1–7, затем 8–13 с фольгой, 049-Р3 Б′, 067-Р9: по порядку, шансов нет). Id форм и призовых — навсегда (059): все 13 форм есть в kits.json (включая `magpies`; проверяет tests/album/order.test.ts).",
+  "parts": ["shirt", "shorts", "socks"],
+  "foilFrom": 8,
+  "kits": ["scarlet", "emerald", "tangerine", "cherry", "magpies", "strawberry", "sand", "pirates", "ember", "dragons", "mint", "tigers", "comet"],
+  "prizes": ["p-turq", "p-star1", "p-red", "p-star2", "p-ystars", "p-champ"]
+}

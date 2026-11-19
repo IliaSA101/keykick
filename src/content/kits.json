@@ -22,5 +22,6 @@
   { "id": "mint", "name": "Мята", "rarity": "rare", "pattern": "checks", "body": "#3ccf9a", "alt": "#ffffff", "sleeves": "#1a5c48", "trim": "#1a5c48" },
   { "id": "dragons", "name": "Драконы", "rarity": "epic", "pattern": "stripes", "body": "#0f7a3a", "alt": "#f4c24a", "sleeves": "#16161a", "trim": "#f4c24a" },
   { "id": "lightning", "name": "Молнии", "rarity": "epic", "pattern": "sash", "body": "#1b1f5e", "alt": "#f5d000", "sleeves": "#1b1f5e", "trim": "#f5d000" },
-  { "id": "phoenix", "name": "Фениксы", "rarity": "epic", "pattern": "halves", "body": "#e8202c", "alt": "#ffb000", "sleeves": "split", "trim": "#16161a" }
+  { "id": "phoenix", "name": "Фениксы", "rarity": "epic", "pattern": "halves", "body": "#e8202c", "alt": "#ffb000", "sleeves": "split", "trim": "#16161a" },
+  { "id": "magpies", "name": "Сороки", "rarity": "common", "pattern": "stripes", "body": "#ffffff", "alt": "#16161a", "sleeves": "#ffffff", "trim": "#16161a" }
 ]

@@ -28,11 +28,15 @@ export const stuckRows = (stuck: readonly StuckPlayer[]): TroubleRow[] =>
   stuck.map((s) => ({ pid: s.pid, kind: s.kind, name: s.name, actions: s.kind === 'broken' ? ['load', 'restart'] : [] }));
 
 /**
- * Устройство, которое не открыть: `broken` — файл или «Новый клуб», `newer` — только текст (просмотр, Р15). `denied` и `absent` — не здесь:
- * первого запуска тупиком не зовём, а «нет доступа» у устройства в спеке нет (страница остаётся при «нет игроков»).
+ * Устройство, которое не открыть: `broken` — файл или «Новый клуб», `newer` — только текст (просмотр, Р15), `denied` (хранилище недоступно, 063-Р72) —
+ * только текст, без действий: писать некуда. `absent` — не здесь: первого запуска тупиком не зовём.
  */
 export const deviceRow = (state: DeviceState): TroubleRow | null =>
-  state === 'broken' ? { pid: null, kind: 'broken', name: null, actions: ['load', 'newClub'] } : state === 'newer' ? { pid: null, kind: 'newer', name: null, actions: [] } : null;
+  state === 'broken'
+    ? { pid: null, kind: 'broken', name: null, actions: ['load', 'newClub'] }
+    : state === 'newer' || state === 'denied'
+      ? { pid: null, kind: state, name: null, actions: [] }
+      : null;
 
 /** Отказ «Начать заново» / «Новый клуб» → ключ строки (063-Р65). `busy` — с именем, `healthy` — «уже открывается», `binned` — «в корзине»; общие — как у корзины. */
 export type RepairNote = 'busy' | 'conflict' | 'readonly' | 'healthy' | 'binned' | 'quota' | 'denied';

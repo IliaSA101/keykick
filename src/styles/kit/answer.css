@@ -1,0 +1,126 @@
+/* ЭБ · Поля ответа новых видов (067 Т15, кадры Э3.28–38): окошко, список, вариант с цифрой-клавишей, соединялка, полоса номеров.
+   Классы `pf-*`; состояния — filled (введено), focus, ok, bad (после ответа), miss (верный, но не отмечен). Цвета — только --paper-*. */
+.pf-fld {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 44px;
+  height: 36px;
+  padding: 0 10px;
+  border: 2px solid var(--paper-border);
+  border-radius: 8px;
+  background: var(--paper-field);
+  color: var(--paper-text);
+  font: inherit;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  vertical-align: middle;
+}
+.pf-fld.filled {
+  border-color: var(--paper-text);
+}
+.pf-fld:focus {
+  outline: none;
+  border-color: var(--paper-focus);
+  box-shadow: 0 0 0 3px rgb(26 79 176 / 0.22);
+}
+.pf-fld.ok {
+  border-color: var(--paper-correct);
+  background: var(--paper-ok-bg);
+  color: var(--paper-correct);
+}
+.pf-fld.bad {
+  border-color: var(--paper-wrong);
+  background: var(--paper-bad-bg);
+  color: var(--paper-wrong);
+}
+
+/* вариант с цифрой-клавишей: кружок (выбор одного) или квадрат (галочки, картинки); у отмеченного — ✓ вместо цифры */
+.pf-opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.pf-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  min-width: 88px;
+  padding: 7px 14px 7px 8px;
+  border: 2px solid var(--paper-border);
+  border-radius: 10px;
+  background: var(--paper-field);
+  color: var(--paper-text);
+  font: inherit;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.pf-opt:disabled {
+  cursor: default;
+}
+.pf-opt:focus-visible {
+  outline: 3px solid var(--paper-focus);
+  outline-offset: 2px;
+}
+.pf-opt .k {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  box-sizing: border-box;
+  border: 2px solid var(--paper-ring);
+  border-radius: 50%;
+  font-size: 15px;
+  color: var(--paper-ring-text);
+}
+.pf-opt.sq .k {
+  border-radius: 6px;
+}
+.pf-opt.pic {
+  flex-direction: column;
+  padding: 8px 10px;
+  min-width: 0;
+}
+.pf-opt.pic .k {
+  align-self: flex-start;
+}
+.pf-opt.pic img {
+  display: block;
+  width: 54px;
+  height: 54px;
+}
+.pf-opt.sel {
+  border-color: var(--paper-text);
+  background: var(--paper-selected);
+}
+.pf-opt.sel .k {
+  border-color: var(--paper-text);
+  background: var(--paper-text);
+  color: var(--paper-button-text);
+}
+.pf-opt.ok {
+  border-color: var(--paper-correct);
+  background: var(--paper-ok-bg);
+}
+.pf-opt.ok .k {
+  border-color: var(--paper-correct);
+  background: var(--paper-correct);
+  color: var(--paper-button-text);
+}
+.pf-opt.bad {
+  border-color: var(--paper-wrong);
+  background: var(--paper-bad-bg);
+}
+.pf-opt.bad .k {
+  border-color: var(--paper-wrong);
+  background: var(--paper-wrong);
+  color: var(--paper-button-text);
+}
+.pf-opt.miss {
+  border-style: dashed;
+}

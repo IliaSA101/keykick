@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { APP_VERSION, createPlayer, serializePlayer, writePlayer, type Envelope } from '../../src/engine/save/envelope';
 import { openPlayer, type Opened } from '../../src/engine/save/open';
 import { isDay, isInt, type SectionDef } from '../../src/engine/save/section';
+import { coachDef } from '../../src/engine/coach/section';
 import { dayDef } from '../../src/engine/day/section';
 import { stadiumDef } from '../../src/engine/home/section';
 import { walletDef } from '../../src/engine/rewards/section';
@@ -560,5 +561,20 @@ describe('check разделов day, stadium, wallet (066 Т6)', () => {
     expect(walletDef.check({ ...walletDef.empty(), paid: ['a', 'b', 'c', 'd'] })).toEqual([]);
     expect(dayDef.check({ played: -1, days: 1.5, todayN: NaN, today: 'x', last: -5 })).toEqual(['played', 'days', 'todayN', 'today', 'last']);
     expect(walletDef.check({ coins: -1, rest: -1, paid: 1 })).toEqual(['coins', 'rest', 'paid']);
+  });
+});
+
+type Obj = Record<string, unknown>;
+describe('К7: раздел coach — старое сохранение без него (067 Т24)', () => {
+  it('К7: конверт без `coach` открывается ok с changed, раздел пуст; свои окна переживают открытие', () => {
+    // Ловит: старое сохранение (до Т24) уходит в карантин или теряет окна, когда раздел уже есть.
+    const withCoach = [...defs, coachDef] as SectionDef<unknown>[];
+    const old = serializePlayer(base());
+    expect((JSON.parse(old) as { sections: Obj }).sections.coach).toBeUndefined();
+    const res = ok(openPlayer(old, withCoach));
+    expect(res.changed).toBe(true);
+    expect(res.env.sections.coach).toEqual({ v: 1, data: { keys: {} } });
+    const mine = ok(openPlayer(rawWith({ ...base().sections, coach: { v: 1, data: { keys: { ы: '1101' } } } }), withCoach));
+    expect(mine.env.sections.coach).toEqual({ v: 1, data: { keys: { ы: '1101' } } });
   });
 });

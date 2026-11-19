@@ -21,11 +21,10 @@
       "trim": "#f5c400"
     },
     {
-      "pattern": "halves",
+      "pattern": "plain",
       "body": "#2f9a27",
-      "alt": "#ffffff",
-      "sleeves": "split",
-      "trim": "#16161a"
+      "sleeves": "#ffffff",
+      "trim": "#ffffff"
     },
     {
       "pattern": "sash",

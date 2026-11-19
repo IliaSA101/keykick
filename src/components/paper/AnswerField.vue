@@ -1,16 +1,32 @@
 <script setup lang="ts">
 /**
- * Поле ответа листа задачи (ЭБ.21, 065 Т10б): по виду ответа — число, дробь, поля, выбор одного и нескольких, порядок, слово.
+ * Поле ответа листа задачи (ЭБ.21, 065 Т10б, 067 Т15): по виду ответа — число, дробь, поля, выбор одного и нескольких, порядок, слово;
+ * список, соединялка, выбор рисунков и окошки выражения — свои компоненты (`FIELD_OF` в paper.ts: какому виду какое поле).
  * Только показ и ввод: значение живёт у вызывающего (`v-model`), проверку делает движок (`engine/school/answers.ts`).
  * После ответа (`locked`) поле не меняется; `reveal` — подсветить верные варианты (эталонный ответ).
  */
-import { computed } from 'vue';
+import { computed, type Component } from 'vue';
 import { moveItem, type AnswerInput, type TaskAnswer } from '../../engine/school/answers';
 import { ru } from '../../i18n/ru';
+import ExprField from './ExprField.vue';
+import MatchField from './MatchField.vue';
+import { FIELD_OF, isComponentField, setAt, toggleIndex, type ComponentField } from './paper';
+import PictureField from './PictureField.vue';
+import SelectField from './SelectField.vue';
 
-const props = defineProps<{ answer: TaskAnswer; modelValue: AnswerInput; locked?: boolean; reveal?: boolean }>();
+/** Свои компоненты полей (виды `FIELD_HOME` = component); тип `Record` — поле без компонента не соберётся. */
+const FIELD_COMPONENT: Record<ComponentField, Component> = { select: SelectField, match: MatchField, expr: ExprField };
+
+/** digits — выбор одного и галочки с цифрами-клавишами (Школа, 067-Р7); без него — буквы А, Б, В (пенальти, не трогаем). */
+const props = defineProps<{ answer: TaskAnswer; modelValue: AnswerInput; locked?: boolean; reveal?: boolean; digits?: boolean }>();
 const emit = defineEmits<{ 'update:modelValue': [AnswerInput] }>();
 const t = ru.paper;
+
+/** Поле по виду ответа — одна таблица `FIELD_OF`: ветки шаблона идут по ней, а не по виду напрямую. */
+const field = computed(() => FIELD_OF[props.answer.kind]);
+const own = computed<Component | null>(() => (isComponentField(field.value) ? FIELD_COMPONENT[field.value] : null));
+/** Цифры-клавиши: у «картинок» — всегда нужен PictureField (без `digits` — с буквами), у выбора одного и галочек — когда `digits`. */
+const pictureField = computed(() => props.answer.kind === 'pictures' || (props.digits === true && field.value === 'options'));
 
 const input = computed(() => props.modelValue);
 const set = (v: AnswerInput): void => {
@@ -23,17 +39,12 @@ const setFraction = (part: 'whole' | 'num' | 'den', e: Event): void => {
 };
 const setField = (i: number, e: Event): void => {
   if (input.value.kind !== 'fields') return;
-  const next = [...input.value.value];
-  next[i] = text(e);
-  set({ kind: 'fields', value: next });
+  set({ kind: 'fields', value: setAt(input.value.value, i, text(e)) });
 };
 /** Выбор: у «одного» — нажатый вариант; у «нескольких» — галочка включается и снимается. */
 const pickOption = (i: number): void => {
   if (input.value.kind === 'choice') set({ kind: 'choice', value: i });
-  else if (input.value.kind === 'multi') {
-    const on = input.value.value.includes(i);
-    set({ kind: 'multi', value: on ? input.value.value.filter((x) => x !== i) : [...input.value.value, i].sort((a, b) => a - b) });
-  }
+  else if (input.value.kind === 'multi') set({ kind: 'multi', value: toggleIndex(input.value.value, i) });
 };
 const chosen = (i: number): boolean => (input.value.kind === 'choice' ? input.value.value === i : input.value.kind === 'multi' && input.value.value.includes(i));
 const isRight = (i: number): boolean => {
@@ -54,7 +65,7 @@ const setWord = (e: Event): void => {
     :data-kind="answer.kind"
   >
     <input
-      v-if="(answer.kind === 'integer' || answer.kind === 'text') && (input.kind === 'integer' || input.kind === 'text')"
+      v-if="field === 'text' && (answer.kind === 'integer' || answer.kind === 'text') && (input.kind === 'integer' || input.kind === 'text')"
       class="fld wide"
       type="text"
       autocomplete="off"
@@ -67,7 +78,7 @@ const setWord = (e: Event): void => {
     >
 
     <div
-      v-else-if="answer.kind === 'fraction' && input.kind === 'fraction'"
+      v-else-if="field === 'fraction' && answer.kind === 'fraction' && input.kind === 'fraction'"
       class="frac"
     >
       <input
@@ -109,7 +120,7 @@ const setWord = (e: Event): void => {
     </div>
 
     <div
-      v-else-if="answer.kind === 'fields' && input.kind === 'fields'"
+      v-else-if="field === 'fields' && answer.kind === 'fields' && input.kind === 'fields'"
       class="rows"
     >
       <label
@@ -130,8 +141,34 @@ const setWord = (e: Event): void => {
       </label>
     </div>
 
+    <PictureField
+      v-else-if="field === 'options' && pictureField && (answer.kind === 'pictures' || answer.kind === 'choice' || answer.kind === 'multi')"
+      :answer="answer"
+      :model-value="modelValue"
+      :locked="locked"
+      :reveal="reveal"
+      :digits="digits"
+      @update:model-value="emit('update:modelValue', $event)"
+    >
+      <template #card="{ index }">
+        <slot
+          name="card"
+          :index="index"
+        />
+      </template>
+    </PictureField>
+    <component
+      :is="own"
+      v-else-if="own !== null"
+      :answer="answer"
+      :model-value="modelValue"
+      :locked="locked"
+      :reveal="reveal"
+      @update:model-value="emit('update:modelValue', $event)"
+    />
+
     <div
-      v-else-if="answer.kind === 'choice' || answer.kind === 'multi'"
+      v-else-if="field === 'options' && (answer.kind === 'choice' || answer.kind === 'multi')"
       class="opts list"
     >
       <button
@@ -153,7 +190,7 @@ const setWord = (e: Event): void => {
     </div>
 
     <ol
-      v-else-if="answer.kind === 'order' && input.kind === 'order'"
+      v-else-if="field === 'order' && answer.kind === 'order' && input.kind === 'order'"
       class="order"
     >
       <li
@@ -201,9 +238,9 @@ const setWord = (e: Event): void => {
 .opt:focus-visible { outline: 3px solid var(--paper-focus); outline-offset: 2px; }
 .txt { flex: 1; }
 .order { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
-.order li { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border: 1.5px solid var(--paper-border); border-radius: 8px; background: #fff; }
+.order li { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border: 1.5px solid var(--paper-border); border-radius: 8px; background: var(--paper-field); }
 .no { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: var(--paper-note); font-weight: 700; font-size: 14px; }
-.mv { width: 34px; height: 30px; border: 1.5px solid var(--paper-border); border-radius: 6px; background: #fff; color: var(--paper-focus); font-size: 18px; font-weight: 700; cursor: pointer; }
+.mv { width: 34px; height: 30px; border: 1.5px solid var(--paper-border); border-radius: 6px; background: var(--paper-field); color: var(--paper-focus); font-size: 18px; font-weight: 700; cursor: pointer; }
 .mv:disabled { opacity: 0.35; cursor: default; }
 .mv:focus-visible { outline: 3px solid var(--paper-focus); outline-offset: 2px; }
 </style>

@@ -7,6 +7,9 @@ import { putFinished, takeFinished, takeMeta } from '../../src/app/match/handoff
 import { cardOf, goalLine, kindOf } from '../../src/app/result/card';
 import { CONFETTI_COLORS, confetti } from '../../src/app/result/confetti';
 import type { ResultView } from '../../src/engine/match';
+import { chainNext, escChain, nextStep, READY_STEPS, STEP_PATH } from '../../src/app/result/chain';
+import { routes } from '../../src/app/router/routes';
+import type { Step } from '../../src/engine/day/chain';
 
 const base: ResultView = {
   verdict: 'win',
@@ -79,6 +82,17 @@ describe('вид итога', () => {
     expect(kindOf({ ...stuck, help: 'minute' })).toBe('loss'); // минута тренера — Т10б
   });
 
+  it('К13 Р282: кнопка «Минута тренера» — только при провале с советом minute/coach; reserve, none и победа — без неё (кадры Э1.23, Э1.24)', () => {
+    // Ловит: кнопку минуты на принятых кадрах (reserve, «Не беда» без совета) или на победе с хвостом помощи.
+    const stuck: ResultView = { ...lost, total: { me: 2, opp: 3 }, missing: { kind: 'goals', n: 2 }, help: 'reserve', rest: true, replay: 'both' };
+    expect(cardOf({ ...lost, help: 'minute' }).minute).toBe('Минута тренера');
+    expect(cardOf({ ...stuck, help: 'coach' }).minute).toBe('Минута тренера');
+    expect(cardOf(stuck).minute).toBeNull();
+    expect(cardOf(lost).minute).toBeNull();
+    expect(cardOf({ ...base, help: 'minute' }).minute).toBeNull();
+    expect(cardOf({ ...base, help: 'coach' }).minute).toBeNull();
+  });
+
   it('край: засчитанная ничья (товарищеский) — «Ничья!», проход; склонение голов', () => {
     expect(cardOf({ ...base, verdict: 'draw', total: { me: 1, opp: 1 } }).title).toBe('Ничья!');
     expect(goalLine({ kind: 'goals', n: 1 })).toBe('Ещё 1 гол — и победа');
@@ -105,5 +119,55 @@ describe('вид итога', () => {
       expect(b <= Math.max(r, g)).toBe(true); // синее не главный канал: нет синих обрывков
       expect(r > g + 100 && r > b + 100).toBe(false); // и нет красных
     }
+  });
+});
+
+describe('К6: цепочка после итога (067 Т12, К-Б)', () => {
+  const day = (todayN: number) => ({ todayN });
+  /** Все звенья готовы — порядок цепочки, каким он станет после Т16 и волны 5. */
+  const ALL: readonly Step[] = ['pack', 'celebrate', 'tourWaits', 'kicks'];
+  it('К6 порядок: пак → «Тур ждёт» (первый матч дня) → конец; пак показан — звено уходит', () => {
+    // Ловит: перестановку звеньев, пак после тура, повторный показ показанного пака.
+    const s = { album: { packs: 5, shown: 4 }, day: day(1) };
+    expect(chainNext(s, true, null, 0, ALL)?.step).toBe('pack');
+    expect(chainNext(s, true, 'pack', 0, ALL)?.step).toBe('tourWaits');
+    expect(chainNext(s, true, 'tourWaits', 0, ALL)).toBeNull();
+    expect(chainNext({ ...s, album: { packs: 5, shown: 5 } }, true, null, 0, ALL)?.step).toBe('tourWaits');
+    expect(chainNext({ ...s, day: day(2) }, true, 'pack', 0, ALL)?.step).toBe('kicks');
+    expect(chainNext(s, false, 'pack', 0, ALL)).toBeNull();
+  });
+
+  it('К6 Р70: каждое звено цепочки ведёт на готовый экран, а не на заглушку «строится»; без звеньев — Карта остаётся целью', () => {
+    // Ловит: со дня 2 после каждой победы ребёнка уводило на /school/kicks (заглушка), а Карта — цель «Дальше» — терялась.
+    const stub = (path: string) => routes.find((r) => r.path === path)?.props !== undefined; // у заглушек есть `props.title`, у живых экранов нет
+    for (const packs of [0, 1, 5]) {
+      for (const todayN of [1, 2, 4]) {
+        for (const open of [true, false]) {
+          const s = { album: { packs, shown: 0 }, day: day(todayN) };
+          for (const after of [null, 'pack', 'tourWaits', 'kicks'] as const) {
+            const next = chainNext(s, open, after, 0);
+            if (next === null) continue;
+            expect(READY_STEPS, `${packs}/${todayN}/${open}/${after}`).toContain(next.step);
+            expect(stub(next.path), next.path).toBe(false);
+          }
+        }
+      }
+    }
+    expect(Object.entries(STEP_PATH).filter(([step]) => READY_STEPS.includes(step as Step)).every(([, path]) => routes.some((r) => r.path === path && r.props === undefined))).toBe(true);
+    // «Штрафные» — живое звено (Т16, Р131): со дня 2 при открытой Школе цепочка ведёт на них.
+    expect(chainNext({ album: { packs: 3, shown: 3 }, day: day(2) }, true, null, 0)).toEqual({ step: 'kicks', path: '/school/kicks' });
+    // День 1: «Тур ждёт» — живое звено, адрес из STEP_PATH (мутант адреса)
+    expect(chainNext({ album: { packs: 3, shown: 3 }, day: day(1) }, true, null, 0)).toEqual({ step: 'tourWaits', path: '/school/waits' });
+    // Карта — цель без звеньев: Школа закрыта (Дом не собран) — звеньев нет, цепочка кончается сразу.
+    expect(chainNext({ album: { packs: 3, shown: 3 }, day: day(2) }, false, null, 0)).toBeNull();
+  });
+
+  it('К6 Esc на звене: Дом, пак не потерян (следующий заход снова с пака)', () => {
+    // Ловит: потерю звена на Esc (Esc не пишет в сохранение, звенья считаются от него заново).
+    const s = { album: { packs: 5, shown: 4 }, day: day(1) };
+    expect(escChain()).toBe('/home');
+    expect(chainNext(s, true, null, 0)?.step).toBe('pack');
+    expect(nextStep(['kicks', 'pack'], null)).toBe('pack');
+    expect(nextStep(['pack'], 'pack')).toBeNull();
   });
 });

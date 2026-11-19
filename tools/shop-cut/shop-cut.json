@@ -1,0 +1,19 @@
+{
+  "$comment": "Лавка (067 Т12): вырезки вещей для карточек — из кадров вещей Дома макета (docs/mockups/map-yard/img, e2b-item-* и kid-mid-22), рамка в px кадра 1920×1080 (из tools/mock-collection/e2k-shop.mjs CUT). Рамка расширяется до соотношения 1,9 вокруг центра и не выходит за кадр; карточка показывает вырезку по центру (object-fit: cover). «yard-whole» — весь двор целиком (кадр Дома среднего ребёнка на ур. 33) для левой колонки Э2К.04 «всё куплено» (макет: `.ce-cut.whole`). Результат — public/art/shop/<id>.webp, строит tools/shop-cut/shop_cut.py. Бутсы берутся из img/kit макета целиком. Id вещей — из yard.json, навсегда.",
+  "aspect": 1.9,
+  "width": 520,
+  "frame": [1920, 1080],
+  "cut": {
+    "gate-sticker": { "src": "e2b-item-наклейка на ворота", "rect": [170, 690, 350, 840] },
+    "center-circle": { "src": "e2b-item-центральный круг", "rect": [784, 816, 1072, 936] },
+    "seats-club": { "src": "e2b-item-сиденья в цвет клуба", "rect": [332, 500, 780, 632] },
+    "net-flags": { "src": "e2b-item-флажки на сетке", "rect": [32, 800, 520, 890] },
+    "graffiti": { "src": "e2b-item-граффити", "rect": [1088, 280, 1372, 380] },
+    "drum": { "src": "e2b-item-барабан", "rect": [340, 640, 560, 780] },
+    "banner": { "src": "e2b-item-растяжка клуба", "rect": [460, 40, 900, 170] },
+    "garland": { "src": "e2b-item-гирлянда", "rect": [336, 140, 800, 280] },
+    "goal-anim": { "src": "kid-mid-22", "rect": [632, 177, 962, 327] },
+    "yard-whole": { "src": "kid-mid-33", "rect": [0, 0, 1920, 1080], "whole": true, "width": 760 }
+  },
+  "boots": { "boots-yard": "boots-white", "boots-box": "boots-green" }
+}

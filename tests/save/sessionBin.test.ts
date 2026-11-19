@@ -19,13 +19,50 @@ describe('session: сирота create (063-Р65)', () => {
     expect(await t.session.create({ name: 'Маша' })).toEqual({ ok: false, why: 'quota' });
     t.store.saveDevice = set;
     expect(mem.map.has(`${P}player.p2`)).toBe(true);
-    expect(t.session.bin.settle('2026-11-19')).toBe(true);
+    expect(await t.session.bin.settle('2026-11-19')).toBe(true);
     expect(mem.map.has(`${P}player.p2`)).toBe(false);
     expect(mem.map.has(`${P}trash.p2`)).toBe(true);
     expect(t.session.bin.list('2026-11-19').map((e) => [e.pid, e.name, e.day])).toEqual([['p2', 'Маша', '2026-11-19']]);
     expect(disk(mem, 'device').players.map((p) => p.pid)).toEqual(['p1']);
     expect(mem.map.has(`${P}player.p1`)).toBe(true);
-    expect(t.session.bin.settle('2026-11-19')).toBe(false); // повтор — ничего нового
+    expect(await t.session.bin.settle('2026-11-19')).toBe(false); // повтор — ничего нового
+  });
+});
+
+describe('session: замок нового игрока (063-Р74)', () => {
+  it('К14 (063-Р74) create берёт замок нового игрока до записи файла: settle второй вкладки между файлом и устройством его пропускает, choose создающей вкладки — ok', async () => {
+    // Ловит: create без замка до записи файла — settle другой вкладки берёт замок нового pid, и choose создающей вкладки получает busy («играет в другой вкладке») до перезагрузки; settle кладёт новичка в корзину.
+    const w = await withClub();
+    const second = w.tab();
+    await second.session.init();
+    const set = w.store.saveDevice.bind(w.store);
+    let pending: Promise<boolean> | undefined;
+    w.store.saveDevice = (device, expect) => {
+      pending = second.session.bin.settle('2026-11-19'); // файл p2 уже записан, устройство — ещё нет
+      return set(device, expect);
+    };
+    expect(await w.session.create({ name: 'Маша' })).toEqual({ ok: true, pid: 'p2' });
+    w.store.saveDevice = set;
+    expect(await pending).toBe(false);
+    expect(w.session.status.value).toBe('ok');
+    expect(w.session.player.value).toMatchObject({ kind: 'ok', pid: 'p2' });
+    expect(disk(w.mem, 'device').players.map((p) => p.pid)).toEqual(['p1', 'p2']);
+    expect(w.mem.map.has(`${P}player.p2`)).toBe(true);
+    expect(w.mem.map.has(`${P}trash.p2`)).toBe(false);
+  });
+
+  it('К14 (063-Р74) create отпускает замок при отказе записи: после quota settle той же и другой вкладки подбирает сироту', async () => {
+    // Ловит: замок нового игрока остаётся взятым после отказа (try/finally) — сирота навсегда «занята» и не уходит в корзину.
+    const w = await withClub();
+    const set = w.store.saveDevice.bind(w.store);
+    w.store.saveDevice = () => ({ ok: false, err: 'quota' });
+    expect(await w.session.create({ name: 'Маша' })).toEqual({ ok: false, why: 'quota' });
+    w.store.saveDevice = set;
+    await new Promise((r) => setTimeout(r, 0)); // замок отпускается на следующем такте
+    const second = w.tab();
+    await second.session.init();
+    expect(await second.session.bin.settle('2026-11-19')).toBe(true);
+    expect(w.mem.map.has(`${P}trash.p2`)).toBe(true);
   });
 });
 
@@ -99,7 +136,7 @@ describe('session.bin: «Начать заново» и «Новый клуб» 
     const w = await withClub();
     w.mem.map.set(`${P}device`, '{не json');
     expect(w.session.player.value).toMatchObject({ kind: 'ok', pid: w.pid }); // вкладка ещё держит игрока в памяти: страница родителя открыта поверх
-    expect(w.session.bin.newClub('2026-11-19')).toEqual({ ok: true });
+    expect(await w.session.bin.newClub('2026-11-19')).toEqual({ ok: true });
     await w.session.init(); // `reload` обёртки не ждётся — `init` отдаёт тот же запуск
     expect(w.session.player.value.kind).toBe('none');
     expect(w.session.entryState()).toMatchObject({ device: 'ok', players: [], player: 'none' });

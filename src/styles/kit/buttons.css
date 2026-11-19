@@ -169,6 +169,11 @@ button.key-btn:disabled {
   background: rgb(21 20 58 / 0.7);
   white-space: nowrap;
 }
+button.kb-chip:disabled {
+  filter: grayscale(1);
+  opacity: 0.45;
+  cursor: default;
+}
 .kb-chip.sm {
   font-size: 12px;
   padding: 2px 8px;

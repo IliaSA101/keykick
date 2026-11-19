@@ -13,6 +13,10 @@ import type { RunningMatch } from '../../engine/match';
 import { ru } from '../../i18n/ru';
 import type { Overlay, UiAction } from '../../app/match/run';
 import { attacksText } from './view';
+import { nextAfter, type AfterGame, type BreakPlan } from '../../app/break/cards';
+import { gameName, mmss } from '../../app/learn/view';
+import { GAMES } from '../../engine/learn/queue';
+import LearnCard from '../../components/break/LearnCard.vue';
 
 const props = defineProps<{
   state: RunningMatch;
@@ -20,8 +24,12 @@ const props = defineProps<{
   started: boolean;
   /** Урок вступления: название, новые клавиши, совет тренера. */
   info: { name: string; keys: string; tip: string };
+  /** Карточки перерыва (Э4.15–19) и слова над ними; пусто — сразу «Второй тайм». */
+  plan: BreakPlan;
+  /** Итог только что сыгранной игры (Э4.17): вместо карточек. */
+  after: AfterGame | null;
 }>();
-const emit = defineEmits<{ act: [UiAction]; start: []; second: []; 'close-all': []; home: []; leave: [] }>();
+const emit = defineEmits<{ act: [UiAction]; start: []; second: []; learn: [id: string]; 'close-all': []; home: []; leave: [] }>();
 
 const t = ru.match;
 const perHalf = (p: 'half1' | 'half2'): number => props.state.plan.filter((a) => a.phase === p).length;
@@ -34,6 +42,10 @@ const steps = ru.handsHelp.steps;
 const step = computed(() => steps[helpStep.value] ?? steps[0]);
 watch(() => props.overlay, (o) => void (o === 'help' && (helpStep.value = 0)));
 const placeName = ru.frame.menu.map;
+/** «Ещё игра» после игры: первая карточка очереди, кроме сыгранной. */
+const nextId = computed(() => (props.after ? nextAfter(props.plan.cards, props.after.id) : null));
+/** Время «золота» игры для строки «до золота» (мм:сс). */
+const goldTime = (id: string): string => mmss((GAMES.find((g) => g.id === id)?.t ?? 0) * 1000);
 </script>
 
 <template>
@@ -102,12 +114,42 @@ const placeName = ru.frame.menu.map;
   <section
     v-if="state.phase === 'break' && overlay === 'none'"
     class="card panel brk"
+    :class="{ lite: plan.lead === null && !after }"
   >
     <div class="top">
       <h2>{{ t.break.title }}</h2>
       <span class="muted">{{ t.break.score }} <b class="big">{{ state.half1.me }} : {{ state.half1.opp }}</b></span>
     </div>
-    <p class="muted">
+    <template v-if="after">
+      <LearnCard
+        :end="after.end"
+        :name="gameName(after.id)"
+        :gold-time="goldTime(after.id)"
+      />
+      <p class="note">
+        {{ ru.learn.end.leadBreak }}
+      </p>
+    </template>
+    <template v-else-if="plan.lead !== null">
+      <p class="muted">
+        {{ ru.learn.brk.lead[plan.lead] }}
+      </p>
+      <div class="games">
+        <LearnCard
+          v-for="c in plan.cards"
+          :key="c.id"
+          :card="c"
+          @pick="emit('learn', c.id)"
+        />
+      </div>
+      <p class="pick">
+        <kbd>Tab</kbd> {{ ru.learn.brk.pick }}
+      </p>
+    </template>
+    <p
+      v-else
+      class="muted"
+    >
       {{ t.break.note }}
     </p>
     <div class="btns">
@@ -118,6 +160,21 @@ const placeName = ru.frame.menu.map;
       >
         {{ t.break.second }}
       </KeyButton>
+      <span
+        v-if="after"
+        style="flex: 1"
+      />
+      <KeyButton
+        v-if="after && nextId"
+        quiet
+        @click="emit('learn', nextId)"
+      >
+        {{ ru.learn.end.next.replace('{name}', gameName(nextId)) }}
+      </KeyButton>
+      <span
+        v-else-if="plan.lead !== null"
+        class="skip"
+      >{{ ru.learn.start.skipNote }}</span>
     </div>
   </section>
 
@@ -237,7 +294,12 @@ const placeName = ru.frame.menu.map;
 <style scoped>
 .card { position: absolute; left: 50%; margin-left: -370px; width: 740px; display: flex; flex-direction: column; justify-content: space-between; }
 .intro { top: 226px; height: 233px; /* тень не ложится на клавиатуру ниже (в кадре Э1.01 клавиши поверх тени): обрезаем её под каймой */ clip-path: inset(-40px -40px -3px -40px); }
-.brk { top: 330px; height: 200px; gap: 10px; }
+.brk { top: 248px; height: 338px; gap: 8px; }
+.brk.lite { top: 330px; height: 200px; gap: 10px; }
+.games { display: flex; gap: 12px; padding-top: 6px; }
+.pick { margin: 0; font-size: 14px; font-weight: 600; color: var(--text-muted); }
+.pick kbd { padding: 1px 6px; border-radius: 5px; background: rgb(255 255 255 / 0.15); font: inherit; font-weight: 800; }
+.skip { margin-left: auto; font-size: 15px; font-weight: 600; color: var(--text-muted); }
 .top { display: flex; justify-content: space-between; align-items: center; }
 .lesson { font-size: 21px; font-weight: 800; }
 .keys, .muted { font-size: 15px; font-weight: 700; color: var(--text-muted); }

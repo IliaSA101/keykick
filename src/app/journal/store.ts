@@ -33,9 +33,9 @@ export function createJournal(env: JournalEnv) {
   };
   return {
     /** После свистка и при выходе: тот же `matchId` перезаписывает запись; сверх предела уходят старые. */
-    put: (matchId: string, rec: { seed: number; events: MatchEvent[] }): Promise<boolean> =>
+    put: (matchId: string, rec: { seed: number; events: MatchEvent[]; cpm?: number }): Promise<boolean> =>
       guarded(false, async (db) => {
-        await db.put({ matchId, seed: rec.seed, events: rec.events, at: env.now() });
+        await db.put({ matchId, seed: rec.seed, events: rec.events, at: env.now(), ...(rec.cpm === undefined ? {} : { cpm: rec.cpm }) });
         const all = exportJournal(await db.all());
         const drop = overflow(all, limit);
         if (drop.length > 0) await db.remove(drop);

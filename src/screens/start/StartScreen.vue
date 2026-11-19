@@ -11,6 +11,8 @@ import { hasV1Keys } from '../../app/players/v1';
 import { useSession } from '../../app/save/session';
 import { browserLocal, createKeyValue } from '../../app/save/storage';
 import { lessonOrder } from '../../app/packs/usePack';
+import ClubEditWindow from '../../components/club/ClubEditWindow.vue';
+import CoachPick from '../../components/club/CoachPick.vue';
 import { factLine, fileLine } from '../../components/club/restoreLines';
 import HomeBackdrop from '../../components/home/HomeBackdrop.vue';
 import KeyButton from '../../components/kit/KeyButton.vue';
@@ -24,17 +26,17 @@ import { oldVersionUrl } from '../../components/shell/footer';
 import type { ImportPlan } from '../../engine/save/import';
 import { ru } from '../../i18n/ru';
 import { SYSTEM_WINDOW, checkWindow, useNarrow } from './layout';
-import ClubEditWindow from './ClubEditWindow.vue';
-import CoachPick from './CoachPick.vue';
 import StartButtons from './StartButtons.vue';
 
 /** Затемнение окон «Новый клуб» и «Клуб пропал?» над Домом: 0,8, как на кадрах Э6.71–82 (системные окна, 050-Р53). */
 const DIM = 'rgb(10 9 32 / 0.8)';
+/** Стенд кадров (067 Т11): шаг, с которого экран открывается (Э2К.34 — тренер, Э2К.41 — приветствие); в игре пропа нет. */
+const props = defineProps<{ frame?: { step: Step } }>();
 const session = useSession();
 const transfer = session.transfer;
 let lastPlan: ImportPlan | undefined;
 const router = useRouter();
-const step = ref<Step>('new');
+const step = ref<Step>(props.frame?.step ?? 'new');
 const draft = reactive(defaultDraft(Math.random));
 const bubble = ref(true);
 const oldUrl = oldVersionUrl(import.meta.env.BASE_URL);
@@ -327,6 +329,7 @@ globalThis.addEventListener('keydown', onEsc);
       v-else
       v-model="draft.coach"
       :busy="busy"
+      :greet="step === 'greet'"
       @done="finish"
     />
   </main>

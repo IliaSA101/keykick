@@ -68,7 +68,8 @@ interface Ctx {
   used: Set<string>;
 }
 
-const typable = (keys: string, text: string): boolean => [...text].every((ch) => ch === ' ' || keys.includes(ch));
+/** Текст набирается только клавишами `keys` (пробел — всегда). */
+export const typable = (keys: string, text: string): boolean => [...text].every((ch) => ch === ' ' || keys.includes(ch));
 
 function makeCtx(l: CourseLesson, d: Dictionary, map: Keymap, stats?: TypingStats): Ctx {
   const own = d.words.filter((w) => typable(l.keys, w));

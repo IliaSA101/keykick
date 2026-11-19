@@ -6,16 +6,26 @@
  *
  * Второй язык (060-Т10): объект `satisfies Messages` — пропуск ключа ловит vue-tsc.
  */
+import { album } from './ru/album';
+import { base } from './ru/base';
+import { club } from './ru/club';
+import { coach } from './ru/coach';
 import { home } from './ru/home';
 import { keyboard, handsHelp } from './ru/keyboard';
 import { kit } from './ru/kit';
+import { league } from './ru/league';
+import { learn } from './ru/learn';
 import { map } from './ru/map';
 import { match } from './ru/match';
+import { museum } from './ru/museum';
 import { paper } from './ru/paper';
 import { parent } from './ru/parent';
+import { path } from './ru/path';
 import { phone } from './ru/phone';
 import { result } from './ru/result';
+import { school } from './ru/school';
 import { frame, shell } from './ru/shell';
+import { shop } from './ru/shop';
 import { start } from './ru/start';
 import { system } from './ru/system';
 
@@ -34,6 +44,16 @@ export const ru = {
   paper,
   result,
   map,
+  path,
+  club,
+  coach,
+  museum,
+  shop,
+  album,
+  school,
+  learn,
+  base,
+  league,
 } as const;
 
 /** Строки в `as const` — литералы; второму языку нужна форма, а не слово, поэтому литералы расширены до string. */

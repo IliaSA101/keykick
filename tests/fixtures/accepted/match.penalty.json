@@ -155,7 +155,7 @@
    "name": "Прогресс",
    "city": "Тверь",
    "coach": "",
-   "backName": "Саша",
+   "backName": "САША",
    "backNumber": 7,
    "kit": {
     "pattern": "plain",
@@ -175,7 +175,7 @@
   },
   "show": {
    "street": "Водопроводной",
-   "task": "t-choice-table"
+   "task": "t-pic-half"
   }
  }
 }

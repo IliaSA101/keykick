@@ -4,8 +4,8 @@ import { plural } from '../../i18n/plural';
 import { ru } from '../../i18n/ru';
 import KitChip from '../kit/KitChip.vue';
 
-const props = defineProps<{ title: string; city: string; stars?: string; fans?: number; coins?: number; dreamText?: string; dreamPct?: number; chips?: string[] }>();
-defineEmits<{ chip: [name: string] }>();
+const props = defineProps<{ title: string; city: string; stars?: string; fans?: number; coins?: number; dreamText?: string; dreamPct?: number; chips?: string[]; coinsLink?: boolean }>();
+defineEmits<{ chip: [name: string]; coins: [] }>();
 const NB = String.fromCharCode(160);
 const num = (n: number): string => n.toLocaleString('ru-RU').replace(/\s/g, NB);
 const fansLine = (): string => `${num(props.fans ?? 0)}${NB}${plural(props.fans ?? 0, ru.home.fansWord)}`;
@@ -41,7 +41,12 @@ const fansLine = (): string => `${num(props.fans ?? 0)}${NB}${plural(props.fans 
       <b
         v-if="coins !== undefined"
         class="co shop"
+        :class="{ link: coinsLink }"
         :title="dreamText"
+        :role="coinsLink ? 'button' : undefined"
+        :tabindex="coinsLink ? 0 : undefined"
+        @click="coinsLink && $emit('coins')"
+        @keydown.enter.stop.prevent="coinsLink && $emit('coins')"
       ><i>●</i>{{ coins }}<i
         v-if="dreamPct !== undefined"
         class="bar"
@@ -58,6 +63,8 @@ const fansLine = (): string => `${num(props.fans ?? 0)}${NB}${plural(props.fans 
 </template>
 
 <style scoped>
+/* монеты Дома — вход в Лавку (049): рука на числе */
+.co.link { cursor: pointer; }
 /* значок болельщиков — как FAN_ICON в kit.mjs: рядом с числом, не отдельным блоком */
 .fan-ic {
   vertical-align: -2px;

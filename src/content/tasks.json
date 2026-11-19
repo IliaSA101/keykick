@@ -147,7 +147,12 @@
     "id": "t-frac-forwards",
     "no": 17,
     "text": "В заявке команды 24 игрока, из них 6 — нападающие. Какую часть всей команды составляют нападающие? Ответ запиши несократимой дробью.",
-    "answer": { "kind": "fraction", "num": 1, "den": 4, "reduced": true },
+    "answer": {
+      "kind": "fraction",
+      "num": 1,
+      "den": 4,
+      "reduced": true
+    },
     "solution": "Нападающие — 6 игроков из 24, это 6/24 команды. Числитель и знаменатель делятся на 6: 6/24 = 1/4. Запись 6/24 тоже равна этому числу, но её можно сократить, а просили несократимую.",
     "verified": true,
     "level": 1
@@ -156,7 +161,11 @@
     "id": "t-frac-pizza",
     "no": 18,
     "text": "После матча команда заказала пиццу, разрезанную на 8 равных кусков. Вратарь съел 3 куска, а капитан — 2 куска. Какая часть пиццы осталась? Ответ запиши дробью.",
-    "answer": { "kind": "fraction", "num": 3, "den": 8 },
+    "answer": {
+      "kind": "fraction",
+      "num": 3,
+      "den": 8
+    },
     "solution": "Съели 3 + 2 = 5 кусков, осталось 8 − 5 = 3 куска. Каждый кусок — это 1/8 пиццы, значит, осталось 3/8.",
     "verified": true,
     "level": 1
@@ -165,7 +174,13 @@
     "id": "t-frac-training",
     "no": 19,
     "text": "Тренировка длилась 2 часа 20 минут. Сколько это часов? Запиши ответ смешанным числом: целая часть и несократимая дробь.",
-    "answer": { "kind": "fraction", "num": 7, "den": 3, "mixed": true, "reduced": true },
+    "answer": {
+      "kind": "fraction",
+      "num": 7,
+      "den": 3,
+      "mixed": true,
+      "reduced": true
+    },
     "solution": "В часе 60 минут, поэтому 20 минут — это 20/60 = 1/3 часа. Всего 2 часа и ещё 1/3 часа, то есть 2 1/3 часа.",
     "verified": true,
     "level": 2
@@ -174,7 +189,12 @@
     "id": "t-frac-chain",
     "no": 20,
     "text": "Найди сумму 1/2 + 1/6 + 1/12 + 1/20. Ответ запиши несократимой дробью.",
-    "answer": { "kind": "fraction", "num": 4, "den": 5, "reduced": true },
+    "answer": {
+      "kind": "fraction",
+      "num": 4,
+      "den": 5,
+      "reduced": true
+    },
     "solution": "Каждую дробь можно записать разностью: 1/2 = 1 − 1/2, 1/6 = 1/2 − 1/3, 1/12 = 1/3 − 1/4, 1/20 = 1/4 − 1/5. При сложении все средние дроби взаимно уничтожаются, и остаётся 1 − 1/5 = 4/5.",
     "verified": true,
     "level": 3
@@ -186,8 +206,14 @@
     "answer": {
       "kind": "fields",
       "fields": [
-        { "label": "Петя:", "value": 8 },
-        { "label": "Вася:", "value": 5 }
+        {
+          "label": "Петя:",
+          "value": 8
+        },
+        {
+          "label": "Вася:",
+          "value": 5
+        }
       ]
     },
     "solution": "Отнимем у Пети 3 «лишних» гола: останется 13 − 3 = 10 голов, и у мальчиков их станет поровну — по 5. Значит, Вася забил 5 голов, а Петя 5 + 3 = 8.",
@@ -201,8 +227,14 @@
     "answer": {
       "kind": "fields",
       "fields": [
-        { "label": "Первое число:", "value": 4 },
-        { "label": "Второе число:", "value": 9 }
+        {
+          "label": "Первое число:",
+          "value": 4
+        },
+        {
+          "label": "Второе число:",
+          "value": 9
+        }
       ],
       "unordered": true
     },
@@ -217,9 +249,18 @@
     "answer": {
       "kind": "fields",
       "fields": [
-        { "label": "Аня:", "value": 12 },
-        { "label": "Боря:", "value": 8 },
-        { "label": "Вика:", "value": 16 }
+        {
+          "label": "Аня:",
+          "value": 12
+        },
+        {
+          "label": "Боря:",
+          "value": 8
+        },
+        {
+          "label": "Вика:",
+          "value": 16
+        }
       ]
     },
     "solution": "Пусть у Бори одна «кучка» наклеек. Тогда у Вики две такие кучки, а у Ани — кучка и ещё 4 наклейки. Вместе это 4 кучки и 4 наклейки, то есть 36. Значит, 4 кучки — это 32 наклейки, а одна кучка — 8. У Бори 8, у Ани 8 + 4 = 12, у Вики 8 · 2 = 16.",
@@ -233,8 +274,14 @@
     "answer": {
       "kind": "fields",
       "fields": [
-        { "label": "a =", "value": 3 },
-        { "label": "b =", "value": 6 }
+        {
+          "label": "a =",
+          "value": 3
+        },
+        {
+          "label": "b =",
+          "value": 6
+        }
       ]
     },
     "solution": "Число равно 10 · a + b, сумма цифр — a + b. Из 10 · a + b = 4 · a + 4 · b получаем 6 · a = 3 · b, то есть b = 2 · a. После перестановки цифр число растёт на 9 · (b − a) = 9 · a, а это 27. Значит, a = 3, b = 6. Проверка: 36 = 4 · 9 и 63 − 36 = 27.",
@@ -245,7 +292,17 @@
     "id": "t-choice-nine",
     "no": 25,
     "text": "Какое из этих чисел делится на 9 без остатка?",
-    "answer": { "kind": "choice", "options": ["123", "252", "331", "404", "515"], "correct": 1 },
+    "answer": {
+      "kind": "choice",
+      "options": [
+        "123",
+        "252",
+        "331",
+        "404",
+        "515"
+      ],
+      "correct": 1
+    },
     "solution": "Число делится на 9, если сумма его цифр делится на 9. Суммы цифр: 6, 9, 7, 8 и 11 — подходит только 252. Проверка: 252 = 9 · 28.",
     "verified": true,
     "level": 1
@@ -256,7 +313,12 @@
     "text": "Команды «Ракета», «Метеор» и «Комета» заняли в турнире три первых места. «Ракета» оказалась выше «Кометы», а «Метеор» не стал ни первым, ни последним. Какая команда победила в турнире?",
     "answer": {
       "kind": "choice",
-      "options": ["«Ракета»", "«Метеор»", "«Комета»", "Определить нельзя"],
+      "options": [
+        "«Ракета»",
+        "«Метеор»",
+        "«Комета»",
+        "Определить нельзя"
+      ],
       "correct": 0
     },
     "solution": "«Метеор» не первый и не третий — значит, второй. Первое и третье места достались «Ракете» и «Комете», а «Ракета» выше. Поэтому «Ракета» — первая, «Комета» — третья.",
@@ -267,7 +329,17 @@
     "id": "t-choice-zeros",
     "no": 27,
     "text": "Сколькими нулями оканчивается произведение всех чисел от 1 до 20, то есть 1 · 2 · 3 · … · 20?",
-    "answer": { "kind": "choice", "options": ["2", "3", "4", "5", "20"], "correct": 2 },
+    "answer": {
+      "kind": "choice",
+      "options": [
+        "2",
+        "3",
+        "4",
+        "5",
+        "20"
+      ],
+      "correct": 2
+    },
     "solution": "Каждый ноль на конце — это множитель 10 = 2 · 5. Двоек в произведении много, поэтому нулей столько, сколько пятёрок. Пятёрку дают только числа 5, 10, 15 и 20 — по одной. Пятёрок 4, значит, и нулей 4.",
     "verified": true,
     "level": 3
@@ -276,7 +348,22 @@
     "id": "t-multi-three",
     "no": 28,
     "text": "Отметь все числа, которые делятся на 3.",
-    "answer": { "kind": "multi", "options": ["111", "124", "201", "302", "405", "511"], "correct": [0, 2, 4] },
+    "answer": {
+      "kind": "multi",
+      "options": [
+        "111",
+        "124",
+        "201",
+        "302",
+        "405",
+        "511"
+      ],
+      "correct": [
+        0,
+        2,
+        4
+      ]
+    },
     "solution": "Число делится на 3, если сумма его цифр делится на 3. Суммы цифр: 111 → 3, 124 → 7, 201 → 3, 302 → 5, 405 → 9, 511 → 7. Подходят 111, 201 и 405.",
     "verified": true,
     "level": 1
@@ -287,8 +374,18 @@
     "text": "Отметь все верные равенства.",
     "answer": {
       "kind": "multi",
-      "options": ["1/2 + 1/3 = 2/5", "3/4 = 6/8", "2/3 · 3 = 2", "1 − 1/4 = 3/4", "5/10 = 1/5"],
-      "correct": [1, 2, 3]
+      "options": [
+        "1/2 + 1/3 = 2/5",
+        "3/4 = 6/8",
+        "2/3 · 3 = 2",
+        "1 − 1/4 = 3/4",
+        "5/10 = 1/5"
+      ],
+      "correct": [
+        1,
+        2,
+        3
+      ]
     },
     "solution": "1/2 + 1/3 = 3/6 + 2/6 = 5/6, а не 2/5 — неверно. 3/4 = 6/8 — верно: числитель и знаменатель умножили на 2. 2/3 · 3 = 6/3 = 2 — верно. 1 − 1/4 = 3/4 — верно. 5/10 = 1/2, а не 1/5 — неверно.",
     "verified": true,
@@ -298,7 +395,21 @@
     "id": "t-multi-numbers",
     "no": 30,
     "text": "Число двузначное, делится на 5, а сумма его цифр равна 9. Какие из этих чисел подходят? Отметь все.",
-    "answer": { "kind": "multi", "options": ["18", "45", "54", "90", "95", "135"], "correct": [1, 3] },
+    "answer": {
+      "kind": "multi",
+      "options": [
+        "18",
+        "45",
+        "54",
+        "90",
+        "95",
+        "135"
+      ],
+      "correct": [
+        1,
+        3
+      ]
+    },
     "solution": "Делится на 5 — значит, оканчивается на 0 или на 5. Если на 0, первая цифра 9: это 90. Если на 5, первая цифра 4: это 45. У 135 тоже сумма цифр 9 и оно делится на 5, но оно трёхзначное.",
     "verified": true,
     "level": 2
@@ -307,7 +418,15 @@
     "id": "t-order-fractions",
     "no": 31,
     "text": "Расставь дроби по возрастанию: сверху — самая маленькая, снизу — самая большая.",
-    "answer": { "kind": "order", "items": ["1/2", "2/3", "3/4", "5/6"] },
+    "answer": {
+      "kind": "order",
+      "items": [
+        "1/2",
+        "2/3",
+        "3/4",
+        "5/6"
+      ]
+    },
     "solution": "Приведём дроби к знаменателю 12: 1/2 = 6/12, 2/3 = 8/12, 3/4 = 9/12, 5/6 = 10/12. Теперь видно: 1/2 < 2/3 < 3/4 < 5/6.",
     "verified": true,
     "level": 2
@@ -316,7 +435,16 @@
     "id": "t-order-time",
     "no": 32,
     "text": "Расставь промежутки времени от самого короткого (сверху) к самому длинному (снизу).",
-    "answer": { "kind": "order", "items": ["100 секунд", "2 минуты", "четверть часа", "1000 секунд", "полчаса"] },
+    "answer": {
+      "kind": "order",
+      "items": [
+        "100 секунд",
+        "2 минуты",
+        "четверть часа",
+        "1000 секунд",
+        "полчаса"
+      ]
+    },
     "solution": "Переведём всё в секунды: 2 минуты = 120 секунд, четверть часа = 15 минут = 900 секунд, полчаса = 30 минут = 1800 секунд. Получается 100 < 120 < 900 < 1000 < 1800.",
     "verified": true,
     "level": 1
@@ -325,7 +453,16 @@
     "id": "t-order-teams",
     "no": 33,
     "text": "Пять команд набрали в турнире разное число очков. «Сокол» набрал больше, чем «Вымпел», но меньше, чем «Торпедо». «Заря» набрала меньше всех. «Маяк» набрал больше, чем «Торпедо». Расставь команды от первого места (сверху) к последнему (снизу).",
-    "answer": { "kind": "order", "items": ["«Маяк»", "«Торпедо»", "«Сокол»", "«Вымпел»", "«Заря»"] },
+    "answer": {
+      "kind": "order",
+      "items": [
+        "«Маяк»",
+        "«Торпедо»",
+        "«Сокол»",
+        "«Вымпел»",
+        "«Заря»"
+      ]
+    },
     "solution": "Выстроим цепочку: «Маяк» выше «Торпедо», «Торпедо» выше «Сокола», «Сокол» выше «Вымпела». «Заря» — последняя. Получается: «Маяк», «Торпедо», «Сокол», «Вымпел», «Заря».",
     "verified": true,
     "level": 2
@@ -334,7 +471,13 @@
     "id": "t-text-weekday",
     "no": 34,
     "text": "Сегодня понедельник. Какой день недели будет через 100 дней? Ответ — одно слово.",
-    "answer": { "kind": "text", "accepted": ["среда", "среду"] },
+    "answer": {
+      "kind": "text",
+      "accepted": [
+        "среда",
+        "среду"
+      ]
+    },
     "solution": "Каждые 7 дней день недели повторяется. 100 = 7 · 14 + 2, поэтому через 98 дней снова будет понедельник, а ещё через 2 дня — среда.",
     "verified": true,
     "level": 2
@@ -343,7 +486,12 @@
     "id": "t-text-dresses",
     "no": 35,
     "text": "Аня, Вера и Галя пришли на праздник в красном, синем и зелёном платьях — у каждой своё. Аня не в красном и не в зелёном, а Вера не в красном. Кто из девочек в красном платье? Напиши имя.",
-    "answer": { "kind": "text", "accepted": ["Галя"] },
+    "answer": {
+      "kind": "text",
+      "accepted": [
+        "Галя"
+      ]
+    },
     "solution": "Аня не в красном и не в зелёном — значит, в синем. Вера не в красном, а синее уже занято — она в зелёном. Красное платье остаётся Гале.",
     "verified": true,
     "level": 1
@@ -352,12 +500,17 @@
     "id": "t-text-cipher",
     "no": 36,
     "text": "Каждую букву слова заменили на следующую букву алфавита: А — на Б, Б — на В и так далее. Получилось слово ХФУВПМ. Какое слово зашифровали?",
-    "answer": { "kind": "text", "accepted": ["футбол"] },
+    "answer": {
+      "kind": "text",
+      "accepted": [
+        "футбол"
+      ]
+    },
     "solution": "Заменим каждую букву на предыдущую: Х → Ф, Ф → У, У → Т, В → Б, П → О, М → Л. Получается ФУТБОЛ.",
     "verified": true,
     "level": 2
   },
-{
+  {
     "id": "t-q-series",
     "no": 37,
     "text": "Продолжи ряд: 2, 5, 11, 23, 47, … Какое число следующее?",
@@ -406,7 +559,12 @@
     "id": "t-q-frac-wins",
     "no": 42,
     "text": "Команда сыграла 12 матчей и выиграла 8 из них. Какую часть матчей она выиграла? Ответ — несократимой дробью.",
-    "answer": { "kind": "fraction", "num": 2, "den": 3, "reduced": true },
+    "answer": {
+      "kind": "fraction",
+      "num": 2,
+      "den": 3,
+      "reduced": true
+    },
     "solution": "Выиграно 8 матчей из 12, это 8/12. Числитель и знаменатель делятся на 4: 8/12 = 2/3.",
     "verified": true,
     "level": 1
@@ -415,7 +573,12 @@
     "id": "t-q-frac-sum",
     "no": 43,
     "text": "Сколько будет 1/3 + 1/6? Ответ — несократимой дробью.",
-    "answer": { "kind": "fraction", "num": 1, "den": 2, "reduced": true },
+    "answer": {
+      "kind": "fraction",
+      "num": 1,
+      "den": 2,
+      "reduced": true
+    },
     "solution": "Приведём к знаменателю 6: 1/3 = 2/6. Тогда 2/6 + 1/6 = 3/6, а 3/6 сокращается на 3 и равно 1/2.",
     "verified": true,
     "level": 1
@@ -424,7 +587,13 @@
     "id": "t-q-frac-pies",
     "no": 44,
     "text": "Семь одинаковых пирогов поровну разделили на троих. Сколько пирогов досталось каждому? Ответ — смешанным числом.",
-    "answer": { "kind": "fraction", "num": 7, "den": 3, "mixed": true, "reduced": true },
+    "answer": {
+      "kind": "fraction",
+      "num": 7,
+      "den": 3,
+      "mixed": true,
+      "reduced": true
+    },
     "solution": "Каждому — 7 : 3 = 7/3 пирога. Сначала раздаём по 2 целых пирога (6 пирогов), а последний делим на три части — каждому ещё 1/3. Итого 2 1/3.",
     "verified": true,
     "level": 2
@@ -436,8 +605,14 @@
     "answer": {
       "kind": "fields",
       "fields": [
-        { "label": "Мальчиков:", "value": 6 },
-        { "label": "Девочек:", "value": 4 }
+        {
+          "label": "Мальчиков:",
+          "value": 6
+        },
+        {
+          "label": "Девочек:",
+          "value": 4
+        }
       ]
     },
     "solution": "Уберём 2 «лишних» мальчиков: останется 8 детей, мальчиков и девочек поровну — по 4. Девочек 4, мальчиков 4 + 2 = 6.",
@@ -451,8 +626,14 @@
     "answer": {
       "kind": "fields",
       "fields": [
-        { "label": "Кур:", "value": 5 },
-        { "label": "Кроликов:", "value": 3 }
+        {
+          "label": "Кур:",
+          "value": 5
+        },
+        {
+          "label": "Кроликов:",
+          "value": 3
+        }
       ]
     },
     "solution": "Если бы все 8 были курами, ног было бы 16. Каждый кролик добавляет ещё 2 ноги, а лишних ног 22 − 16 = 6 — значит, кроликов 3, а кур 8 − 3 = 5. Проверка: 5 · 2 + 3 · 4 = 22.",
@@ -466,8 +647,14 @@
     "answer": {
       "kind": "fields",
       "fields": [
-        { "label": "Меньшее:", "value": 5 },
-        { "label": "Большее:", "value": 15 }
+        {
+          "label": "Меньшее:",
+          "value": 5
+        },
+        {
+          "label": "Большее:",
+          "value": 15
+        }
       ]
     },
     "solution": "Меньшее число — одна часть, большее — три таких части, вместе 4 части. 20 : 4 = 5 — меньшее, 5 · 3 = 15 — большее.",
@@ -478,7 +665,17 @@
     "id": "t-q-choice-odd",
     "no": 48,
     "text": "Какое число лишнее в ряду 3, 9, 27, 54, 81?",
-    "answer": { "kind": "choice", "options": ["3", "9", "27", "54", "81"], "correct": 3 },
+    "answer": {
+      "kind": "choice",
+      "options": [
+        "3",
+        "9",
+        "27",
+        "54",
+        "81"
+      ],
+      "correct": 3
+    },
     "solution": "В ряду каждое число в 3 раза больше предыдущего: 3, 9, 27, 81. Число 54 — это 27 · 2, оно в это правило не вписывается (и оно единственное чётное).",
     "verified": true,
     "level": 1
@@ -487,7 +684,16 @@
     "id": "t-q-choice-frac",
     "no": 49,
     "text": "Какая из этих дробей самая большая?",
-    "answer": { "kind": "choice", "options": ["1/2", "3/5", "2/3", "5/8"], "correct": 2 },
+    "answer": {
+      "kind": "choice",
+      "options": [
+        "1/2",
+        "3/5",
+        "2/3",
+        "5/8"
+      ],
+      "correct": 2
+    },
     "solution": "Приведём дроби к знаменателю 120: 1/2 = 60/120, 3/5 = 72/120, 2/3 = 80/120, 5/8 = 75/120. Больше всех 2/3.",
     "verified": true,
     "level": 2
@@ -496,7 +702,17 @@
     "id": "t-q-choice-twos",
     "no": 50,
     "text": "Перемножили десять двоек: 2 · 2 · … · 2. Какой цифрой оканчивается результат?",
-    "answer": { "kind": "choice", "options": ["0", "2", "4", "6", "8"], "correct": 2 },
+    "answer": {
+      "kind": "choice",
+      "options": [
+        "0",
+        "2",
+        "4",
+        "6",
+        "8"
+      ],
+      "correct": 2
+    },
     "solution": "Последние цифры при умножении на 2 идут по кругу: 2, 4, 8, 6, 2, 4, 8, 6, 2, 4. Десятая — 4. Действительно, 2 · 2 · … · 2 (десять двоек) = 1024.",
     "verified": true,
     "level": 2
@@ -505,7 +721,22 @@
     "id": "t-q-multi-six",
     "no": 51,
     "text": "Отметь все числа, которые делятся и на 2, и на 3.",
-    "answer": { "kind": "multi", "options": ["12", "15", "18", "20", "24", "27"], "correct": [0, 2, 4] },
+    "answer": {
+      "kind": "multi",
+      "options": [
+        "12",
+        "15",
+        "18",
+        "20",
+        "24",
+        "27"
+      ],
+      "correct": [
+        0,
+        2,
+        4
+      ]
+    },
     "solution": "На 2 делятся чётные: 12, 18, 20, 24. Из них на 3 делятся те, у кого сумма цифр делится на 3: 12 (3), 18 (9), 24 (6). У 20 сумма цифр 2 — не подходит. 15 и 27 нечётные.",
     "verified": true,
     "level": 1
@@ -514,7 +745,23 @@
     "id": "t-q-multi-half",
     "no": 52,
     "text": "Отметь все дроби, которые равны 1/2.",
-    "answer": { "kind": "multi", "options": ["2/4", "3/5", "4/8", "5/10", "6/10", "7/14"], "correct": [0, 2, 3, 5] },
+    "answer": {
+      "kind": "multi",
+      "options": [
+        "2/4",
+        "3/5",
+        "4/8",
+        "5/10",
+        "6/10",
+        "7/14"
+      ],
+      "correct": [
+        0,
+        2,
+        3,
+        5
+      ]
+    },
     "solution": "Дробь равна 1/2, если числитель ровно в 2 раза меньше знаменателя: 2/4, 4/8, 5/10, 7/14. А 3/5 и 6/10 (это одно и то же число) больше половины.",
     "verified": true,
     "level": 1
@@ -523,7 +770,16 @@
     "id": "t-q-order-length",
     "no": 53,
     "text": "Расставь длины от самой короткой (сверху) к самой длинной (снизу).",
-    "answer": { "kind": "order", "items": ["5 мм", "3 см", "1 дм", "50 см", "1 м"] },
+    "answer": {
+      "kind": "order",
+      "items": [
+        "5 мм",
+        "3 см",
+        "1 дм",
+        "50 см",
+        "1 м"
+      ]
+    },
     "solution": "Переведём всё в миллиметры: 3 см = 30 мм, 1 дм = 100 мм, 50 см = 500 мм, 1 м = 1000 мм. Получается 5 < 30 < 100 < 500 < 1000.",
     "verified": true,
     "level": 1
@@ -532,7 +788,15 @@
     "id": "t-q-order-height",
     "no": 54,
     "text": "Аня выше Бори, Вика ниже Бори, а Гена выше Ани. Расставь ребят от самого высокого (сверху) к самому низкому.",
-    "answer": { "kind": "order", "items": ["Гена", "Аня", "Боря", "Вика"] },
+    "answer": {
+      "kind": "order",
+      "items": [
+        "Гена",
+        "Аня",
+        "Боря",
+        "Вика"
+      ]
+    },
     "solution": "Гена выше Ани, Аня выше Бори, Боря выше Вики. Получается цепочка: Гена, Аня, Боря, Вика.",
     "verified": true,
     "level": 1
@@ -541,7 +805,13 @@
     "id": "t-q-text-month",
     "no": 55,
     "text": "Сегодня 31 января. Какой месяц будет через 40 дней? Ответ — одно слово.",
-    "answer": { "kind": "text", "accepted": ["март", "марта"] },
+    "answer": {
+      "kind": "text",
+      "accepted": [
+        "март",
+        "марта"
+      ]
+    },
     "solution": "Через 1 день наступит 1 февраля. В феврале 28 или 29 дней, поэтому через 29 или 30 дней уже будет 1 марта. 40 дней — больше, а до апреля ещё далеко: будет 11 или 12 марта.",
     "verified": true,
     "level": 1
@@ -550,9 +820,549 @@
     "id": "t-q-text-pets",
     "no": 56,
     "text": "У Ани, Бори и Вики кошка, собака и попугай — у каждого свой. У Ани кошка, у Вики не попугай. Какое животное у Бори?",
-    "answer": { "kind": "text", "accepted": ["попугай"] },
+    "answer": {
+      "kind": "text",
+      "accepted": [
+        "попугай"
+      ]
+    },
     "solution": "Кошка у Ани. Вике остаются собака и попугай, но попугай не у неё — значит, у Вики собака. Боре достаётся попугай.",
     "verified": true,
     "level": 1
+  },
+  {
+    "id": "t-sel-signs",
+    "no": 57,
+    "text": "Расставь знаки так, чтобы равенство стало верным.",
+    "answer": {
+      "kind": "select",
+      "row": [
+        "6",
+        [
+          "+",
+          "−",
+          "×",
+          "÷"
+        ],
+        "4",
+        [
+          "+",
+          "−",
+          "×",
+          "÷"
+        ],
+        "5",
+        [
+          "+",
+          "−",
+          "×",
+          "÷"
+        ],
+        "3",
+        "=",
+        [
+          "19",
+          "22",
+          "24",
+          "21"
+        ]
+      ],
+      "correct": [
+        2,
+        1,
+        0,
+        1
+      ]
+    },
+    "solution": "Умножение выполняется раньше сложения и вычитания: 6 × 4 = 24, потом 24 − 5 = 19, потом 19 + 3 = 22.",
+    "verified": true,
+    "level": 3
+  },
+  {
+    "id": "t-sel-cmp-frac",
+    "no": 58,
+    "text": "Сравни дроби: выбери знак.",
+    "answer": {
+      "kind": "select",
+      "row": [
+        "3/4",
+        [
+          "<",
+          "=",
+          ">"
+        ],
+        "4/5"
+      ],
+      "correct": [
+        0
+      ]
+    },
+    "solution": "Приведём к общему знаменателю 20: 3/4 = 15/20, а 4/5 = 16/20. Значит, 3/4 меньше 4/5.",
+    "verified": true,
+    "level": 2
+  },
+  {
+    "id": "t-sel-cmp-expr",
+    "no": 59,
+    "text": "Сравни значения выражений: выбери знак.",
+    "answer": {
+      "kind": "select",
+      "row": [
+        "7 · 8",
+        [
+          "<",
+          "=",
+          ">"
+        ],
+        "8 · 7 + 1"
+      ],
+      "correct": [
+        0
+      ]
+    },
+    "solution": "7 · 8 = 56, а 8 · 7 + 1 = 57. Значит, 56 меньше 57.",
+    "verified": true,
+    "level": 1
+  },
+  {
+    "id": "t-sel-div",
+    "no": 60,
+    "text": "Выбери числа, чтобы равенство стало верным.",
+    "answer": {
+      "kind": "select",
+      "row": [
+        "36 :",
+        [
+          "4",
+          "6",
+          "12"
+        ],
+        "=",
+        [
+          "8",
+          "9",
+          "12"
+        ]
+      ],
+      "correct": [
+        0,
+        1
+      ]
+    },
+    "solution": "36 : 4 = 9. Другие делители дают 6 и 3 — этих чисел в правом списке нет.",
+    "verified": true,
+    "level": 2
+  },
+  {
+    "id": "t-sel-signs2",
+    "no": 61,
+    "text": "Выбери знаки так, чтобы равенство стало верным.",
+    "answer": {
+      "kind": "select",
+      "row": [
+        "12",
+        [
+          "+",
+          "−",
+          "×"
+        ],
+        "3",
+        [
+          "+",
+          "−",
+          "×"
+        ],
+        "2",
+        "=",
+        "38"
+      ],
+      "correct": [
+        2,
+        0
+      ]
+    },
+    "solution": "Сначала умножение: 12 × 3 = 36, потом 36 + 2 = 38. Другие знаки дают 6, 11, 13, 17, 34, 72, 7 — не 38.",
+    "verified": true,
+    "level": 2
+  },
+  {
+    "id": "t-match-dec",
+    "no": 62,
+    "text": "Соедини дробь и её запись десятичным числом.",
+    "answer": {
+      "kind": "match",
+      "left": [
+        "1/2",
+        "1/4",
+        "3/4",
+        "1/5"
+      ],
+      "right": [
+        "0,75",
+        "0,2",
+        "0,5",
+        "0,25"
+      ],
+      "pairs": [
+        2,
+        3,
+        0,
+        1
+      ]
+    },
+    "solution": "1/2 — это 5 из 10, то есть 0,5. 1/4 — 25 из 100, то есть 0,25. 3/4 — 75 из 100. 1/5 — 2 из 10.",
+    "verified": true,
+    "level": 2
+  },
+  {
+    "id": "t-match-expr",
+    "no": 63,
+    "text": "Соедини выражение и его значение.",
+    "answer": {
+      "kind": "match",
+      "left": [
+        "3 · 4",
+        "20 : 4",
+        "9 + 8",
+        "30 − 6"
+      ],
+      "right": [
+        "24",
+        "12",
+        "5",
+        "17"
+      ],
+      "pairs": [
+        1,
+        2,
+        3,
+        0
+      ]
+    },
+    "solution": "3 · 4 = 12, 20 : 4 = 5, 9 + 8 = 17, 30 − 6 = 24.",
+    "verified": true,
+    "level": 1
+  },
+  {
+    "id": "t-match-time",
+    "no": 64,
+    "text": "Соедини время и число минут.",
+    "answer": {
+      "kind": "match",
+      "left": [
+        "1 час",
+        "2 часа",
+        "1,5 часа",
+        "3 часа"
+      ],
+      "right": [
+        "120 минут",
+        "60 минут",
+        "180 минут",
+        "90 минут"
+      ],
+      "pairs": [
+        1,
+        0,
+        3,
+        2
+      ]
+    },
+    "solution": "В часе 60 минут. 2 часа — 120 минут, полтора часа — 60 + 30 = 90 минут, 3 часа — 180 минут.",
+    "verified": true,
+    "level": 1
+  },
+  {
+    "id": "t-match-polygon",
+    "no": 65,
+    "text": "Соедини фигуру и число её сторон.",
+    "answer": {
+      "kind": "match",
+      "left": [
+        "треугольник",
+        "четырёхугольник",
+        "пятиугольник",
+        "шестиугольник"
+      ],
+      "right": [
+        "6",
+        "3",
+        "5",
+        "4"
+      ],
+      "pairs": [
+        1,
+        3,
+        2,
+        0
+      ]
+    },
+    "solution": "Число сторон названо в самом слове: три, четыре, пять, шесть.",
+    "verified": true,
+    "level": 1
+  },
+  {
+    "id": "t-match-len",
+    "no": 66,
+    "text": "Соедини равные длины.",
+    "answer": {
+      "kind": "match",
+      "left": [
+        "1 м",
+        "2 км",
+        "3 дм",
+        "5 см"
+      ],
+      "right": [
+        "50 мм",
+        "2000 м",
+        "100 см",
+        "30 см"
+      ],
+      "pairs": [
+        2,
+        1,
+        3,
+        0
+      ]
+    },
+    "solution": "1 м = 100 см. 2 км = 2000 м. 3 дм = 30 см. 5 см = 50 мм.",
+    "verified": true,
+    "level": 2
+  },
+  {
+    "id": "t-pic-quarter",
+    "no": 67,
+    "text": "Выбери рисунки, где закрашена ровно четверть клеток.",
+    "answer": {
+      "kind": "pictures",
+      "pictures": [
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"74\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"74\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"74\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"74\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"50\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"74\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"74\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"74\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"74\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"50\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"50\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"74\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"74\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"74\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"74\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"50\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"74\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"74\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"74\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"74\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>"
+      ],
+      "correct": [
+        0,
+        1,
+        3
+      ]
+    },
+    "solution": "Всего 16 клеток, четверть — это 16 : 4 = 4 клетки. Закрашено по 4 клетки на первом, втором и четвёртом рисунках, на третьем — 6.",
+    "verified": true,
+    "level": 2
+  },
+  {
+    "id": "t-pic-half",
+    "no": 68,
+    "text": "Выбери рисунки, где закрашена половина клеток.",
+    "answer": {
+      "kind": "pictures",
+      "pictures": [
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 52\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 52\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 52\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 52\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>"
+      ],
+      "correct": [
+        0,
+        2
+      ]
+    },
+    "solution": "Всего 8 клеток, половина — 4 клетки. Закрашено 4 клетки на первом и третьем рисунках.",
+    "verified": true,
+    "level": 1
+  },
+  {
+    "id": "t-pic-less",
+    "no": 69,
+    "text": "Выбери рисунки, где закрашено меньше половины клеток.",
+    "answer": {
+      "kind": "pictures",
+      "pictures": [
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 76\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 76\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"50\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"50\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 76\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"50\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"50\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 76\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 76\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"50\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/></svg>"
+      ],
+      "correct": [
+        0,
+        2,
+        4
+      ]
+    },
+    "solution": "Всего 12 клеток, половина — 6. Меньше шести закрашено на первом (5), третьем (4) и пятом (3) рисунках.",
+    "verified": true,
+    "level": 2
+  },
+  {
+    "id": "t-pic-third",
+    "no": 70,
+    "text": "Выбери рисунки, где закрашена одна треть клеток.",
+    "answer": {
+      "kind": "pictures",
+      "pictures": [
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 76 76\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 76 76\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 76 76\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"50\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 76 76\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"50\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>"
+      ],
+      "correct": [
+        0,
+        2
+      ]
+    },
+    "solution": "Всего 9 клеток, треть — 9 : 3 = 3 клетки. Закрашено по 3 клетки на первом и третьем рисунках.",
+    "verified": true,
+    "level": 2
+  },
+  {
+    "id": "t-pic-fifths",
+    "no": 71,
+    "text": "Выбери рисунки, где закрашены две пятых клеток.",
+    "answer": {
+      "kind": "pictures",
+      "pictures": [
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 124 52\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"98\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"98\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 124 52\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"98\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"98\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 124 52\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"98\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"98\" y=\"26\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/></svg>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 124 52\"><rect x=\"2\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"2\" width=\"24\" height=\"24\" fill=\"#2e9e5b\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"98\" y=\"2\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"2\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"26\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"50\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"74\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/><rect x=\"98\" y=\"26\" width=\"24\" height=\"24\" fill=\"#ffffff\" stroke=\"#334155\" stroke-width=\"2\"/></svg>"
+      ],
+      "correct": [
+        0,
+        2
+      ]
+    },
+    "solution": "Всего 10 клеток, одна пятая — 2 клетки, две пятых — 4 клетки. Закрашено 4 клетки на первом и третьем рисунках.",
+    "verified": true,
+    "level": 3
+  },
+  {
+    "id": "t-expr-field",
+    "no": 72,
+    "text": "Поле для мини-футбола разметили на клетки. Ширина поля — 4 клетки, а длина — на 2 клетки больше. Сколько клеток во всём поле? Впиши числа в окошки выражения.",
+    "figure": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-30 -22 180 126\" width=\"180\" height=\"126\"><rect x=\"0\" y=\"0\" width=\"144\" height=\"96\" fill=\"#f3f8f1\"/><rect x=\"24\" y=\"0\" width=\"24\" height=\"24\" fill=\"#e6efe3\"/><rect x=\"72\" y=\"0\" width=\"24\" height=\"24\" fill=\"#e6efe3\"/><rect x=\"120\" y=\"0\" width=\"24\" height=\"24\" fill=\"#e6efe3\"/><rect x=\"0\" y=\"24\" width=\"24\" height=\"24\" fill=\"#e6efe3\"/><rect x=\"48\" y=\"24\" width=\"24\" height=\"24\" fill=\"#e6efe3\"/><rect x=\"96\" y=\"24\" width=\"24\" height=\"24\" fill=\"#e6efe3\"/><rect x=\"24\" y=\"48\" width=\"24\" height=\"24\" fill=\"#e6efe3\"/><rect x=\"72\" y=\"48\" width=\"24\" height=\"24\" fill=\"#e6efe3\"/><rect x=\"120\" y=\"48\" width=\"24\" height=\"24\" fill=\"#e6efe3\"/><rect x=\"0\" y=\"72\" width=\"24\" height=\"24\" fill=\"#e6efe3\"/><rect x=\"48\" y=\"72\" width=\"24\" height=\"24\" fill=\"#e6efe3\"/><rect x=\"96\" y=\"72\" width=\"24\" height=\"24\" fill=\"#e6efe3\"/><path d=\"M0 0 V96 M24 0 V96 M48 0 V96 M72 0 V96 M96 0 V96 M120 0 V96 M144 0 V96 M0 0 H144 M0 24 H144 M0 48 H144 M0 72 H144 M0 96 H144\" fill=\"none\" stroke=\"#1f1f1f\" stroke-width=\"1\"/><rect x=\"0\" y=\"0\" width=\"144\" height=\"96\" fill=\"none\" stroke=\"#1f1f1f\" stroke-width=\"2\"/><path d=\"M-12 47 L-19 57 H-8 M-12 47 V62 M63 -14 L56 -4 H67 M63 -14 V1 M70 -6 H78 M74 -10 V-2 M81 -12 C82 -18 90 -18 90 -12 C90 -8 83 -5 81 -1 H91\" fill=\"none\" stroke=\"#1f1f1f\" stroke-width=\"2\"/></svg>",
+    "answer": {
+      "kind": "expr",
+      "parts": [
+        null,
+        "×",
+        "(",
+        null,
+        "+ 2",
+        ")",
+        "=",
+        null
+      ],
+      "values": [
+        4,
+        4,
+        24
+      ]
+    },
+    "hint": "Длина — это ширина и ещё 2 клетки.",
+    "solution": "Длина — это ширина и ещё 2 клетки: 4 + 2 = 6. Площадь — длина на ширину: 4 × 6 = 24.",
+    "verified": true,
+    "level": 2
+  },
+  {
+    "id": "t-expr-points",
+    "no": 73,
+    "text": "У команды 3 победы и 2 ничьи. За победу дают 3 очка, за ничью — 1. Сколько очков у команды? Впиши числа в окошки выражения.",
+    "answer": {
+      "kind": "expr",
+      "parts": [
+        null,
+        "×",
+        "3",
+        "+",
+        null,
+        "=",
+        null
+      ],
+      "values": [
+        3,
+        2,
+        11
+      ]
+    },
+    "solution": "Победы: 3 × 3 = 9 очков. Ничьи: 2 очка. Всего 9 + 2 = 11.",
+    "verified": true,
+    "level": 1
+  },
+  {
+    "id": "t-expr-yard",
+    "no": 74,
+    "text": "Двор прямоугольный: ширина 7 метров, а длина — на 3 метра больше. Чему равна площадь двора? Впиши числа в окошки выражения.",
+    "answer": {
+      "kind": "expr",
+      "parts": [
+        null,
+        "×",
+        "(",
+        null,
+        "+ 3",
+        ")",
+        "=",
+        null
+      ],
+      "values": [
+        7,
+        7,
+        70
+      ]
+    },
+    "solution": "Длина — 7 + 3 = 10 метров. Площадь — 7 × 10 = 70 квадратных метров.",
+    "verified": true,
+    "level": 2
+  },
+  {
+    "id": "t-expr-kids",
+    "no": 75,
+    "text": "В школе футбола 5 групп по 8 детей, а потом пришли ещё 6 детей. Сколько всего детей? Впиши числа в окошки выражения.",
+    "answer": {
+      "kind": "expr",
+      "parts": [
+        null,
+        "× 8",
+        "+",
+        null,
+        "=",
+        null
+      ],
+      "values": [
+        5,
+        6,
+        46
+      ]
+    },
+    "solution": "В группах 5 × 8 = 40 детей, и ещё 6: 40 + 6 = 46.",
+    "verified": true,
+    "level": 1
+  },
+  {
+    "id": "t-expr-balls",
+    "no": 76,
+    "text": "Тренер купил 4 мяча по 12 монет, и у него осталось 2 монеты. Сколько монет у тренера было сначала? Впиши числа в окошки выражения.",
+    "answer": {
+      "kind": "expr",
+      "parts": [
+        null,
+        "× 12",
+        "+",
+        null,
+        "=",
+        null
+      ],
+      "values": [
+        4,
+        2,
+        50
+      ]
+    },
+    "solution": "Мячи стоили 4 × 12 = 48 монет, и ещё осталось 2 монеты: 48 + 2 = 50.",
+    "verified": true,
+    "level": 2
   }
 ]

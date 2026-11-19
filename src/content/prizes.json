@@ -1,0 +1,8 @@
+[
+  { "id": "p-turq", "name": "Бирюзовый шеврон", "plate": "Шеврон", "why": "За выход из группы", "pattern": "chevron", "body": "#12a4a8", "sleeves": "#12a4a8", "trim": "#ffffff" },
+  { "id": "p-star1", "name": "Звёздная I", "why": "За 30 ★", "club": true, "deco": { "kant": true, "sheen": true, "stars": 1 } },
+  { "id": "p-red", "name": "Белая с красными полосами", "why": "За победу в 1/2", "pattern": "stripes", "body": "#f4f4f4", "alt": "#d4202c", "sleeves": "#f4f4f4", "trim": "#d4202c" },
+  { "id": "p-star2", "name": "Звёздная II", "why": "За 80 ★", "club": true, "deco": { "kant": true, "stars": 2 } },
+  { "id": "p-ystars", "name": "Белая в жёлтых звёздах", "plate": "Жёлтые звёзды", "why": "За Кубок двора", "pattern": "stars", "body": "#ffffff", "alt": "#f5c400", "sleeves": "#ffffff", "trim": "#f5c400" },
+  { "id": "p-champ", "name": "Чемпионская", "why": "За Кубок двора · одна на всех", "pattern": "champ", "body": "#ffffff", "alt": "#d9a520", "sleeves": "#ffffff", "trim": "#d9a520" }
+]

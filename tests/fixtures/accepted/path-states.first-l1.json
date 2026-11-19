@@ -1,0 +1,87 @@
+{
+ "id": "path-states.first-l1",
+ "codes": {
+  "1920": "Э7.183"
+ },
+ "screen": "path-states",
+ "route": "/path",
+ "state": "Первый день · Двор · урок 1",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 941773,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.ao",
+   "lessons": {},
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 0,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 0,
+   "days": 1,
+   "today": "2026-11-18",
+   "todayN": 0,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 0,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "album": {
+   "packs": 0,
+   "shown": 0,
+   "worn": null,
+   "prize": []
+  }
+ },
+ "home": {
+  "cur": 1,
+  "day": 1,
+  "matchesToday": 0,
+  "played": 0,
+  "stars": {},
+  "best": 0,
+  "coins": 0,
+  "fans": 0,
+  "bought": [],
+  "friendly": true,
+  "round": null,
+  "end": false,
+  "region": false,
+  "pause5": false,
+  "extras": {
+   "cup": null,
+   "events": {},
+   "papers": 0,
+   "paperDay": null,
+   "emblemN": 0,
+   "tourWaits": false,
+   "silver": false
+  }
+ },
+ "path": {}
+}

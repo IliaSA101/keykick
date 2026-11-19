@@ -1,0 +1,119 @@
+{
+ "id": "learn-arrows.start-base",
+ "codes": {
+  "1920": "Э8.28"
+ },
+ "screen": "learn-arrows",
+ "route": "/base",
+ "state": "1. Пас стрелками — старт повтором на Базе, урок 6",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 539728,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.yd",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 0,
+     "best": 100,
+     "tries": 1,
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 64,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 9,
+   "days": 3,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 2680,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "learn": {
+   "games": {
+    "arrows": {
+     "step": 2,
+     "plays": 2,
+     "best": 41000,
+     "last": "2026-11-17"
+    }
+   },
+   "recent": [
+    "arrows"
+   ]
+  }
+ },
+ "learn": {
+  "game": "arrows",
+  "place": "base",
+  "step": "start"
+ },
+ "learnCtx": {
+  "lesson": 6,
+  "keys": "аовлыд"
+ }
+}

@@ -6,22 +6,21 @@
  */
 import { computed } from 'vue';
 import cfg from '../../content/map-yard.json';
-import art from '../../content/home-art.json';
 import { fill } from '../../app/home/texts';
+import YardGround from '../../components/home/YardGround.vue';
 import KitChip from '../../components/kit/KitChip.vue';
 import PlaceTag from '../../components/league/PlaceTag.vue';
 import type { MapView, YardNode } from '../../engine/map';
 import { ru } from '../../i18n/ru';
-import { H, IW, alongPath, joinRoute, legOf, offOf, pointOf, smooth, yardAt } from './geometry';
+import { gateOf, gateX as gateXOf, H, pointOf } from '../../components/home/yardGeometry';
+import { alongPath, joinRoute, legOf, smooth, yardAt } from './geometry';
 
 /** `travel` — идёт переезд (Э2.08): двор-цель и кто едет (`away` — наш автобус к ним, `incoming` — соперника к нам). */
 const props = defineProps<{ view: MapView; width: number; built: number; end: boolean; region: boolean; kitBody: string; hover: number | null; travel?: { stage: number; bus: 'away' | 'incoming' } | null }>();
 const emit = defineEmits<{ pick: [stage: number]; hover: [stage: number | null] }>();
 const t = ru.map;
 const base = import.meta.env.BASE_URL;
-const K = H / 1072;
 
-const off = computed(() => offOf(props.width));
 const yards = computed(() => cfg.yards.map((y) => ({ y, n: props.view.nodes[y.stage - 1]!, at: yardAt(props.width, y.stage) })));
 const allDone = computed(() => props.view.nodes.every((n) => n.state === 'done'));
 /** Двор текущего урока (11 — все пройдены): путь до него ясный, дальше — бледный (макет `leagueFrame`). */
@@ -42,10 +41,10 @@ const bus = computed(() => {
 });
 
 const fogs = computed(() => yards.value.filter((q) => q.n.state === 'fog').map((q) => ({ stage: q.n.stage, c: pointOf(props.width, q.y.pic) })));
-const gate = computed(() => pointOf(props.width, cfg.gateAt));
-const gateX = computed(() => Math.max(gate.value[0] + 20, 16 + 110));
+const gate = computed(() => gateOf(props.width));
+const gateX = computed(() => gateXOf(props.width));
 const homeAt = computed(() => pointOf(props.width, cfg.home.at));
-const yardBox = computed(() => (props.end ? art.map.yard.full : props.built === 0 ? art.map.yard.empty : null));
+const yard = computed(() => (props.end ? 'full' : props.built === 0 ? 'empty' : null));
 const cloudSrc = (i: number, j: number): string => `${base}art/map/cloud-${((i * 2 + j) % 6) + 1}.webp`;
 
 const name = (n: YardNode): string => fill(t.yard, { street: n.street });
@@ -60,20 +59,10 @@ const hereAt = computed(() => yards.value.find((q) => q.n.here)?.at ?? null);
 
 <template>
   <div class="board">
-    <img
-      class="bg"
-      :src="`${base}${art.map.base}`"
-      :style="{ left: `${off}px`, width: `${IW}px` }"
-      alt=""
-    >
-    <img
-      v-if="yardBox"
-      class="yardcut"
-      :src="`${base}${yardBox.file}`"
-      :style="{ left: `${off + yardBox.box[0]! * K}px`, top: `${yardBox.box[1]! * K}px`, width: `${(yardBox.box[2]! - yardBox.box[0]!) * K}px` }"
-      alt=""
-    >
-    <div class="shade" />
+    <YardGround
+      :width="width"
+      :yard="yard"
+    />
     <svg
       class="road"
       :width="width"
@@ -241,24 +230,6 @@ const hereAt = computed(() => yards.value.find((q) => q.n.here)?.at ?? null);
   inset: 0;
   overflow: hidden;
   background: var(--map-ground);
-}
-.bg,
-.yardcut {
-  position: absolute;
-  pointer-events: none;
-}
-.bg {
-  top: 0;
-  height: 640px;
-}
-/* затемнение верха и краёв — как `.homeshade.map` кадра (лист Э2, map.css) */
-.shade {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(rgb(21 20 58 / 0.85), rgb(21 20 58 / 0.3) 14%, transparent 20%),
-    radial-gradient(ellipse at 50% 55%, transparent 55%, rgb(21 20 58 / 0.4));
 }
 .road {
   position: absolute;

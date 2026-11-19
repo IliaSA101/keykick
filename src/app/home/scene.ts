@@ -99,6 +99,9 @@ function crowd(places: Place[], n: number, pool: { file: string; w: number; h: n
   });
 }
 
+/** Кадр Двора для ступени `built` (нет такого — первый): Дом, врезка Музея и догрузка графики берут основу отсюда. */
+export const baseOf = (built: number): string => art.bases.find((b) => b.n === built)?.file ?? art.bases[0]!.file;
+
 /** Слои сцены по виду Дома. */
 export function sceneOf(i: HomeInput, v: HomeView, seed: number): Scene {
   const built = v.stadium.built;
@@ -147,7 +150,7 @@ export function sceneOf(i: HomeInput, v: HomeView, seed: number): Scene {
     if (lv > 0) people.push(...crowd(places, Math.round((places.length * lv) / 3), fans, rnd, 't', true));
     if (star) people.push(...crowd(seatsOf(yard.seats.sector.rows, yard.fanGap).filter((p) => s0 <= p[0] && p[0] <= s1), 99, art.sprites.stars, rnd, 's', false));
   }
-  const base = art.bases.find((b) => b.n === built)?.file ?? art.bases[0]!.file;
+  const base = baseOf(built);
   const ghost = v.stadium.ghost ? (art.ghosts.find((g) => g.n === built)?.file ?? null) : null;
   return { base, ghost, under, people, over, team: teamOf(i.cur, i.bought, built) };
 }
@@ -164,3 +167,6 @@ export function newStepId(cur: number, steps: readonly { after: number; id: stri
   const s = steps.find((x) => x.after + 1 === cur && x.id !== 'gate');
   return s?.id ?? null;
 }
+
+/** Семя сцены двора по id игрока: у каждого игрока свой, но один и тот же на Доме и в отъезде к Пути клуба (М8). */
+export const seedOf = (pid: string | undefined): number => Number(String(pid ?? 'p0').replace(/\D/g, '')) || 1;

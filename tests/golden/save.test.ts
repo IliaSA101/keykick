@@ -10,6 +10,7 @@ import { cpSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, wri
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
+import { coachDef } from '../../src/engine/coach/section';
 import { reconcile, type CourseProgress } from '../../src/engine/course/reconcile';
 import { serializePlayer, writePlayer } from '../../src/engine/save/envelope';
 import { planImport } from '../../src/engine/save/import';
@@ -87,6 +88,18 @@ describe('К21: голден fmt:1 — игрок (060 Т7)', () => {
     expect(course.data).toEqual({ ...before, streak: 0 });
     const orig = JSON.parse(raw) as { sections: Obj };
     for (const name of ['club', ...GOLDEN_UNKNOWN]) expect(JSON.stringify(opened.env.sections[name])).toBe(JSON.stringify(orig.sections[name]));
+  });
+
+  it('К8: эталон fmt:1 + раздел coach (067 Т24) — открывается, получает пустой coach, остальное байт в байт', () => {
+    // Ловит: новый раздел задевает старый формат (карантин, правка чужих разделов) или не создаётся пустым.
+    const raw = read('fmt1.player.json').trimEnd();
+    const opened = openPlayer(raw, [...GOLDEN_DEFS, coachDef]);
+    expect(opened.kind).toBe('ok');
+    if (opened.kind !== 'ok') return;
+    expect(opened.changed).toBe(true);
+    expect(opened.env.sections['coach']).toEqual({ v: 1, data: { keys: {} } });
+    const orig = JSON.parse(raw) as { sections: Obj };
+    for (const name of ['club', 'course:ru', ...GOLDEN_UNKNOWN]) expect(JSON.stringify(opened.env.sections[name])).toBe(JSON.stringify(orig.sections[name]));
   });
 });
 

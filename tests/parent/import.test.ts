@@ -300,13 +300,13 @@ describe('К12 (063-Р65): со страницы родителя — выход
     expect(w.store.quarantined('p-b')).toEqual(['{"name":"Миша","rev":4}']);
   });
 
-  it('К12 (063-Р65) битое устройство: here() даёт строку «Новый клуб», после newClub устройство читается, прежний игрок — в корзине, старая запись — в карантине', () => {
+  it('К12 (063-Р65) битое устройство: here() даёт строку «Новый клуб», после newClub устройство читается, прежний игрок — в корзине, старая запись — в карантине', async () => {
     // Ловит: на битом устройстве страница молчит «нет игроков» без выхода; «Новый клуб» стирает игроков, а не кладёт в корзину.
     const w = world([kid('p-a', 10)]);
     w.mem.map.set(`${P}device`, '{не json');
     expect(deviceRow(w.transfer.here().state)?.actions).toEqual(['load', 'newClub']);
     const bin = createBin({ store: w.store });
-    expect(bin.newClub(DAY)).toEqual({ ok: true });
+    expect(await bin.newClub(DAY)).toEqual({ ok: true });
     expect(w.transfer.here()).toMatchObject({ players: [], stuck: [], state: 'ok' });
     expect(bin.list(DAY).map((e) => e.pid)).toEqual(['p-a']);
     expect(w.store.quarantined('device')).toEqual(['{не json']);

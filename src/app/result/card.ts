@@ -32,6 +32,8 @@ export interface ResultCardModel {
   primary: { label: string; go: ResultGo };
   /** Кнопка помощи («С запасом»); ведёт туда же, куда главная: помощь матча задаёт счётчик провалов (065-Р18). */
   help: { label: string; note: string } | null;
+  /** Кнопка «Минута тренера» (067-Р278, Р282): подпись, если матч не пройден и совет — `minute` или `coach`; при `reserve` и в победе — `null` (кадры Э1.23, Э1.24 прежние). */
+  minute: string | null;
   home: string;
 }
 
@@ -44,6 +46,11 @@ export interface CardCtx {
 export function kindOf(v: ResultView): ResultKind {
   if (v.passed) return v.verdict === 'win' ? 'win' : 'draw';
   return v.help === 'reserve' || v.help === 'coach' ? 'stuck' : 'loss';
+}
+
+/** Подпись кнопки минуты: только провал с советом «минута» (2-й провал) или «с тренером» (5-й и дальше). */
+export function minuteOf(v: ResultView): string | null {
+  return !v.passed && (v.help === 'minute' || v.help === 'coach') ? ru.coach.title : null;
 }
 
 const fill = (s: string, vars: Record<string, string | number>): string => s.replace(/\{(\w+)\}/g, (_, k: string) => String(vars[k] ?? ''));
@@ -97,6 +104,7 @@ export function cardOf(v: ResultView, ctx: CardCtx = {}): ResultCardModel {
       stuck: { title: t.stuck.title, lead: t.stuck.lead, helpLabel: coach ? t.stuck.coach : t.stuck.reserve, helpNote: coach ? t.stuck.coachNote : t.stuck.reserveNote, rest: t.stuck.rest, keys: t.stuck.keys },
       primary: { label: t.again.match, go: 'replay' },
       help: { label: coach ? t.stuck.coach : t.stuck.reserve, note: coach ? t.stuck.coachNote : t.stuck.reserveNote },
+      minute: minuteOf(v),
       home: v.rest ? t.stuck.rest : home,
     };
   }
@@ -120,6 +128,7 @@ export function cardOf(v: ResultView, ctx: CardCtx = {}): ResultCardModel {
     stuck: null,
     primary: ok ? { label: t.next, go: 'map' } : { label: again, go: 'replay' },
     help: null,
+    minute: minuteOf(v),
     home,
   };
 }

@@ -85,24 +85,3 @@ export type BinNote = 'limit' | 'phrase' | 'conflict' | 'readonly' | 'listed' | 
 export function binNoteKey(why: string): BinNote {
   return why === 'limit' || why === 'phrase' || why === 'conflict' || why === 'readonly' || why === 'listed' ? why : 'fail';
 }
-
-/** Имя для сравнения при очистке корзины: без разницы регистр и лишние пробелы по краям и внутри. */
-const folded = (s: string): string => s.trim().replace(/\s+/g, ' ').toLowerCase();
-
-/**
- * Очистка корзины вводом имён (063-Р66): введены ровно имена игроков из корзины, каждое один раз, в любом порядке; регистр и пробелы не важны.
- * Имя может состоять из нескольких слов («Ваня Иванов»), поэтому разбираем не по пробелам, а подбором: от начала строки откусываем
- * любое ещё не взятое имя, пока строка не кончится. Одинаковые имена двух игроков нужно ввести столько раз, сколько их в корзине.
- * Корзина пуста — подтверждать нечего (`false`).
- */
-export function clearTyped(names: readonly string[], typed: string): boolean {
-  if (names.length === 0) return false;
-  const take = (rest: string, left: readonly string[]): boolean => {
-    if (left.length === 0) return rest === '';
-    return left.some((n, i) => {
-      if (rest !== n && !rest.startsWith(`${n} `)) return false;
-      return take(rest.slice(n.length).trimStart(), [...left.slice(0, i), ...left.slice(i + 1)]);
-    });
-  };
-  return take(folded(typed), names.map(folded));
-}

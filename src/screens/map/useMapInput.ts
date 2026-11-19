@@ -8,11 +8,11 @@ import type { ClubKit } from '../../engine/club/section';
 import type { HomeInput } from '../../engine/home';
 import type { MapInput } from '../../engine/map';
 
-type Stand = { seed?: number; over?: Partial<HomeInput>; travel?: boolean } | null;
+type Stand = { seed?: number; over?: Partial<HomeInput>; travel?: boolean; pick?: number } | null;
 
 export function useMapInput() {
   const stand = inject<(() => Stand) | null>('kk-home-stand', null)?.() ?? null;
-  const { session, pack, player, data, facts, input: home } = useHomeInput(stand?.over);
+  const { session, pack, player, data, facts, input: home, lessonName } = useHomeInput(stand?.over);
   const map = computed<MapInput | null>(() => {
     const h = home.value;
     const f = facts.value;
@@ -21,9 +21,5 @@ export function useMapInput() {
   });
   const club = computed(() => data<{ name: string; city: string; kit?: ClubKit }>('club', { name: '', city: '' }));
   const lessonId = (n: number): string | undefined => pack.pack.value?.lessons.order[n - 1];
-  const lessonName = (n: number): string => {
-    const id = lessonId(n);
-    return id === undefined ? '' : (pack.pack.value?.text.ru?.lessons[id]?.name ?? '');
-  };
   return { session, stand, pack, player, home, map, club, lessonId, lessonName };
 }

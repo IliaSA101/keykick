@@ -35,7 +35,7 @@ export interface Bin {
    * «Новый клуб» поверх битого устройства (063-Р65): `saveDevice(новое, null)` поверх карантина, файлы прежних игроков тут же —
    * в корзину (`settle(day)`, день — сегодня). Устройство читается — `healthy`, «новее» — `readonly`.
    */
-  newClub(day: string): RepairResult;
+  newClub(day: string): Promise<RepairResult>;
   /** Что в корзине (по ключам `trash.*`), свежее выше. `today` — день `ГГГГ-ММ-ДД`. */
   list(today: string): BinEntry[];
   /** Игрок — в корзину; `day` — день удаления. */
@@ -46,9 +46,9 @@ export interface Bin {
   empty(typed: string): BinResult;
   /**
    * Дописывает оборванное удаление (конверт в корзине, игрок ещё в списке) и подбирает сирот в корзину (063-Р65).
-   * `day` — сегодня (часы снаружи). Вернуло `true` — устройство или корзина изменились.
+   * `day` — сегодня (часы снаружи). Вернуло `true` — устройство или корзина изменились. Игроков под замком другой вкладки не трогает (063-Р71).
    */
-  settle(day: string): boolean;
+  settle(day: string): Promise<boolean>;
 }
 
 export interface BinDeps {
@@ -184,7 +184,7 @@ export function createBin({ store, own, defs = SECTIONS }: BinDeps): Bin {
       }
     },
 
-    newClub(day) {
+    async newClub(day) {
       const d = store.loadDevice();
       if (d.kind === 'newer') return repairFail('readonly');
       if (d.kind === 'ok') return repairFail('healthy');
@@ -194,28 +194,50 @@ export function createBin({ store, own, defs = SECTIONS }: BinDeps): Bin {
       // Битое сырое уже в карантине; пустое устройство — поверх. Файлы прежних игроков остаются на диске сиротами: `settle` кладёт их в корзину.
       const put = store.saveDevice(newDevice(), null);
       if (!put.ok) return repairFail(put.err === 'invalid' ? 'denied' : put.err);
-      api.settle(day);
+      await api.settle(day);
       return { ok: true };
     },
 
-    settle(day) {
-      const d = store.loadDevice();
-      if (d.kind !== 'ok') return false;
-      // Файл игрока ещё на диске (оборвалось между записью корзины и удалением ключа) — не трогаем: список и файл на месте.
-      const stuck = halfDeleted(d.device, pids()).filter((pid) => store.loadPlayer(pid).kind === 'absent');
-      let next = d.device;
-      for (const pid of stuck) next = withoutPlayer(next, pid, next.bin?.[pid] ?? day);
-      // Сироты (063-Р65): файл игрока есть, а в списке и в корзине его нет — след `create` без записи устройства или двойного отказа
-      // при возврате. В корзину, а не стирать: ничего не теряется (свежий файл без данных тоже — проще, чем различать).
-      let trashed = false;
-      for (const pid of orphans(next)) {
-        if (!store.trash(pid).ok) continue;
-        next = withBinDay(next, pid, day);
-        trashed = true;
+    async settle(day) {
+      const first = store.loadDevice();
+      if (first.kind !== 'ok') return false;
+      // Чужого не трогаем (063-Р71, Р74): игрока, которого держит другая вкладка (она пишет его сама — `create` берёт замок до записи файла
+      // и держит до устройства, удаление — между корзиной и устройством), settle пропускает; остальных держит на время записи, как `remove` и `restart`.
+      // Игрок этой вкладки замок уже держит — повторно не берём, но он «свой»: «Новый клуб» кладёт в корзину и его.
+      const holds: (Hold & { kind: 'held' })[] = [];
+      const free = new Set<string>();
+      try {
+        for (const pid of new Set([...halfDeleted(first.device, pids()), ...orphans(first.device)])) {
+          if (own?.(pid)) {
+            free.add(pid);
+            continue;
+          }
+          const got = await store.hold(pid);
+          if (got.kind === 'busy') continue;
+          if (got.kind === 'held') holds.push(got);
+          free.add(pid);
+        }
+        // Устройство читаем после замков: пока ждали, другая вкладка могла его записать (иначе conflict на ровном месте).
+        const d = store.loadDevice();
+        if (d.kind !== 'ok') return false;
+        // Файл игрока ещё на диске (оборвалось между записью корзины и удалением ключа) — не трогаем: список и файл на месте.
+        const stuck = halfDeleted(d.device, pids()).filter((pid) => free.has(pid) && store.loadPlayer(pid).kind === 'absent');
+        let next = d.device;
+        for (const pid of stuck) next = withoutPlayer(next, pid, next.bin?.[pid] ?? day);
+        // Сироты (063-Р65): файл игрока есть, а в списке и в корзине его нет — след `create` без записи устройства или двойного отказа
+        // при возврате. В корзину, а не стирать: ничего не теряется (свежий файл без данных тоже — проще, чем различать).
+        let trashed = false;
+        for (const pid of orphans(next)) {
+          if (!free.has(pid) || !store.trash(pid).ok) continue;
+          next = withBinDay(next, pid, day);
+          trashed = true;
+        }
+        if (next === d.device) return false;
+        // День — лишь подпись для строки корзины: не легло, конверты в корзине всё равно лежат (правда — ключи `trash.*`).
+        return store.saveDevice(next, d.device.rev).ok || trashed;
+      } finally {
+        for (const h of holds) h.release();
       }
-      if (next === d.device) return false;
-      // День — лишь подпись для строки корзины: не легло, конверты в корзине всё равно лежат (правда — ключи `trash.*`).
-      return store.saveDevice(next, d.device.rev).ok || trashed;
     },
   };
   return api;

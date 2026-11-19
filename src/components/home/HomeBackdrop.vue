@@ -14,9 +14,10 @@ import { PREVIEW_KIT, previewInputOf } from '../../app/home/preview';
 import { sceneOf } from '../../app/home/scene';
 import { cupText, dreamText, mainText } from '../../app/home/texts';
 import { crowdHue } from '../../engine/club/crowd';
+import type { ClubKit } from '../../engine/club/section';
 import { FIRST_LESSON, ruCourseDef } from '../../engine/course/section';
 import { emptyDay } from '../../engine/day/section';
-import { homeView } from '../../engine/home';
+import { homeView, type HomeInput } from '../../engine/home';
 import { emptyStadium } from '../../engine/home/section';
 import { ru } from '../../i18n/ru';
 import ScreenHead from '../league/ScreenHead.vue';
@@ -32,21 +33,23 @@ export interface BackdropPreview {
   order: readonly string[];
   lessonName: (n: number) => string;
 }
-const props = defineProps<{ mode: 'home' | 'scene' | 'show'; preview?: BackdropPreview }>();
+/** `input` — точный Дом игрока (окно «Клуб» над его двором, 067 Т11): вместо выдуманного по `preview`; `kit` — форма клуба для цвета трибун. */
+const props = defineProps<{ mode: 'home' | 'scene' | 'show'; preview?: BackdropPreview; input?: HomeInput; kit?: ClubKit }>();
 const t = ru.home;
 /** Рассадка людей на дне 1 не нужна (болельщиков нет), семя — любое постоянное. */
 const SEED = 1;
 const width = useStageWidth();
 const today = new Date().toLocaleDateString('sv-SE');
-const input = props.preview
-  ? previewInputOf(props.preview.order, props.preview.lesson, today)
-  : homeInputOf(
+const input: HomeInput = props.input
+  ?? (props.preview
+    ? previewInputOf(props.preview.order, props.preview.lesson, today)
+    : homeInputOf(
       { course: ruCourseDef.empty(), day: emptyDay(), wallet: { coins: 0, rest: 0, paid: [] }, stadium: emptyStadium() },
       { order: [FIRST_LESSON.ru!], friendly: new Set() },
       {},
       today,
-    );
-const hue = props.preview ? crowdHue(PREVIEW_KIT) : null;
+    ));
+const hue = computed(() => (props.kit ? crowdHue(props.kit) : props.preview ? crowdHue(PREVIEW_KIT) : null)); // форму меняют на месте: трибуны перекрашиваются
 const view = homeView(input);
 const scene = computed(() => sceneOf(input, view, SEED));
 const main = mainText(view, props.preview?.lessonName ?? (() => ''));

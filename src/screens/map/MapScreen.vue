@@ -6,9 +6,11 @@
  * `?travel=1` — открыть сразу в переезде (вход с Дома «На матч», 012-Р39). Наведение — подсказка, выбор — клик или стрелки (054-Р1). Колёсика нет (063-Р28, К4).
  * Выбранный урок уходит в матч через `?lesson=<id>`; без выбора — текущий (`course:ru.current`).
  */
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { PREVIEW_KIT } from '../../app/home/preview';
 import { dreamText, fill } from '../../app/home/texts';
+import { useNav } from '../../app/nav/useNav';
 import { stageScale } from '../../components/shell/stageScale';
 import KeyButton from '../../components/kit/KeyButton.vue';
 import ScreenHead from '../../components/league/ScreenHead.vue';
@@ -36,6 +38,7 @@ interface PickRow {
   play?: string;
 }
 const router = useRouter();
+const nav = useNav();
 const route = useRoute();
 const { session, stand, pack, player, home, map, club, lessonId, lessonName } = useMapInput();
 
@@ -51,6 +54,19 @@ const going = ref(false);
 const phase = ref<TravelPhase>(stand?.travel === true || route.query.travel === '1' ? 'travel' : 'idle');
 
 const view = computed(() => (map.value ? mapView(map.value, sel.value) : null));
+// стенд кадра (065-Р187): двор выбран и окно уроков открыто с первого кадра — один раз, когда вход собрался
+const standPick = stand?.pick;
+let standDone = standPick === undefined;
+watch(
+  [map, view],
+  ([m, v]) => {
+    if (standDone || !m || !v || standPick === undefined) return;
+    standDone = true;
+    sel.value = pickYard(m, v.sel, standPick);
+    opened.value = true;
+  },
+  { immediate: true },
+);
 const hv = computed(() => (home.value ? homeView(home.value) : null));
 const head = computed(() => (hv.value ? dreamText(hv.value) : null));
 const canPlay = computed(() => session.status.value === 'ok' && !going.value);
@@ -123,7 +139,7 @@ function key(e: KeyboardEvent): void {
   if (going.value) return;
   if (phase.value === 'travel') {
     // в переезде стрелок нет: выбор уже сделан; Esc — назад, на Дом (строка плашки)
-    if (e.key === 'Escape' && travelKey(phase.value, 'escape').go === 'home') void router.push('/home');
+    if (e.key === 'Escape' && travelKey(phase.value, 'escape').go === 'home') nav.send({ t: 'esc' });
     else if (e.key === 'Enter' && !e.repeat && !(e.target instanceof HTMLButtonElement)) go();
     return;
   }
@@ -134,7 +150,7 @@ function key(e: KeyboardEvent): void {
   } else if (e.key === 'Escape') {
     if (opened.value) opened.value = false;
     else if (coachOpen.value && coach.value) coachOpen.value = false;
-    else void router.push('/home');
+    else nav.send({ t: 'esc' });
   } else if (e.key === 'Enter' && !e.repeat && !(e.target instanceof HTMLButtonElement)) go();
 }
 onMounted(() => {
@@ -158,7 +174,7 @@ onUnmounted(() => {
       :built="hv.stadium.built"
       :end="home.end"
       :region="home.region"
-      :kit-body="club.kit?.body ?? '#2f9a27'"
+      :kit-body="club.kit?.body ?? PREVIEW_KIT.body"
       :hover="hover"
       :travel="busOn"
       @pick="onPick"

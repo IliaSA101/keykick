@@ -19,7 +19,7 @@ import { ru } from '../../i18n/ru';
 import { stepBoxOf, sxOf, syOf } from './geometry';
 
 const props = defineProps<{ view: HomeView; input: HomeInput; scene: Scene; width: number; peek: boolean; building: boolean; newStep: string | null }>();
-const emit = defineEmits<{ build: []; closeBuilding: [] }>();
+const emit = defineEmits<{ build: []; closeBuilding: []; open: [house: HouseId] }>();
 const t = ru.home;
 const base = import.meta.env.BASE_URL;
 
@@ -55,7 +55,7 @@ const peekStyle = computed(() => ({ left: `${sx((box.value[0] + box.value[2]) / 
     :rows="houseText(view.houses[h]).rows"
     :mark="houseText(view.houses[h]).mark"
     :dot="h !== 'school'"
-    @click="emit('build')"
+    @click="h === 'museum' && !view.houses[h].lock ? emit('open', h) : emit('build')"
   >
     <template
       v-if="view.houses[h].lock"

@@ -7,8 +7,10 @@
 import { computed, inject, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import cfg from '../../content/yard.json';
+import { useGoMatch } from '../../app/home/useGoMatch';
+import { useNav } from '../../app/nav/useNav';
 import { useHomeInput } from '../../app/home/useHomeInput';
-import { newStepId, sceneOf, stepGrew } from '../../app/home/scene';
+import { newStepId, sceneOf, seedOf, stepGrew } from '../../app/home/scene';
 import { dreamText, mainText, cupText } from '../../app/home/texts';
 import { isNarrowStage } from '../../components/shell/stageScale';
 import { useStageWidth } from '../../components/home/useStageWidth';
@@ -22,11 +24,14 @@ import HomeScene from '../../components/home/HomeScene.vue';
 import { crowdHue } from '../../engine/club/crowd';
 import { coachNameOf } from '../../engine/club/start';
 import type { ClubKit } from '../../engine/club/section';
-import { homeView, type HomeInput } from '../../engine/home';
+import { homeView, type HomeInput, type HouseId } from '../../engine/home';
 import { ru } from '../../i18n/ru';
 
 const t = ru.home;
+/** Здания с экраном: ярлык открывает его, когда замок снят (Музей клуба, 067 Т11). */
+const HOUSE_ROUTES: Partial<Record<HouseId, string>> = { museum: '/museum', locker: '/locker' };
 const router = useRouter();
+const nav = useNav();
 /** Стенд кадров: семя, поставщики следующих волн, окна кадра. В игре — null (065-Р64). */
 const stand = inject<(() => { seed?: number; over?: Partial<HomeInput>; peek?: boolean; coach?: boolean; noBanner?: boolean }) | null>('kk-home-stand', null)?.() ?? null;
 
@@ -35,18 +40,14 @@ const W = useStageWidth();
 const narrow = computed(() => isNarrowStage(W.value));
 
 // --- вход правил из разделов сеанса (общий с Картой)
-const { session, pack, player, data, input } = useHomeInput(stand?.over);
+const { session, pack, player, data, input, lessonName } = useHomeInput(stand?.over);
 const view = computed(() => (input.value ? homeView(input.value) : null));
 const club = computed(() => data<{ name: string; city: string; kit?: ClubKit; coach?: string }>('club', { name: '', city: '' }));
 /** Цвета клуба у людей на трибуне (Р80): оттенок формы или null — спрайты как есть. */
 const hue = computed(() => crowdHue(club.value.kit));
-const lessonName = (n: number): string => {
-  const id = pack.pack.value?.lessons.order[n - 1];
-  return id === undefined ? '' : (pack.pack.value?.text.ru?.lessons[id]?.name ?? '');
-};
 
 // --- сцена и моушн М4 (ступень выросла с прошлого показа Дома)
-const seed = computed(() => stand?.seed ?? (Number(String(player.value?.pid ?? 'p0').replace(/\D/g, '')) || 1));
+const seed = computed(() => stand?.seed ?? seedOf(player.value?.pid));
 const scene = computed(() => (input.value && view.value ? sceneOf(input.value, view.value, seed.value) : null));
 const shown = new Map<string, number>();
 const grow = ref(false);
@@ -74,17 +75,14 @@ watch(input, (i) => {
   coachOpen.value = true;
 }, { immediate: true });
 const coachShown = computed(() => (coachOpen.value ? coachText.value : ''));
-const canPlay = computed(() => session.status.value === 'ok');
+const { canPlay, go } = useGoMatch(session);
 const main = computed(() => (view.value ? mainText(view.value, lessonName) : null));
 const cup = computed(() => (view.value ? cupText(view.value) : null));
 const head = computed(() => (view.value ? dreamText(view.value) : null));
 
-function go(): void {
-  if (!canPlay.value) return;
-  void router.push({ path: '/map', query: { travel: '1' } }); // «На матч» — сразу переезд на Карте (065-Р171), чип «Карта» — просто Карта
-}
 function key(e: KeyboardEvent): void {
   if (e.key === 'Escape') {
+    if (e.repeat) return; // удержанная клавиша закрывает по одному слою, а не все сразу
     if (building.value) building.value = false;
     else if (peek.value) peek.value = false;
     else coachOpen.value = false;
@@ -121,6 +119,8 @@ onUnmounted(() => globalThis.removeEventListener('keydown', key));
       :dream-text="head.text"
       :dream-pct="head.pct"
       :chips="[t.leagueSheet]"
+      coins-link
+      @coins="router.push('/shop')"
     />
 
     <HomeHouses
@@ -132,6 +132,7 @@ onUnmounted(() => globalThis.removeEventListener('keydown', key));
       :building="building"
       :new-step="newStep"
       @build="building = true"
+      @open="(house) => router.push(HOUSE_ROUTES[house] ?? '/home')"
       @close-building="building = false"
     />
 
@@ -151,7 +152,7 @@ onUnmounted(() => globalThis.removeEventListener('keydown', key));
       :narrow="narrow"
       :can-play="canPlay"
       @play="go"
-      @map="router.push('/map')"
+      @map="nav.send({ t: 'chipMap' })"
       @cup="router.push('/cup')"
     />
   </main>

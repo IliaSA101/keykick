@@ -1,5 +1,5 @@
 /**
- * Минута тренера (ТЗ-2.9, 3.4; 017 §5): без счёта и голов, строки пар из 2 самых ошибочных клавиш. Строка за строкой;
+ * Минута тренера (ТЗ-2.9, 3.4; 017 §5): без счёта и голов, строки пар из 2 самых трудных клавиш. Строка за строкой;
  * минута кончается на конце строки, когда с первого нажатия прошло `coach.ms`. Не матч (ТЗ-10.9). Платит как печать
  * (монеты — касса, `finishMinute`), пишет окно формы (`presses`). Чистый редьюсер: часы — в `key.t`, зерно — в `start`.
  */
@@ -7,15 +7,14 @@ import cfg from '../../content/match.json';
 import type { Effect, KeyEvent, Press } from '../match/types';
 import { makeCourseHalf } from '../plan/attack';
 import type { CourseLesson, Dictionary } from '../plan/lesson';
-import { weakKeys } from '../stats';
-import type { Keymap, Layout } from '../typing/keymap';
+import { findChar, type Keymap, type Layout } from '../typing/keymap';
 import { emptyStats, isDone, startLine, step as typeStep, type KeyPress, type TypingState, type TypingStats } from '../typing/typing';
 
 export interface MinuteStart {
   type: 'start';
   seed: number;
   lesson: CourseLesson;
-  /** Клавиши фокуса — строчные знаки (две самые ошибочные, `coachKeys`). */
+  /** Клавиши фокуса — строчные знаки (две самые трудные, `coachKeys`). */
   keys: string;
   dict: Dictionary;
   keymap: Keymap;
@@ -57,11 +56,21 @@ export function coachLesson(l: CourseLesson, keys: string): CourseLesson {
   return { ...l, focus: keys, focusWeak: 0, material: 'pairs', ladder: ['pairs'], noWords: true, attacks: [l.rowWidth], rows: 1 };
 }
 
-/** Две самые ошибочные клавиши урока (по ошибкам игрока); не хватает — добираем из фокуса урока. */
-export function coachKeys(keyErrors: Readonly<Record<string, number>>, keymap: Keymap, lesson: CourseLesson): string {
-  const weak = weakKeys(keyErrors, keymap, lesson.layout, cfg.coach.keys).map((k) => k.label.toLowerCase());
-  const more = Array.from(lesson.focus.toLowerCase()).filter((c) => !weak.includes(c));
-  return [...weak, ...more].slice(0, cfg.coach.keys).join('');
+/** Трудные клавиши, что есть на раскладке урока: строчные, не больше `coach.keys`; остальных до числа минуте не хватает (`fresh`). */
+export function weakKeys(hard: readonly string[], keymap: Keymap, lesson: CourseLesson): string[] {
+  return hard.map((c) => c.toLowerCase()).filter((c) => findChar(keymap, lesson.layout, c) !== undefined).slice(0, cfg.coach.keys);
+}
+
+/**
+ * Две самые трудные клавиши (`hardKeys`: буквы, худшая точность первой); нет на раскладке урока — пропуск; не хватает — добираем из
+ * фокуса урока, а на уроке без фокуса — самыми свежими буквами урока (сначала новые, затем с конца `keys`; 067-Р280): строка минуты не пустая.
+ */
+export function coachKeys(hard: readonly string[], keymap: Keymap, lesson: CourseLesson): string {
+  const weak = weakKeys(hard, keymap, lesson);
+  const letters = (s: string): string[] => Array.from(s.toLowerCase()).filter((c) => /\p{L}/u.test(c) && findChar(keymap, lesson.layout, c) !== undefined);
+  const fresh = [...letters(lesson.newKeys), ...letters(lesson.keys).reverse()];
+  const more = [...Array.from(lesson.focus.toLowerCase()), ...fresh].filter((c) => !weak.includes(c));
+  return [...new Set([...weak, ...more])].slice(0, cfg.coach.keys).join('');
 }
 
 const lineOf = (s: Pick<RunningMinute, 'lesson' | 'keys' | 'dict' | 'keymap' | 'seed'>, n: number): string => {

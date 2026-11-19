@@ -132,6 +132,12 @@ export function createSession(deps: SessionDeps): Session {
     device.value = got.kind === 'ok' ? { kind: 'ok', value: got.device } : { kind: got.kind };
   }
 
+  /** Запись легла — сеанс перечитывает устройство (корзина и перенос пишут мимо него). */
+  function synced<R extends boolean | { ok: boolean }>(done: R): R {
+    if (done === true || (typeof done === 'object' && done.ok)) readDevice();
+    return done;
+  }
+
   function resetPlayer(): void {
     choice++;
     inflight = undefined;
@@ -257,18 +263,30 @@ export function createSession(deps: SessionDeps): Session {
     const base = d.kind === 'ok' ? d.value : newDevice();
     if (base.players.length >= MAX_PLAYERS) return { ok: false, why: 'limit' };
     const pid = deps.newPid();
-    const env = createPlayer({ pid, name: init.name }, defs);
-    const wrote = store.savePlayer(pid, env, null);
-    if (!wrote.ok) return { ok: false, why: wrote.err === 'invalid' ? 'invalid' : wrote.err === 'conflict' ? 'conflict' : wrote.err === 'readonly' ? 'readonly' : 'quota' };
-    const next = withPlayer(base, pid);
-    const listed = store.saveDevice(next, d.kind === 'ok' ? base.rev : null);
-    if (!listed.ok) {
-      if (listed.err === 'conflict') readDevice(); // другая вкладка успела раньше: покажем её список
-      return { ok: false, why: listed.err === 'conflict' ? 'conflict' : listed.err === 'invalid' ? 'invalid' : listed.err === 'readonly' ? 'readonly' : 'quota' };
+    // Замок нового игрока — до записи файла (063-Р74): `settle` другой вкладки пропускает занятого, и `choose` не получит busy.
+    // Замок уходит в `pick` как `spare`.
+    const mine = await store.hold(pid);
+    if (mine.kind === 'busy') return { ok: false, why: 'conflict' }; // pid уже занят другой вкладкой — не наш игрок
+    try {
+      const env = createPlayer({ pid, name: init.name }, defs);
+      const wrote = store.savePlayer(pid, env, null);
+      if (!wrote.ok) return { ok: false, why: wrote.err === 'invalid' ? 'invalid' : wrote.err === 'conflict' ? 'conflict' : wrote.err === 'readonly' ? 'readonly' : 'quota' };
+      const next = withPlayer(base, pid);
+      const listed = store.saveDevice(next, d.kind === 'ok' ? base.rev : null);
+      if (!listed.ok) {
+        if (listed.err === 'conflict') readDevice(); // другая вкладка успела раньше: покажем её список
+        return { ok: false, why: listed.err === 'conflict' ? 'conflict' : listed.err === 'invalid' ? 'invalid' : listed.err === 'readonly' ? 'readonly' : 'quota' };
+      }
+      device.value = { kind: 'ok', value: next };
+      if (spare?.hold.kind === 'held') spare.hold.release();
+      spare = { pid, hold: mine };
+      await choose(pid);
+      return { ok: true, pid };
+    } finally {
+      // Отказ записи или замок остался в `spare` — отпускаем; ушедший в `hold` отпустит `releaseHold`.
+      if (spare?.hold === mine) spare = undefined;
+      if (mine.kind === 'held' && hold !== mine) mine.release();
     }
-    device.value = { kind: 'ok', value: next };
-    await choose(pid);
-    return { ok: true, pid };
   }
 
   function reload(): Promise<void> {
@@ -279,11 +297,7 @@ export function createSession(deps: SessionDeps): Session {
   const moved = createTransfer({ store, defs, app: deps.app ?? APP_VERSION, own: (pid) => hold?.kind === 'held' && holdPid === pid });
   const transfer: Transfer = {
     ...moved,
-    markExported(day) {
-      const done = moved.markExported(day);
-      if (done) readDevice();
-      return done;
-    },
+    markExported: (day) => synced(moved.markExported(day)),
     async apply(plan, picks) {
       const done = await moved.apply(plan, picks);
       // Отказ до первой записи не трогает ничего. Иначе сеанс видит диск: игрока вкладки перечитываем, только если его файл записан
@@ -307,16 +321,8 @@ export function createSession(deps: SessionDeps): Session {
       else readDevice();
       return done;
     },
-    restore(pid) {
-      const done = binApi.restore(pid);
-      if (done.ok) readDevice();
-      return done;
-    },
-    empty(typed) {
-      const done = binApi.empty(typed);
-      if (done.ok) readDevice();
-      return done;
-    },
+    restore: (pid) => synced(binApi.restore(pid)),
+    empty: (typed) => synced(binApi.empty(typed)),
     async restart(pid, fallbackName) {
       const done = await binApi.restart(pid, fallbackName);
       if (!done.ok) return done;
@@ -324,16 +330,12 @@ export function createSession(deps: SessionDeps): Session {
       else readDevice();
       return done;
     },
-    newClub(day) {
-      const done = binApi.newClub(day);
+    async newClub(day) {
+      const done = await binApi.newClub(day);
       if (done.ok) void reload(); // устройство новое: вкладка начинает с первого запуска
       return done;
     },
-    settle(day) {
-      const done = binApi.settle(day);
-      if (done) readDevice();
-      return done;
-    },
+    settle: async (day) => synced(await binApi.settle(day)),
   };
 
   return {

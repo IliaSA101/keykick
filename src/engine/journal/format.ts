@@ -13,6 +13,8 @@ export interface JournalEntry {
   events: MatchEvent[];
   /** Время последней записи, мс — порядок вытеснения (часы приходят снаружи). */
   at: number;
+  /** Скорость доигранного матча, знаков в минуту (067 Т17: ставка учебных игр, ТЗ-3.3); у старых записей и брошенных матчей нет. */
+  cpm?: number;
 }
 
 /** Запись из значения неизвестной формы; не похоже на запись — `null` (битое не роняет). */
@@ -23,7 +25,9 @@ export function parseEntry(raw: unknown): JournalEntry | null {
   if (typeof r.seed !== 'number' || !Number.isFinite(r.seed)) return null;
   if (!Array.isArray(r.events)) return null;
   if (typeof r.at !== 'number' || !Number.isFinite(r.at)) return null;
-  return { matchId: r.matchId, seed: r.seed, events: r.events as MatchEvent[], at: r.at };
+  const entry: JournalEntry = { matchId: r.matchId, seed: r.seed, events: r.events as MatchEvent[], at: r.at };
+  if (typeof r.cpm === 'number' && Number.isFinite(r.cpm) && r.cpm >= 0) entry.cpm = r.cpm;
+  return entry;
 }
 
 /** `matchId` записей, не влезших в предел: самые старые по `at` (при равенстве — по id, чтобы порядок был однозначен). */

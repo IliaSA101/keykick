@@ -4,9 +4,13 @@
  * (`engine/rewards/cash.ts`, страж С1). Повтор с тем же `matchId` (двойной Enter, F5 на итоге) — сохранение без изменений.
  */
 import cfg from '../../content/match.json';
+import { PACKS_YARD } from '../album/order';
+import type { Album } from '../album/section';
 import type { CourseProgress, LessonMark } from '../course/reconcile';
 import { ruCourseDef } from '../course/section';
 import { playedMatch, type Day } from '../day/section';
+import { applyKeys, keyTile, type KeyTile } from '../coach/keys';
+import type { CoachKeys } from '../coach/section';
 import { addGoals, type Stadium } from '../home/section';
 import { applyPresses, type FormGrowth, type FormState } from '../form/rank';
 import { credit, isPaid, type Wallet } from '../rewards/cash';
@@ -25,12 +29,15 @@ export interface MatchSave {
   day: Day;
   school: School;
   form: FormState;
+  /** Окна нажатий по буквам — «трудные клавиши» (067 Т24). */
+  coach: CoachKeys;
   stadium: Stadium;
+  album: Album;
 }
 
 /** Имя раздела в конверте → данные: то, что отдают `session.save(patch)`. */
 export function matchPatch(s: MatchSave): Record<string, unknown> {
-  return { [ruCourseDef.name]: s.course, wallet: s.wallet, day: s.day, school: s.school, form: s.form, stadium: s.stadium };
+  return { [ruCourseDef.name]: s.course, wallet: s.wallet, day: s.day, school: s.school, form: s.form, coach: s.coach, stadium: s.stadium, album: s.album };
 }
 
 export interface FinishCtx {
@@ -125,12 +132,15 @@ export function finishMatch(save: MatchSave, result: MatchResult, ctx: FinishCtx
 
   const pays = ctx.pays ?? true;
   const correct = pays ? result.stats.correct : 0;
-  let purse = { wallet: save.wallet, school: save.school, stadium: save.stadium };
+  let purse = { wallet: save.wallet, school: save.school, stadium: save.stadium, album: save.album };
   const coin = credit(purse, 'match-coins', correct, ctx.matchId);
   const fan = credit(coin.purse, 'match-fans', correct);
   purse = fan.purse;
   if (result.penalty.scored) purse = credit(purse, 'penalty-knower', 1).purse;
+  // Пак — за первый проход урока (ТЗ-5.1); повтор и поражение — нет; Двор даёт 39 паков, дальше пака нет.
+  if (passed && !wasDone && !(ctx.championship ?? false) && purse.album.packs < PACKS_YARD) purse = credit(purse, 'lesson-pack', 1).purse;
   const formed = applyPresses(save.form, result.presses);
+  const coach = applyKeys(save.coach, result.presses);
 
   const view: ResultView = {
     verdict: result.verdict,
@@ -153,7 +163,7 @@ export function finishMatch(save: MatchSave, result: MatchResult, ctx: FinishCtx
     back,
     knower: result.penalty.scored,
   };
-  const out: MatchSave = { course, wallet: purse.wallet, day: playedMatch(save.day, ctx.day, ctx.now), school: purse.school, form: formed.form, stadium: addGoals(purse.stadium, result.total.me) };
+  const out: MatchSave = { course, wallet: purse.wallet, day: playedMatch(save.day, ctx.day, ctx.now), school: purse.school, form: formed.form, coach, stadium: addGoals(purse.stadium, result.total.me), album: purse.album };
   return { save: out, facts: [{ fact: 'match', verdict: result.verdict, replay: result.replay }], view };
 }
 
@@ -163,19 +173,31 @@ export interface MinuteView {
   correct: number;
   coins: number;
   grew: FormGrowth[];
+  /** По клавишам минуты (`ctx.keys`): плитка до и после — «было → стало» (Э4.14), ранг — из формы. */
+  keys: { before: KeyTile; after: KeyTile }[];
+}
+
+/** Разделы, которые меняет минута тренера (067 Т25): не матч — курс и игровой день не трогает. */
+export type MinuteSave = Pick<MatchSave, 'wallet' | 'school' | 'form' | 'coach' | 'stadium' | 'album'>;
+
+/** Имя раздела в конверте → данные после минуты: то, что отдают `session.save(patch)`; ровно разделы `MinuteSave`. */
+export function minutePatch(s: MinuteSave): Record<string, unknown> {
+  return { wallet: s.wallet, school: s.school, form: s.form, coach: s.coach, stadium: s.stadium, album: s.album };
 }
 
 export function finishMinute(
-  save: Pick<MatchSave, 'wallet' | 'school' | 'form' | 'stadium'>,
+  save: MinuteSave,
   minute: MinuteResult,
-  ctx: { matchId: string },
-): { save: Pick<MatchSave, 'wallet' | 'school' | 'form' | 'stadium'>; facts: Fact[]; view: MinuteView | null } {
+  ctx: { matchId: string; /** Клавиши минуты — строчные буквы (`RunningMinute.keys`). */ keys?: string },
+): { save: MinuteSave; facts: Fact[]; view: MinuteView | null } {
   if (isPaid(save.wallet, ctx.matchId)) return { save, facts: [], view: null };
-  const coin = credit({ wallet: save.wallet, school: save.school, stadium: save.stadium }, 'minute-coins', minute.correct, ctx.matchId);
+  const coin = credit({ wallet: save.wallet, school: save.school, stadium: save.stadium, album: save.album }, 'minute-coins', minute.correct, ctx.matchId);
   const formed = applyPresses(save.form, minute.list);
+  const coach = applyKeys(save.coach, minute.list);
+  const keys = Array.from(ctx.keys ?? '').map((ch) => ({ before: keyTile(save.coach, save.form, ch), after: keyTile(coach, formed.form, ch) }));
   return {
-    save: { wallet: coin.purse.wallet, school: coin.purse.school, form: formed.form, stadium: coin.purse.stadium },
+    save: { wallet: coin.purse.wallet, school: coin.purse.school, form: formed.form, coach, stadium: coin.purse.stadium, album: coin.purse.album },
     facts: [],
-    view: { presses: minute.presses, correct: minute.correct, coins: coin.gain, grew: formed.grew },
+    view: { presses: minute.presses, correct: minute.correct, coins: coin.gain, grew: formed.grew, keys },
   };
 }

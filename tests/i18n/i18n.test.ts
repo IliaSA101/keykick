@@ -70,3 +70,11 @@ describe('plural', () => {
     expect(plural(5, ruForms)).toBe('ошибок');
   });
 });
+
+describe('служебные окна: форма рядом с Telegram (063-Р68)', () => {
+  // Ловит: адрес формы стал не https или подпись пропала (пустой url скрывает строку — это намеренно).
+  it('адрес формы — https, подпись не пуста', () => {
+    expect(ru.system.form.url).toMatch(/^https:\/\//);
+    expect(ru.system.form.label.length).toBeGreaterThan(0);
+  });
+});

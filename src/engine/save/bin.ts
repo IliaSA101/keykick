@@ -52,8 +52,8 @@ export function restoreCheck(device: Pick<Device, 'players'>, pid: string): 'ok'
 export const halfDeleted = (device: Pick<Device, 'players'>, trashed: readonly string[]): string[] =>
   device.players.map((p) => p.pid).filter((pid) => trashed.includes(pid));
 
-/** Сравнение имени при подтверждении: без разницы регистр и лишние пробелы по краям и внутри. */
-const normal = (s: string): string => s.trim().replace(/\s+/g, ' ').toLowerCase();
+/** Имя для сравнения при очистке корзины: без разницы регистр и лишние пробелы по краям и внутри. */
+const folded = (s: string): string => s.trim().replace(/\s+/g, ' ').toLowerCase();
 
 /**
  * Что нужно ввести, чтобы очистить корзину: имена игроков в порядке строк, через пробел (имя не читается — `pid`).
@@ -61,5 +61,20 @@ const normal = (s: string): string => s.trim().replace(/\s+/g, ' ').toLowerCase(
  */
 export const clearPhrase = (entries: readonly BinEntry[]): string => entries.map((e) => e.name ?? e.pid).join(' ');
 
-/** Подтверждение очистки: введено то же, что `clearPhrase`, регистр и пробелы не важны. Корзина пуста — подтверждать нечего (`false`). */
-export const clearConfirmed = (entries: readonly BinEntry[], typed: string): boolean => entries.length > 0 && normal(typed) === normal(clearPhrase(entries));
+/**
+ * Единственное правило очистки корзины (063-Р66, Р70): введены ровно имена игроков из корзины (имя не читается — `pid`), каждое один раз,
+ * в любом порядке; регистр и пробелы не важны. Имя может состоять из нескольких слов («Ваня Иванов»), поэтому разбираем не по пробелам,
+ * а подбором: от начала строки откусываем любое ещё не взятое имя, пока строка не кончится. Одинаковые имена двух игроков нужно ввести
+ * столько раз, сколько их в корзине. Корзина пуста — подтверждать нечего (`false`).
+ */
+export function clearConfirmed(entries: readonly BinEntry[], typed: string): boolean {
+  if (entries.length === 0) return false;
+  const take = (rest: string, left: readonly string[]): boolean => {
+    if (left.length === 0) return rest === '';
+    return left.some((n, i) => {
+      if (rest !== n && !rest.startsWith(`${n} `)) return false;
+      return take(rest.slice(n.length).trimStart(), [...left.slice(0, i), ...left.slice(i + 1)]);
+    });
+  };
+  return take(folded(typed), entries.map((e) => folded(e.name ?? e.pid)));
+}

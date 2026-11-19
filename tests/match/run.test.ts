@@ -4,12 +4,14 @@
  */
 import { describe, expect, it } from 'vitest';
 import { courseLessons, dictionary } from '../course/yard';
+import { albumDef } from '../../src/engine/album/section';
 import { dayDef } from '../../src/engine/day/section';
 import { formDef } from '../../src/engine/form/section';
 import { stadiumDef } from '../../src/engine/home/section';
 import { ruCourseDef } from '../../src/engine/course/section';
 import { walletDef } from '../../src/engine/rewards/section';
 import { schoolDef } from '../../src/engine/school/section';
+import { coachDef } from '../../src/engine/coach/section';
 import type { MatchEvent, MatchSave, RunningMatch } from '../../src/engine/match';
 import { expectedHit } from '../../src/engine/typing/typing';
 import { keymap } from '../../src/engine/typing/layouts';
@@ -24,7 +26,7 @@ import { correctInput } from '../../src/engine/school/answers';
 
 const lesson = courseLessons.find((l) => !l.friendly)!;
 const fresh = (): Run => startRun(buildStart(lesson, 7, dictionary)).run;
-const empty = (): MatchSave => ({ course: ruCourseDef.empty(), wallet: walletDef.empty(), day: dayDef.empty(), school: schoolDef.empty(), form: formDef.empty(), stadium: stadiumDef.empty() });
+const empty = (): MatchSave => ({ course: ruCourseDef.empty(), wallet: walletDef.empty(), day: dayDef.empty(), school: schoolDef.empty(), form: formDef.empty(), coach: coachDef.empty(), stadium: stadiumDef.empty(), album: albumDef.empty() });
 const typing = (r: Run): RunningMatch => {
   if (r.state.phase === 'idle') throw new Error('матч не начат');
   return r.state;
@@ -91,7 +93,7 @@ describe('К-Т9: свисток → сохранение и журнал (М3, 
         read: () => cur,
         save: (patch) => {
           saves.push(patch);
-          cur = { course: patch['course:ru'] as MatchSave['course'], wallet: patch.wallet as MatchSave['wallet'], day: patch.day as MatchSave['day'], school: patch.school as MatchSave['school'], form: patch.form as MatchSave['form'], stadium: patch.stadium as MatchSave['stadium'] };
+          cur = { course: patch['course:ru'] as MatchSave['course'], wallet: patch.wallet as MatchSave['wallet'], day: patch.day as MatchSave['day'], school: patch.school as MatchSave['school'], form: patch.form as MatchSave['form'], coach: patch.coach as MatchSave['coach'], stadium: patch.stadium as MatchSave['stadium'], album: patch.album as MatchSave['album'] };
           return { ok: true };
         },
         journal: { put: (id) => (puts.push(id), Promise.resolve()) },
@@ -118,6 +120,46 @@ describe('К-Т9: свисток → сохранение и журнал (М3, 
     expect(again).toEqual({ kind: 'repeat' });
     expect(x.saves.length).toBe(1);
     expect(x.puts).toEqual(['m1']);
+  });
+});
+
+describe('К5 (067 Т24): раздел coach из свистка', () => {
+  it('К5: окна букв — из нажатий матча без разминки; повтор того же matchId окна не растит', () => {
+    // Ловит: разминка попадает в «трудные клавиши» (там много промахов новичка) и двойной Enter удваивает окно.
+    let cur = empty();
+    const d: FinishDeps = {
+      read: () => cur,
+      save: (patch) => ((cur = { ...cur, ...(patch as Partial<MatchSave>), course: patch['course:ru'] as MatchSave['course'] }), { ok: true }),
+      journal: { put: () => Promise.resolve() },
+    };
+    const run = playToWhistle(fresh());
+    const result = typing(run).result!;
+    const c = { now: 1_000_000, day: '2026-11-18', lessonId: lesson.id, matchId: 'm-k5' };
+    expect(finishRun(run, c, d).kind).toBe('done');
+    const total = (): number => Object.values(cur.coach.keys).reduce((n, w) => n + w.length, 0);
+    const letters = result.presses.filter((p) => /^\p{Ll}$/u.test(p.ch)).length;
+    expect(total()).toBeLessThanOrEqual(letters);
+    expect(total()).toBeGreaterThan(0);
+    expect(result.presses.length).toBeLessThan(result.stats.correct + result.stats.errors);
+    const once = total();
+    expect(finishRun(run, c, d)).toEqual({ kind: 'repeat' });
+    expect(total()).toBe(once);
+  });
+});
+
+describe('К4 (067 Т17): свисток передаёт скорость в журнал', () => {
+  it('К4: finishRun кладёт в журнал ту же скорость, что показывает итог', () => {
+    // Ловит: `cpm` не доезжает до журнала — ставка учебных игр считается из пустого списка скоростей.
+    const puts: { id: string; cpm: number | undefined }[] = [];
+    const d: FinishDeps = {
+      read: () => empty(),
+      save: () => ({ ok: true }),
+      journal: { put: (id, rec) => (puts.push({ id, cpm: rec.cpm }), Promise.resolve()) },
+    };
+    const done = finishRun(playToWhistle(fresh()), { now: 1_000_000, day: '2026-11-18', lessonId: lesson.id, matchId: 'm-p1-1' }, d);
+    if (done.kind !== 'done') throw new Error('матч не записан');
+    expect(done.view.cpm).toBeGreaterThan(0);
+    expect(puts).toEqual([{ id: 'm-p1-1', cpm: done.view.cpm }]);
   });
 });
 

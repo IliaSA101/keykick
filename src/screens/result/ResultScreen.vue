@@ -7,14 +7,21 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { takeFinished, takeMeta } from '../../app/match/handoff';
+import { rivalName } from '../../app/home/texts';
+import { useHomeInput } from '../../app/home/useHomeInput';
 import { cardOf, type ResultGo } from '../../app/result/card';
+import { chainNext, chainSave, schoolOpenOf, setChainTarget } from '../../app/result/chain';
 import { useSession } from '../../app/save/session';
 import ResultCard from '../../components/result/ResultCard.vue';
 import ShellHeader from '../../components/shell/ShellHeader.vue';
 import { stageScale } from '../../components/shell/stageScale';
-import { clubDef, type Club, type ClubKit } from '../../engine/club/section';
-import { streetName, streetOf } from '../../engine/home';
+import { albumDef, type Album } from '../../engine/album/section';
+import { rivalKitOf } from '../../engine/club/rival';
+import { rivalOf } from '../../engine/cup/teams';
+import { clubDef, type Club } from '../../engine/club/section';
+import { dayDef, type Day } from '../../engine/day/section';
 import type { ResultView, Score } from '../../engine/match';
+import { schoolDef, type School } from '../../engine/school/section';
 import { ru } from '../../i18n/ru';
 import MatchScene from '../match/MatchScene.vue';
 import type { MatchView } from '../match/view';
@@ -33,6 +40,7 @@ const props = defineProps<{ frame?: ResultFrame }>();
 const t = ru.match;
 const router = useRouter();
 const session = useSession();
+const { input, data, today, trainers } = useHomeInput();
 const win = ref({ w: globalThis.innerWidth, h: globalThis.innerHeight });
 const onResize = (): void => void (win.value = { w: globalThis.innerWidth, h: globalThis.innerHeight });
 const width = computed(() => stageScale(win.value.w, win.value.h).width);
@@ -48,9 +56,9 @@ const board: MatchView | null = view === null ? null : { phase: t.phase.result, 
 
 const player = computed(() => (session.player.value.kind === 'ok' ? session.player.value : null));
 const club = computed<Club>(() => (player.value?.env.sections[clubDef.name]?.data as Club | undefined) ?? clubDef.empty());
-const rivalKit = (k: ClubKit): ClubKit => ({ pattern: k.pattern, body: '#f28a1c', sleeves: 'split', trim: '#1f1f1f' });
-const rivalName = computed(() => {
-  const s = ru.home.rival.replace('{street}', props.frame?.street ?? streetName(streetOf(meta.no))).replace(' ', ' ');
+const rival = rivalOf(meta.no);
+const rivalTitle = computed(() => {
+  const s = rivalName(props.frame?.street ?? rival.street);
   return s.charAt(0).toUpperCase() + s.slice(1);
 });
 
@@ -62,8 +70,26 @@ function go(to: ResultGo): void {
   if (to === 'replay') void router.push(meta.lesson === '' ? '/match' : { path: '/match', query: { lesson: meta.lesson } });
   else void router.push(to === 'map' ? '/map' : '/home');
 }
+/**
+ * «Дальше» (067 Т12, К-Б): сначала звенья цепочки — пак, «Тур ждёт» или «штрафные» (`app/result/chain`), потом Карта или Дом.
+ * «Ещё раз» (после поражения) идёт прямо в матч; Esc и «Дом» — в Дом без звеньев, непоказанное звено вернётся в следующий заход.
+ */
+function advance(to: ResultGo): void {
+  if (left || props.frame) return;
+  const next = to === 'replay' ? null : chainNext(chainSave(data<Album>(albumDef.name, albumDef.empty()), data<Day>(dayDef.name, dayDef.empty()), data<School>(schoolDef.name, schoolDef.empty()), today(), trainers()), schoolOpenOf(input.value), null, globalThis.Date.now());
+  if (next === null) return go(to);
+  left = true;
+  setChainTarget(to);
+  void router.push(next.path);
+}
+/** «Минута тренера» из «Застрял» (067-Р278): тот же один переход, что «Дальше» и «Дом»; звенья цепочки не трогаем — игра не пройдена. */
+const minute = (): void => {
+  if (left || props.frame) return;
+  left = true;
+  void router.push('/coach');
+};
 const primary = (): void => {
-  if (card.value) go(card.value.primary.go);
+  if (card.value) advance(card.value.primary.go);
 };
 
 function onKey(e: KeyboardEvent): void {
@@ -93,9 +119,9 @@ onUnmounted(() => {
     <MatchScene
       :view="board"
       :kit="club.kit"
-      :rival-kit="rivalKit(club.kit)"
+      :rival-kit="rivalKitOf(rival, club.kit)"
       :us="{ name: club.name || t.sides.us, backName: club.backName, backNumber: club.backNumber }"
-      :rival="{ name: rivalName, city: club.city }"
+      :rival="{ name: rivalTitle, city: club.city }"
       :width="width"
       :shout="null"
       :bump="null"
@@ -124,6 +150,7 @@ onUnmounted(() => {
       :card="card"
       @primary="primary"
       @home="go('home')"
+      @minute="minute"
     />
   </main>
 </template>

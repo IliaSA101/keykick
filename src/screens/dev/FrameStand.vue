@@ -7,12 +7,17 @@
  */
 import { provide, shallowRef, type Component } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { gameOfPath } from '../../app/base/run';
+import type { SchoolStand } from '../../app/school/frame';
 import { setSession, useSession } from '../../app/save/session';
 import FooterLine from '../../components/shell/FooterLine.vue';
 import ShellHeader from '../../components/shell/ShellHeader.vue';
+import LearnWindow from '../../components/learn/LearnWindow.vue';
 import UpdateWindow from '../system/UpdateWindow.vue';
 import { PARENT_STAND, type ParentStand } from '../parent/stand';
+import { PATH_STAND, type PathStand } from '../path/stand';
 import { frameSession, type FrameFixture } from './frameSession';
+import { learnStandOf, type LearnStand } from './learnStand';
 
 const files = import.meta.glob<FrameFixture>('../../../tests/fixtures/accepted/*.json', { import: 'default' });
 
@@ -33,7 +38,34 @@ provide('kk-home-stand', () => homeStand.value);
 // страница родителя: файл, выбранный на кадре «Загрузить файл» (063 Т11), вкладка и шаг блока «Игроки» (Т12), окно поверх экрана (обновление) — из фикстуры
 const parentStand = shallowRef<ParentStand>({});
 provide(PARENT_STAND, () => parentStand.value);
+// окно «Клуб»: трудные клавиши и открытое окно кадра — из фикстуры (в игре поставщик пуст, 067 Т11)
+const clubStand = shallowRef<FrameFixture['club']>({});
+provide('kk-club-stand', () => clubStand.value);
+// Музей: покупки Двора и ролики кадра — из фикстуры (источники — 068 Т7)
+const museumStand = shallowRef<FrameFixture['museum']>({});
+provide('kk-museum-stand', () => museumStand.value);
+// Путь клуба (067 Т10): вид входа, доля отъезда, деление под мышью — из фикстуры; в игре ключа нет
+const pathStand = shallowRef<PathStand>({});
+provide(PATH_STAND, () => pathStand.value);
+// Лавка: подтверждение покупки на кадре — из фикстуры (067 Т12)
+const shopStand = shallowRef<FrameFixture['shop']>({});
+provide('kk-shop-stand', () => shopStand.value);
+// Пак: открытая фаза на кадре — из фикстуры (067 Т12); в игре пак всегда начинается закрытым
+const packStand = shallowRef<FrameFixture['pack']>({});
+provide('kk-pack-stand', () => packStand.value);
+// Раздевалка: окно «Рассмотреть» или «Игроки», открытое на кадре, — из фикстуры (067 Т13); в игре его открывает ребёнок
+const lockerStand = shallowRef<FrameFixture['locker']>({});
+provide('kk-locker-stand', () => lockerStand.value);
+// Школа (067 Т14): строка журнала под мышью и шаг тура — из фикстуры; в игре поставщика нет
+const schoolStand = shallowRef<SchoolStand>({});
+provide('kk-school-stand', () => schoolStand.value);
+// База (067 Т19): открыта ли доска рекордов на кадре — из фикстуры; в игре поставщика нет
+const baseStand = shallowRef<FrameFixture['base']>({});
+provide('kk-base-stand', () => baseStand.value);
 const win = shallowRef<FrameFixture['window']>();
+// учебная игра 1–4 (067 Т17): окно поверх перерыва или Базы; время кадра не тикает (`frozenNow`)
+const learn = shallowRef<LearnStand | null>(null);
+const learnNow = shallowRef(0);
 
 /** Кадры, где макет не рисует баннер «Новая ступень» (проверка длины имён, наведение на стенд): ступень на них та же, что на соседних (065-Р80). */
 const NO_BANNER = /^home\.(long|long-city|news)$/;
@@ -50,10 +82,20 @@ async function open(): Promise<void> {
   const fx = await load();
   clock.value = fx.clock;
   const h = (fx.home ?? {}) as Record<string, unknown>;
-  homeStand.value = { seed: fx.seed, over: { bought: h.bought, round: h.round, end: h.end, region: h.region, extras: plain(h.extras) }, peek: id === 'home.peek', coach: id === 'home.coach', noBanner: NO_BANNER.test(id), travel: fx.travel === true };
+  homeStand.value = { seed: fx.seed, over: { bought: h.bought, round: h.round, end: h.end, region: h.region, extras: plain(h.extras) }, peek: id === 'home.peek', coach: id === 'home.coach', noBanner: NO_BANNER.test(id), travel: fx.travel === true, pick: fx.mapPick };
   setSession(await frameSession(fx));
   win.value = fx.window;
+  learn.value = learnStandOf(fx);
+  learnNow.value = fx.clock.now;
+  clubStand.value = fx.club ?? {};
+  museumStand.value = fx.museum ?? {};
+  shopStand.value = fx.shop ?? {};
+  packStand.value = fx.pack ?? {};
+  lockerStand.value = fx.locker ?? {};
   parentStand.value = { ...fx.stand };
+  pathStand.value = { ...fx.path };
+  schoolStand.value = { ...fx.school };
+  baseStand.value = fx.base ?? {};
   if (fx.file) {
     const [first] = fx.file.players;
     if (first) {
@@ -73,10 +115,16 @@ async function open(): Promise<void> {
   view.value = comp;
   const cur = useSession().player.value;
   playerName.value = cur.kind === 'ok' ? cur.env.name : '';
-  shell.value = rec.meta.bare === true ? '' : String(rec.name);
+  shell.value = rec.meta.bare === true ? '' : typeof rec.meta.menu === 'string' ? rec.meta.menu : String(rec.name);
   props.value = (typeof rec.props === 'object' && rec.props !== null ? (rec.props as { default?: Record<string, unknown> }).default : undefined) ?? {};
   // экран матча (настоящий) получает состояние кадра из фикстуры; заглушкам оно не нужно (065 Т9г)
   if (fx.route === '/match' && fx.match && note.value === '') props.value = { ...props.value, frame: fx.match };
+  // игра на Базе: адрес `/base/<игра>` на стенде не настоящий — игру в экран передаём свойством (067 Т19)
+  if (note.value === '' && gameOfPath(fx.route) !== undefined) props.value = { ...props.value, game: gameOfPath(fx.route) };
+  // первый запуск: шаг кадра (тренер, приветствие) — из фикстуры (067 Т11)
+  if (fx.route === '/start' && fx.start && note.value === '') props.value = { ...props.value, frame: fx.start };
+  // «Минута тренера» (067 Т25): шаг кадра, ход минуты и итог — из фикстуры
+  if (fx.route === '/coach' && fx.coach && note.value === '') props.value = { ...props.value, frame: fx.coach };
   // экран итога (065 Т10а): готовый вид итога из фикстуры, без записи и без клавиш
   if (fx.route === '/result' && fx.result && note.value === '') props.value = { ...props.value, frame: fx.result };
 }
@@ -102,6 +150,17 @@ void open();
     <UpdateWindow
       v-if="win"
       :lines="win.lines ?? []"
+    />
+    <LearnWindow
+      v-if="learn"
+      :flow="learn.flow"
+      :before="learn.before"
+      :kit-body="learn.kitBody"
+      :rival-body="learn.rivalBody"
+      :layout="learn.layout"
+      :stake="learn.stake"
+      :frozen-now="learnNow"
+      :miss="learn.miss"
     />
     <FooterLine
       v-if="shell && playerName !== ''"

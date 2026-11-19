@@ -4,15 +4,24 @@
  * page — id активного пункта (`home`, `map`…; другой — никакого); match — состояние «матч»: меню приглушено и не нажимается,
  * справа «Пауза Esc»; pause=false — без паузы (матч окончен, окно поверх держит Esc само, запрос Сюжета 050 №21).
  */
+import { useNav } from '../../app/nav/useNav';
 import { artUrl } from '../../art/assets';
+import { isScreen } from '../../engine/nav';
 import { ru } from '../../i18n/ru';
 import PauseButton from './PauseButton.vue';
 import SoundButton from './SoundButton.vue';
 
-withDefaults(defineProps<{ page?: string; match?: boolean; pause?: boolean }>(), { page: '', match: false, pause: true });
+const props = withDefaults(defineProps<{ page?: string; match?: boolean; pause?: boolean }>(), { page: '', match: false, pause: true });
 defineEmits<{ pause: [] }>();
 
 const items = Object.entries(ru.frame.menu);
+const nav = useNav();
+/** Пункт меню идёт через модель навигации (054): вид входа в Путь клуба и счёт входов; ссылка с `href` остаётся для открытия в новой вкладке. */
+function go(e: MouseEvent, id: string): void {
+  if (props.match || e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0 || !isScreen(id)) return;
+  e.preventDefault();
+  nav.send({ t: 'menu', item: id });
+}
 </script>
 
 <template>
@@ -32,6 +41,7 @@ const items = Object.entries(ru.frame.menu);
         :href="match ? undefined : `#/${id}`"
         :class="{ on: !match && id === page }"
         :aria-current="!match && id === page ? 'page' : undefined"
+        @click="go($event, id)"
       >{{ title }}</a>
     </nav>
     <div class="kb-tools">

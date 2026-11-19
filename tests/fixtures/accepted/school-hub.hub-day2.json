@@ -1,0 +1,85 @@
+{
+ "id": "school-hub.hub-day2",
+ "codes": {
+  "1920": "Э3.08"
+ },
+ "screen": "school-hub",
+ "route": "/school",
+ "state": "Первый вход: спросить класс игрока",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 834073,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.vl",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 0,
+     "best": 12,
+     "tries": 1,
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 20,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 4,
+   "days": 2,
+   "today": "2026-11-18",
+   "todayN": 0,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 1000,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "school": {
+   "knower": 1,
+   "grade": null,
+   "tours": [],
+   "emblem": 0,
+   "solved": [],
+   "level": {},
+   "trainerSkip": []
+  }
+ }
+}

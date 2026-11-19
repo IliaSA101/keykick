@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * Ярлык места (ЭБ.11, ЭБ.29) — `placeTag` из tools/mock-kit/kit.mjs: одна часть на Дом и Карту. kind — состояние (ref, lock, go, near, done, cur, home),
- * x, y — центр верхней кромки в px сцены; rows — подписи; mark — метка на кромке («новое»), dot — точка вместо пилюли. Нажимаемый (`go`) — кнопка; «›» после имени — у `go`, если не задан `noArrow` (на Карте кнопка без стрелки, как в кадре Э2).
+ * x, y — центр верхней кромки в px сцены; rows — подписи; head — строка над именем (новость стадиона), слот `head` — метка статуса над именем (ворота Района, «Ты здесь»); mark — метка на кромке («новое»), dot — точка вместо пилюли. Нажимаемый (`go`) — кнопка; «›» после имени — у `go`, если не задан `noArrow` (на Карте кнопка без стрелки, как в кадре Э2).
  */
 withDefaults(defineProps<{ kind?: string; x: number; y: number; name: string; go?: boolean; noArrow?: boolean; rows?: string[]; mark?: string; dot?: boolean; head?: string }>(), {
   kind: 'ref',
@@ -24,6 +24,7 @@ defineEmits<{ click: [] }>();
     :style="{ left: `${x}px`, top: `${y}px` }"
     @click="go && $emit('click')"
   >
+    <slot name="head" />
     <em
       v-if="head"
       class="news"

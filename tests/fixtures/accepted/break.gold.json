@@ -1,0 +1,313 @@
+{
+ "id": "break.gold",
+ "codes": {
+  "1920": "Э4.18"
+ },
+ "screen": "break",
+ "route": "/match",
+ "state": "Точный, урок 27: «побей рекорд»",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 85046,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.first-phrases",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-05",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-06",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-06",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-07",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-07",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-08",
+     "fails": 0
+    },
+    "ru.yard.yd-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-08",
+     "fails": 0
+    },
+    "ru.yard.six-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-09",
+     "fails": 0
+    },
+    "ru.yard.six-keys-review": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-09",
+     "fails": 0
+    },
+    "ru.yard.fzh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.fzh-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.fzh-again": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.eight-keys-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.test-eight": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.pr": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.pr-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.longer-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.row-no-eh": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.eh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.eh-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.test-row": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.short-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.long-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.mixed-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.return-match": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.rematch": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    },
+    "ru.yard.first-phrases": {
+     "stars": 0,
+     "best": 70,
+     "tries": 1,
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 16,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 53,
+   "days": 14,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 19520,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "learn": {
+   "games": {
+    "arrows": {
+     "step": 3,
+     "plays": 5,
+     "best": 27000,
+     "last": "2026-11-16"
+    },
+    "mouse": {
+     "step": 3,
+     "plays": 5,
+     "best": 30000,
+     "last": "2026-11-16"
+    },
+    "tab": {
+     "step": 3,
+     "plays": 5,
+     "best": 32000,
+     "last": "2026-11-16"
+    },
+    "keyboard": {
+     "step": 3,
+     "plays": 5,
+     "best": 33000,
+     "last": "2026-11-16"
+    },
+    "squad": {
+     "step": 3,
+     "plays": 5,
+     "best": 34000,
+     "last": "2026-11-16"
+    },
+    "board": {
+     "step": 3,
+     "plays": 5,
+     "best": 35000,
+     "last": "2026-11-16"
+    },
+    "roster": {
+     "step": 2,
+     "plays": 3,
+     "best": 49000,
+     "last": "2026-11-16"
+    },
+    "pairs": {
+     "step": 3,
+     "plays": 5,
+     "best": 37000,
+     "last": "2026-11-16"
+    }
+   },
+   "recent": [
+    "pairs",
+    "squad",
+    "board"
+   ]
+  }
+ },
+ "match": {
+  "seed": 85046,
+  "lesson": 27,
+  "started": true,
+  "spec": {
+   "outcomes": "kkgc",
+   "toBreak": true
+  },
+  "show": {
+   "street": "Водопроводной"
+  }
+ }
+}

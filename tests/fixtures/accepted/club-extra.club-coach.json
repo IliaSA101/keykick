@@ -1,0 +1,263 @@
+{
+ "id": "club-extra.club-coach",
+ "codes": {
+  "1920": "Э2К.38"
+ },
+ "screen": "club-extra",
+ "route": "/club",
+ "state": "Клуб · смена тренера",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 163441,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.longer-words",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.yd-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.six-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.six-keys-review": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.fzh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.fzh-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.fzh-again": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.eight-keys-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.test-eight": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.pr": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.pr-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    },
+    "ru.yard.longer-words": {
+     "stars": 0,
+     "best": 24,
+     "tries": 1,
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 89,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 31,
+   "days": 9,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 11780,
+   "goals": 70
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "school": {
+   "knower": 0,
+   "grade": null,
+   "tours": [],
+   "emblem": 0,
+   "solved": [
+    "frame.task.1",
+    "frame.task.2",
+    "frame.task.3",
+    "frame.task.4",
+    "frame.task.5",
+    "frame.task.6",
+    "frame.task.7",
+    "frame.task.8",
+    "frame.task.9",
+    "frame.task.10",
+    "frame.task.11",
+    "frame.task.12",
+    "frame.task.13",
+    "frame.task.14",
+    "frame.task.15",
+    "frame.task.16",
+    "frame.task.17",
+    "frame.task.18",
+    "frame.task.19",
+    "frame.task.20",
+    "frame.task.21",
+    "frame.task.22",
+    "frame.task.23",
+    "frame.task.24",
+    "frame.task.25",
+    "frame.task.26",
+    "frame.task.27",
+    "frame.task.28",
+    "frame.task.29",
+    "frame.task.30",
+    "frame.task.31",
+    "frame.task.32",
+    "frame.task.33",
+    "frame.task.34",
+    "frame.task.35",
+    "frame.task.36",
+    "frame.task.37",
+    "frame.task.38",
+    "frame.task.39",
+    "frame.task.40",
+    "frame.task.41",
+    "frame.task.42",
+    "frame.task.43",
+    "frame.task.44",
+    "frame.task.45",
+    "frame.task.46",
+    "frame.task.47",
+    "frame.task.48",
+    "frame.task.49",
+    "frame.task.50",
+    "frame.task.51",
+    "frame.task.52",
+    "frame.task.53",
+    "frame.task.54",
+    "frame.task.55",
+    "frame.task.56",
+    "frame.task.57",
+    "frame.task.58",
+    "frame.task.59",
+    "frame.task.60",
+    "frame.task.61",
+    "frame.task.62",
+    "frame.task.63",
+    "frame.task.64",
+    "frame.task.65",
+    "frame.task.66",
+    "frame.task.67"
+   ],
+   "level": {},
+   "trainerSkip": []
+  },
+  "coach": {
+   "keys": {
+    "ы": "111111111111111111111111111111111111111111000000000000000000",
+    "ж": "111111111111111111111111111111111111111111111111000000000000",
+    "д": "111111111111111111111111111111111111111111111111111100000000",
+    "а": "111111111111111111111111111111111111111111111111111111111110",
+    "п": "111111111111111111111111100000"
+   }
+  }
+ },
+ "club": {
+  "win": "swap"
+ }
+}

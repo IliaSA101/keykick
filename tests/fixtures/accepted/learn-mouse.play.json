@@ -1,0 +1,97 @@
+{
+ "id": "learn-mouse.play",
+ "codes": {
+  "1920": "Э8.05"
+ },
+ "screen": "learn-mouse",
+ "route": "/match",
+ "state": "2. Точный пас мышью — игра",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 479821,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.ao-pairs",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 0,
+     "best": 100,
+     "tries": 1,
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 0,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 1,
+   "days": 1,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 0,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "learn": {
+   "games": {},
+   "recent": []
+  }
+ },
+ "learn": {
+  "game": "mouse",
+  "place": "break",
+  "step": "play",
+  "misses": 1,
+  "elapsedMs": 19000
+ },
+ "learnCtx": {
+  "lesson": 2,
+  "keys": "ао"
+ },
+ "match": {
+  "seed": 479821,
+  "lesson": 2,
+  "started": true,
+  "spec": {
+   "outcomes": "",
+   "toBreak": true
+  },
+  "learn": true,
+  "show": {
+   "street": "Водопроводной"
+  }
+ }
+}

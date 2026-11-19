@@ -43,7 +43,7 @@ async function go(): Promise<void> {
   const row = asked.value;
   if (!row || working.value) return; // двойной клик: вторая запись не стартует
   working.value = true;
-  const done = row.pid === null ? session.bin.newClub(day()) : await session.bin.restart(row.pid, nameOf(row));
+  const done = row.pid === null ? await session.bin.newClub(day()) : await session.bin.restart(row.pid, nameOf(row));
   working.value = false;
   asked.value = null;
   if (done.ok) {
@@ -73,11 +73,11 @@ async function go(): Promise<void> {
         <template v-if="r.pid !== null">
           {{ nameOf(r) }} — {{ r.kind === 'binned' ? s.inBin : s.tail }}
         </template>
-        <template v-else-if="r.kind === 'broken'">
+        <template v-else-if="r.kind === 'broken' || r.kind === 'denied'">
           {{ s.device }}
         </template>
         <small v-if="r.kind === 'newer'">{{ ru.frame.notice.readonly }}</small>
-        <small v-else-if="r.kind === 'denied'">{{ s.noAccess }}</small>
+        <small v-else-if="r.kind === 'denied'">{{ r.pid === null ? s.deviceDenied : s.noAccess }}</small>
       </p>
       <div
         v-if="r.actions.length > 0"

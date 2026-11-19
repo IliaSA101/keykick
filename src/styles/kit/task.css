@@ -225,3 +225,11 @@
   background: #b3261e;
 }
 
+/* клавиша на синей кнопке листа («Ответить Enter», «Дальше Enter»; Э3.39, Э3.19) */
+.sheet .ans .go kbd {
+  margin-left: 6px;
+  border-color: rgb(255 255 255 / 0.7);
+  background: rgb(255 255 255 / 0.18);
+  color: #fff;
+}
+

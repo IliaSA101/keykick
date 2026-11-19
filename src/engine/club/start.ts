@@ -29,7 +29,10 @@ export interface Draft {
   backName: string;
   /** 0 — не выбран. */
   backNumber: number;
+  /** Индекс в `PALETTES`; −1 — расцветка текущего клуба не из набора (импорт, образец): она лежит в `kit` и сохраняется как есть. */
   palette: number;
+  /** Своя расцветка при `palette < 0`. */
+  kit?: ClubKit | undefined;
   coach: string;
 }
 
@@ -102,9 +105,22 @@ export function coachEnter(focus: 'card' | 'button' | 'none'): 'native' | 'confi
   return focus === 'button' ? 'native' : 'confirm';
 }
 
+/** Расцветка черновика: из набора по индексу; своя (`palette < 0`) — как есть; иначе клуб образца. */
+export function draftKit(d: Draft): ClubKit {
+  return PALETTES[d.palette] ?? (d.palette < 0 ? d.kit : undefined) ?? PALETTES[DEFAULT_PALETTE]!;
+}
+
+const sameKit = (a: ClubKit, b: ClubKit): boolean => a.body === b.body && a.pattern === b.pattern && a.sleeves === b.sleeves && a.trim === b.trim && a.alt === b.alt;
+
+/** Черновик окна «Изменить» из текущего клуба: поля заполнены им же, расцветка — тот же набор или своя (молча на другую не меняем). */
+export function draftOfClub(c: Club, coachId: string): Draft {
+  const at = PALETTES.findIndex((p) => sameKit(p, c.kit));
+  return { name: c.name, city: c.city, backName: c.backName, backNumber: c.backNumber, palette: at, kit: at < 0 ? { ...c.kit } : undefined, coach: coachId };
+}
+
 /** Раздел `club` из черновика: поля подрезаны под границы раздела (063-Р30). */
 export function clubFromDraft(d: Draft): Club {
-  const kit = PALETTES[d.palette] ?? PALETTES[DEFAULT_PALETTE]!;
+  const kit = draftKit(d);
   return {
     name: cleanText(d.name, NAME_MAX),
     kit: { ...kit },

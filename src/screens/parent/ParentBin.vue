@@ -7,9 +7,9 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { saveOnePlayerFile } from '../../app/save/exportFile';
 import { useSession } from '../../app/save/session';
 import KeyButton from '../../components/kit/KeyButton.vue';
-import { binNoteKey, clearTyped } from '../../engine/parent/progress';
+import { binNoteKey } from '../../engine/parent/progress';
 import type { TroubleRow } from '../../engine/parent/repair';
-import { clearPhrase, type BinEntry } from '../../engine/save/bin';
+import { clearConfirmed, clearPhrase, type BinEntry } from '../../engine/save/bin';
 import { ru } from '../../i18n/ru';
 import ParentStuck from './ParentStuck.vue';
 import { useParentStand } from './stand';
@@ -63,7 +63,10 @@ watch(
   },
 );
 onMounted(() => {
-  session.bin.settle(day()); // оборванное удаление (перезагрузка посреди): игрок в корзине, а в списке ещё есть
+  // оборванное удаление (перезагрузка посреди): игрок в корзине, а в списке ещё есть; ждёт замки (063-Р71), поэтому корзину перечитываем сразу и ещё раз по итогу
+  void session.bin.settle(day()).then((changed) => {
+    if (changed) reload();
+  });
   reload();
   // стенд кадров (только в разработке): открытый шаг блока; «back» — «Вернуть» уже нажато
   const want = stand().step;
@@ -78,7 +81,7 @@ onMounted(() => {
 /** Блок пуст — единственный игрок и корзина пуста (удалять нечего, возвращать нечего): заголовок без текста не показываем (Э6.47 блока без содержимого не знает). */
 const shown = computed(() => props.deletable || props.stuck.length > 0 || entries.value.length > 0 || step.value !== 'idle' || note.value !== '');
 const phrase = computed(() => clearPhrase(entries.value));
-const ready = computed(() => clearTyped(entries.value.map((e) => e.name ?? e.pid), typed.value));
+const ready = computed(() => clearConfirmed(entries.value, typed.value));
 const dateOf = (e: BinEntry): string => (e.day === null ? '' : `— ${e.day.slice(8)}.${e.day.slice(5, 7)}`);
 
 const say = (why: string, name?: string): void => {
@@ -104,8 +107,8 @@ function restore(e: BinEntry): void {
 }
 function clear(): void {
   emit('act');
-  // порядок имён не важен (clearTyped); хранилище ждёт имена в порядке заголовка — отдаём ему эту фразу
-  const done = session.bin.empty(ready.value ? phrase.value : typed.value);
+  // одно правило на экране и в хранилище (`clearConfirmed`, порядок имён не важен): введённое отдаём как есть
+  const done = session.bin.empty(typed.value);
   step.value = 'idle';
   typed.value = '';
   note.value = done.ok ? p.players.gone : (say(done.why), note.value);

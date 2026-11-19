@@ -8,12 +8,14 @@ import { SECTIONS, walletOf } from '../../src/app/save/sections';
 import { createSession } from '../../src/app/save/session';
 import { createKeyValue } from '../../src/app/save/storage';
 import { createStore } from '../../src/app/save/store';
+import { coachDef } from '../../src/engine/coach/section';
 import { dayDef } from '../../src/engine/day/section';
 import { formDef } from '../../src/engine/form/section';
 import { stadiumDef } from '../../src/engine/home/section';
 import { finishMatch, finishMinute, matchPatch, type MatchSave } from '../../src/engine/match';
 import type { MatchResult, Press } from '../../src/engine/match';
-import { credit } from '../../src/engine/rewards/cash';
+import { credit, debit, type AlbumPurse, type Purse } from '../../src/engine/rewards/cash';
+import { albumDef } from '../../src/engine/album/section';
 import { walletDef } from '../../src/engine/rewards/section';
 import { schoolDef } from '../../src/engine/school/section';
 import { ruCourseDef } from '../../src/engine/course/section';
@@ -43,11 +45,13 @@ function result(me: number, opp: number, correct: number, o: { errors?: number; 
 }
 
 const empty = (): MatchSave => ({
+  album: albumDef.empty(),
   course: ruCourseDef.empty(),
   wallet: walletDef.empty(),
   day: dayDef.empty(),
   school: schoolDef.empty(),
   form: formDef.empty(),
+  coach: coachDef.empty(),
   stadium: stadiumDef.empty(),
 });
 const ctx = (matchId: string, over: object = {}) => ({ now: 1_000_000, day: '2026-11-18', lessonId: 'ru.yard.ao', matchId, ...over });
@@ -150,6 +154,46 @@ describe('К2: отметка урока, день, форма', () => {
   });
 });
 
+describe('К5: раздел coach — запись матча (067 Т24)', () => {
+  const bits = (ch: string, n: number, miss = 0): Press[] => Array.from({ length: n }, (_, i) => ({ ch, ok: i >= miss }));
+
+  it('К5: свисток пишет окна букв (пробел не пишется, окно ≤ 300, хвост — последние); тот же matchId второй раз — без изменений', () => {
+    // Ловит: двойной Enter удваивает окно; рост окна без предела; пробел и знаки в «трудных».
+    const presses = [...bits('ы', 400), ...bits(' ', 10), ...bits('.', 5), { ch: 'Ж', ok: false }];
+    const a = finishMatch(empty(), result(3, 0, 40, { presses }), ctx('m1'));
+    expect(a.save.coach.keys['ы']).toBe('1'.repeat(300));
+    expect(a.save.coach.keys['ж']).toBe('0');
+    expect(Object.keys(a.save.coach.keys).sort()).toEqual(['ж', 'ы']);
+    const again = finishMatch(a.save, result(3, 0, 40, { presses }), ctx('m1'));
+    expect(again.view).toBeNull();
+    expect(again.save.coach).toEqual(a.save.coach);
+    expect(matchPatch(a.save).coach).toBe(a.save.coach);
+    const next = finishMatch(a.save, result(3, 0, 40, { presses: bits('ы', 10, 4) }), ctx('m2'));
+    expect(next.save.coach.keys['ы']).toBe('1'.repeat(290) + '0000111111');
+  });
+});
+
+describe('К6: раздел coach — итог минуты (067 Т24)', () => {
+  const win = (ok: number, miss: number): string => '1'.repeat(ok) + '0'.repeat(miss);
+
+  it('К6: окна клавиш минуты выросли; view.keys — «было → стало» из раздела, ранг — из формы после минуты', () => {
+    // Ловит: «было → стало» берётся не из сохранения (а из заглушки) или ранг «после» из старой формы.
+    const before = { ...empty(), coach: { keys: { ы: win(80, 20), ж: win(45, 5) } }, form: { fingers: { lr: { w: win(80, 20), max: 0, cand: { rank: 0, n: 0 } } } } };
+    const list: Press[] = [...Array.from({ length: 100 }, () => ({ ch: 'ы', ok: true })), ...Array.from({ length: 10 }, () => ({ ch: 'ж', ok: true }))];
+    const out = finishMinute(before, { presses: 110, correct: 110, list }, { matchId: 'min1', keys: 'ыж' });
+    expect(out.save.coach.keys['ы']).toBe((win(80, 20) + '1'.repeat(100)).slice(-300));
+    expect(out.save.coach.keys['ж']).toBe(win(45, 5) + '1'.repeat(10));
+    const ys = out.view!.keys;
+    expect(ys.map((k) => k.after.ch)).toEqual(['ы', 'ж']);
+    expect(ys[0]!.before).toMatchObject({ permille: 800, rank: 0 });
+    expect(ys[0]!.after.permille).toBe(900);
+    expect(ys[0]!.after.rank).toBe(1);
+    expect(ys[0]!.after.rank).toBeGreaterThan(ys[0]!.before.rank);
+    expect(out.view!.grew).toEqual([{ finger: 'lr', from: 0, to: 1 }]);
+    expect(finishMinute({ ...before, ...out.save }, { presses: 110, correct: 110, list }, { matchId: 'min1', keys: 'ыж' }).view).toBeNull();
+  });
+});
+
 describe('К2: минута тренера (ТЗ-3.4)', () => {
   it('К2: платит как печать (1 за 20 верных), в дни и матчи не идёт, повтор — без второй награды', () => {
     // Ловит: минута считается матчем (ТЗ-10.9), платит иначе, повторно.
@@ -157,7 +201,7 @@ describe('К2: минута тренера (ТЗ-3.4)', () => {
     const a = finishMinute(empty(), m, { matchId: 'min1' });
     expect(a.view).toMatchObject({ coins: 3, correct: 60 });
     expect(a.save.wallet).toMatchObject({ coins: 3, rest: 0 });
-    expect(Object.keys(a.save)).toEqual(['wallet', 'school', 'form', 'stadium']);
+    expect(Object.keys(a.save)).toEqual(['wallet', 'school', 'form', 'coach', 'stadium', 'album']);
     const again = finishMinute({ ...empty(), ...a.save }, m, { matchId: 'min1' });
     expect(again.view).toBeNull();
     expect(again.save.wallet.coins).toBe(3);
@@ -165,7 +209,7 @@ describe('К2: минута тренера (ТЗ-3.4)', () => {
 
   it('К2: касса — остаток копится между матчем и минутой (общий кошелёк), отрицательное и дробь не ломают', () => {
     // Ловит: минус монет от отрицательного входа; потерю остатка между источниками.
-    const one = credit({ wallet: walletDef.empty(), school: schoolDef.empty(), stadium: stadiumDef.empty() }, 'match-coins', 15);
+    const one = credit({ wallet: walletDef.empty(), school: schoolDef.empty(), stadium: stadiumDef.empty(), album: albumDef.empty() }, 'match-coins', 15);
     const two = credit(one.purse, 'minute-coins', 7.9);
     expect(two.purse.wallet).toMatchObject({ coins: 1, rest: 2 });
     expect(credit(two.purse, 'match-coins', -5).purse.wallet).toMatchObject({ coins: 1, rest: 2 });
@@ -178,7 +222,8 @@ describe('К2: разделы сборки', () => {
     for (const d of [walletDef, dayDef, schoolDef, formDef]) expect(d.check(d.empty() as never)).toEqual([]);
     expect(walletDef.check({ coins: -1, rest: 20, paid: [1] })).toEqual(['coins', 'rest', 'paid']);
     expect(dayDef.check({ played: 1.5, days: 0, today: '2026-13-01', todayN: 0, last: -1 })).toEqual(['played', 'today', 'last']);
-    expect(schoolDef.check({ knower: -1 })).toEqual(['knower']);
+    // школа v2 (067 Т1): та же порча — минус у «Знатока», остальные поля целые
+    expect(schoolDef.check({ ...schoolDef.empty(), knower: -1 })).toEqual(['knower']);
     expect(SECTIONS.map((d) => d.name)).toEqual(expect.arrayContaining(['wallet', 'day', 'school', 'form']));
   });
 });
@@ -204,7 +249,7 @@ describe('К2: цепочка двух игроков на сеансе (065 Т2
       const p = s.player.value;
       if (p.kind !== 'ok') throw new Error('player');
       const d = (name: string): unknown => p.env.sections[name]!.data;
-      return { course: d('course:ru'), wallet: d('wallet'), day: d('day'), school: d('school'), form: d('form'), stadium: d('stadium') } as MatchSave;
+      return { course: d('course:ru'), wallet: d('wallet'), day: d('day'), school: d('school'), form: d('form'), coach: d('coach'), stadium: d('stadium'), album: d('album') } as MatchSave;
     };
     const play = (s: ReturnType<typeof tab>, id: string, r: MatchResult) => {
       const out = finishMatch(read(s), r, ctx(id));
@@ -218,6 +263,8 @@ describe('К2: цепочка двух игроков на сеансе (065 Т2
     expect(read(a).day.played).toBe(1);
     expect(read(b).wallet.coins).toBe(2);
     expect(read(b).school.knower).toBe(0);
+    expect(read(a).album.packs).toBe(1);
+    expect(read(b).album.packs).toBe(0);
     expect(read(b).course.lessons['ru.yard.ao']?.fails).toBe(1);
     expect(read(a).course.lessons['ru.yard.ao']?.fails).toBe(0);
   });
@@ -237,8 +284,74 @@ describe('чтение кошелька экраном (063 Т8, страж С1)
     const read = matchRead({ wallet: { data: { coins: 7, rest: 2, paid: ['m1'] } }, day: { data: { ...dayDef.empty(), last: 1_763_380_000_000 } } });
     expect(read.wallet).toEqual({ coins: 7, rest: 2, paid: ['m1'] });
     expect(read.day.last).toBe(1_763_380_000_000);
+    expect(matchRead({ album: { data: { ...albumDef.empty(), packs: 5, shown: 5 } } }).album.packs).toBe(5);
+    expect(matchRead({ coach: { data: { keys: { ы: '110' } } } }).coach).toEqual({ keys: { ы: '110' } }); // окна «трудных клавиш» доезжают до свистка
     expect(matchRead(undefined)).toEqual({
-      course: ruCourseDef.empty(), wallet: walletDef.empty(), day: dayDef.empty(), school: schoolDef.empty(), form: formDef.empty(), stadium: stadiumDef.empty(),
+      course: ruCourseDef.empty(), wallet: walletDef.empty(), day: dayDef.empty(), school: schoolDef.empty(), form: formDef.empty(), coach: coachDef.empty(), stadium: stadiumDef.empty(), album: albumDef.empty(),
     });
+  });
+});
+
+describe('К6: касса волны 4 (067 Т1)', () => {
+  const purse = (coins = 10): AlbumPurse => ({ wallet: { ...walletDef.empty(), coins }, school: schoolDef.empty(), stadium: stadiumDef.empty(), album: albumDef.empty() });
+
+  it('К6: новые награды растят своё поле; пак без альбома в кассе не выдаётся', () => {
+    // Ловит: награда пишет не туда (монеты вместо «Знатока»), теряет монеты учебной игры, выдаёт пак в пустоту.
+    expect(credit(purse(), 'tour-knower', 2).purse.school.knower).toBe(2);
+    expect(credit(purse(), 'kicks-knower', 1).purse.school.knower).toBe(1);
+    expect(credit(purse(), 'lesson-pack', 1).purse.album.packs).toBe(1);
+    const l = credit(purse(), 'learn-coins', 4, 'run1');
+    expect(l.purse.wallet).toMatchObject({ coins: 14, paid: ['run1'] });
+  });
+
+  it('К6: debit — списывает один раз, в минус не уходит, плохая цена и пустой ref отвергаются', () => {
+    // Ловит: двойное списание на двойном Enter, минус монет, покупку за 0 или дробь, покупку без идентификатора.
+    const a = debit(purse(), 'shop-buy', 6, 'buy1');
+    expect(a).toMatchObject({ result: 'paid' });
+    expect(a.purse.wallet.coins).toBe(4);
+    const again = debit(a.purse, 'shop-buy', 6, 'buy1');
+    expect(again.result).toBe('again');
+    expect(again.purse.wallet.coins).toBe(4);
+    const poor = debit(a.purse, 'shop-buy', 5, 'buy2');
+    expect(poor.result).toBe('coins');
+    expect(poor.purse.wallet.coins).toBe(4);
+    const exact = debit(purse(6), 'shop-buy', 6, 'b');
+    expect(exact.result).toBe('paid');
+    expect(exact.purse.wallet.coins).toBe(0);
+    for (const price of [0, -3, 1.5, NaN]) expect(debit(purse(), 'shop-buy', price, 'x').result).toBe('bad');
+    expect(debit(purse(), 'shop-buy', 1, '').result).toBe('bad');
+  });
+});
+
+describe('К6: пак за первый проход урока (ТЗ-5.1)', () => {
+  it('К6: победа в уроке впервые — +1 пак через кассу; повтор урока, поражение и повтор matchId — без пака', () => {
+    // Ловит: пак за повтор или поражение (ферма), пак мимо кассы, второй пак на двойном Enter.
+    const a = finishMatch(empty(), result(3, 0, 45), ctx('m1'));
+    expect(a.save.album.packs).toBe(1);
+    expect(finishMatch(a.save, result(3, 0, 45), ctx('m2')).save.album.packs).toBe(1);
+    expect(finishMatch(a.save, result(3, 0, 45), ctx('m1')).save).toBe(a.save);
+    expect(finishMatch(empty(), result(0, 2, 45), ctx('m3')).save.album.packs).toBe(0);
+    expect(finishMatch(a.save, result(3, 0, 45), ctx('m4', { lessonId: 'ru.yard.ab' })).save.album.packs).toBe(2);
+  });
+
+  it('К6: чемпионат — пака нет; урок старше прошлой лиги (`pays: false`) пак даёт (ТЗ-0.2, 5.1)', () => {
+    // Ловит: пак за чемпионат (ферма); потерянный пак за старый урок, когда монеты не платятся.
+    expect(finishMatch(empty(), result(3, 0, 45), ctx('m1', { championship: true })).save.album.packs).toBe(0);
+    const old = finishMatch(empty(), result(3, 0, 45), ctx('m2', { pays: false }));
+    expect(old.save.album.packs).toBe(1);
+    expect(old.save.wallet.coins).toBe(0);
+  });
+
+  it('К6: кошелёк без альбома — источник без пака работает', () => {
+    // Ловит: `credit` требует альбом у всех источников (ломало сборку учебных игр без `album`).
+    const bare: Purse = { wallet: walletDef.empty(), school: schoolDef.empty(), stadium: stadiumDef.empty() };
+    expect(credit(bare, 'tour-knower', 2).purse.school.knower).toBe(2);
+    expect(credit(bare, 'learn-coins', 3, 'r').purse.wallet.coins).toBe(3);
+  });
+
+  it('К6: во Дворе 39 паков — дальше пак не выдаётся', () => {
+    // Ловит: пак 40+ (формы нет), рост `packs` за пределы альбома.
+    const full = { ...empty(), album: { ...albumDef.empty(), packs: 39, shown: 39 } };
+    expect(finishMatch(full, result(3, 0, 45), ctx('m1')).save.album.packs).toBe(39);
   });
 });

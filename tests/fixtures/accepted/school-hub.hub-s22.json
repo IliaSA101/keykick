@@ -1,0 +1,352 @@
+{
+ "id": "school-hub.hub-s22",
+ "codes": {
+  "1024": "Э3.14",
+  "1920": "Э3.11"
+ },
+ "screen": "school-hub",
+ "route": "/school",
+ "state": "Журнал: ждёт тур-повтор",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 315344,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.short-words",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-07",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-08",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-08",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-09",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-09",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.yd-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-10",
+     "fails": 0
+    },
+    "ru.yard.six-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-11",
+     "fails": 0
+    },
+    "ru.yard.six-keys-review": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.fzh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.fzh-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-12",
+     "fails": 0
+    },
+    "ru.yard.fzh-again": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.eight-keys-words": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-13",
+     "fails": 0
+    },
+    "ru.yard.test-eight": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.pr": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-14",
+     "fails": 0
+    },
+    "ru.yard.pr-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.longer-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.row-no-eh": {
+     "stars": 0,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.eh": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.eh-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.test-row": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    },
+    "ru.yard.short-words": {
+     "stars": 0,
+     "best": 27,
+     "tries": 1,
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 232,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 42,
+   "days": 12,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 17840,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "school": {
+   "knower": 92,
+   "grade": 2,
+   "tours": [
+    {
+     "n": 1,
+     "kind": "number",
+     "medal": 2,
+     "first": 4,
+     "day": "2026-11-08",
+     "sid": 7919,
+     "miss": []
+    },
+    {
+     "n": 2,
+     "kind": "number",
+     "medal": 1,
+     "first": 3,
+     "day": "2026-11-09",
+     "sid": 15838,
+     "miss": []
+    },
+    {
+     "n": 3,
+     "kind": "choice",
+     "medal": 3,
+     "first": 5,
+     "day": "2026-11-10",
+     "sid": 23757,
+     "miss": []
+    },
+    {
+     "n": 4,
+     "kind": "choice",
+     "medal": 2,
+     "first": 4,
+     "day": "2026-11-11",
+     "sid": 31676,
+     "miss": []
+    },
+    {
+     "n": 5,
+     "kind": "multi",
+     "medal": 0,
+     "first": 2,
+     "day": "2026-11-11",
+     "sid": 39595,
+     "miss": [
+      "t-think-1"
+     ]
+    },
+    {
+     "n": 6,
+     "kind": "multi",
+     "medal": 2,
+     "first": 4,
+     "day": "2026-11-12",
+     "sid": 47514,
+     "miss": []
+    },
+    {
+     "n": 6,
+     "kind": "repeat",
+     "medal": 2,
+     "first": 4,
+     "day": "2026-11-12",
+     "sid": 628374
+    },
+    {
+     "n": 7,
+     "kind": "fields",
+     "medal": 1,
+     "first": 3,
+     "day": "2026-11-13",
+     "sid": 55433,
+     "miss": []
+    },
+    {
+     "n": 8,
+     "kind": "fields",
+     "medal": 3,
+     "first": 5,
+     "day": "2026-11-14",
+     "sid": 63352,
+     "miss": []
+    },
+    {
+     "n": 9,
+     "kind": "expr",
+     "medal": 2,
+     "first": 4,
+     "day": "2026-11-14",
+     "sid": 71271,
+     "miss": []
+    },
+    {
+     "n": 10,
+     "kind": "expr",
+     "medal": 1,
+     "first": 3,
+     "day": "2026-11-15",
+     "sid": 79190,
+     "miss": []
+    },
+    {
+     "n": 11,
+     "kind": "fraction",
+     "medal": 2,
+     "first": 4,
+     "day": "2026-11-16",
+     "sid": 87109,
+     "miss": []
+    },
+    {
+     "n": 12,
+     "kind": "fraction",
+     "medal": 1,
+     "first": 3,
+     "day": "2026-11-17",
+     "sid": 95028,
+     "miss": []
+    },
+    {
+     "n": 13,
+     "kind": "select",
+     "medal": 0,
+     "first": 2,
+     "day": "2026-11-17",
+     "sid": 102947,
+     "miss": [
+      "t-bibs-1"
+     ]
+    }
+   ],
+   "emblem": 63,
+   "solved": [],
+   "level": {},
+   "trainerSkip": []
+  }
+ },
+ "school": {
+  "hover": 10
+ }
+}

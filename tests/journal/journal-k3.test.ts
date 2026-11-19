@@ -2,7 +2,7 @@
  * К3 (065 Т3): журнал ≤ 100 матчей, повтор matchId перезаписывает, отказ хранилища игру не роняет (адаптер в памяти, 065-Р14).
  */
 import { describe, expect, it } from 'vitest';
-import { exportJournal, JOURNAL_LIMIT, overflow, parseEntry } from '../../src/engine/journal';
+import { exportJournal, JOURNAL_LIMIT, matchIdOf, overflow, ownEntries, parseEntry, speedsOf } from '../../src/engine/journal';
 import { createJournal, lazyDb, memoryDb, openIdb, type JournalDb } from '../../src/app/journal';
 import { createCrash } from '../../src/app/crash/crash';
 import { journalDbName } from '../../src/app/save/storage';
@@ -86,5 +86,36 @@ describe('К3 подключение к приложению (065-Т3б)', () =>
     expect(journalDbName(2, 'next')).toBe(`${prefix(2, 'next')}journal`);
     expect(journalDbName(3, 'release')).not.toBe(journalDbName(2, 'release'));
     expect(journalDbName(2, 'next')).not.toBe(journalDbName(2, 'release'));
+  });
+});
+
+describe('К4 (067 Т17): скорости матчей из журнала для ставки учебных игр', () => {
+  const e = (matchId: string, at: number, cpm?: number) => ({ matchId, seed: 1, events: [], at, ...(cpm === undefined ? {} : { cpm }) });
+  it('К4: журнал хранит скорость записи (`put` с `cpm` → `all()` отдаёт `cpm`); без скорости поля нет', async () => {
+    // Ловит: `put` не кладёт `cpm` в запись — скорости матчей не доезжают до ставки учебных игр.
+    let t = 0;
+    const j = createJournal({ db: memoryDb(), now: () => ++t, onFail: () => undefined });
+    await j.put('m-p1-1', { ...rec(1), cpm: 47 });
+    await j.put('m-p1-2', rec(2));
+    const all = await j.all();
+    expect(all.find((x) => x.matchId === 'm-p1-1')?.cpm).toBe(47);
+    expect(all.find((x) => x.matchId === 'm-p1-2')).not.toHaveProperty('cpm');
+  });
+
+  it('К4: ownEntries — журнал один на устройство, берутся записи только этого игрока; matchIdOf строит тот же id, что ищет фильтр', () => {
+    // Ловит: ставка Ани считается по скоростям Бори; фильтр по префиксу «p1» цепляет игрока «p10».
+    const list = [e('m-p1-100', 1, 30), e('m-p2-200', 2, 90), e('m-p10-300', 3, 70), e(matchIdOf('p1', 400), 4, 50)];
+    expect(ownEntries(list, 'p1').map((x) => x.matchId)).toEqual(['m-p1-100', 'm-p1-400']);
+    expect(speedsOf(ownEntries(list, 'p2'))).toEqual([90]);
+    expect(ownEntries(list, 'p3')).toEqual([]);
+  });
+
+  it('К4: speedsOf — старые первыми, без скорости и нулевые пропускаются; parseEntry скорость не теряет', () => {
+    // Ловит: скорость не доезжает до ставки (parseEntry выбрасывает поле), порядок «новые первыми» ломает «3 последних», нулевая скорость тянет медиану вниз.
+    const list = [e('b', 20, 40), e('a', 10, 30), e('old', 5), e('zero', 25, 0), e('c', 30, 50)];
+    expect(speedsOf(list)).toEqual([30, 40, 50]);
+    expect(parseEntry(e('x', 1, 33))?.cpm).toBe(33);
+    expect(parseEntry({ ...e('x', 1), cpm: 'много' })?.cpm).toBeUndefined();
+    expect(exportJournal([e('m', 1, 44)])[0]?.cpm).toBe(44);
   });
 });

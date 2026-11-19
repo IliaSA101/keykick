@@ -103,9 +103,19 @@ export function cashCallers(files: Array<[string, string]>): string[] {
     .map(([p]) => p);
 }
 
-/** Какие `id` наград файл передаёт кассе: первая строка-литерал после `credit(…,` . */
+/** Какие `id` наград файл передаёт кассе: первая строка-литерал после `credit(…,` — в любых кавычках (ревью 067 Т1). */
 export function creditedIds(src: string): string[] {
-  return [...withoutComments(src).matchAll(/\bcredit\s*\([^'"`]*?,\s*'([a-z-]+)'/g)].map((m) => m[1]!);
+  return [...withoutComments(src).matchAll(/\bcredit\s*\([^'"`]*?,\s*(['"`])([a-z-]+)\1/g)].map((m) => m[2]!);
+}
+
+/** Файлы, которые списывают монеты: импортируют `rewards/cash` и вызывают `debit(` (067-Р24: только Лавка). */
+export function debitCallers(files: Array<[string, string]>): string[] {
+  return files
+    .filter(([, src]) => {
+      const code = withoutComments(src);
+      return /(from|import)\s*\(?\s*['"][^'"]*rewards\/cash(\.ts)?['"]/.test(code) && /\bdebit\s*\(/.test(code);
+    })
+    .map(([p]) => p);
 }
 
 describe('касса наград — только через реестр (063 С1, ТЗ-0.3)', () => {
@@ -139,6 +149,18 @@ describe('касса наград — только через реестр (063 
     ];
     expect(walletImporters(values)).toHaveLength(4);
     expect(creditedIds("credit(purse, 'minute-coins', n, ref)")).toEqual(['minute-coins']);
+    expect(creditedIds('credit(purse, "lesson-pack", 1)')).toEqual(['lesson-pack']);
+    const debits: Array<[string, string]> = [
+      ['src/engine/day/chain.ts', "import { debit } from '../rewards/cash';\ndebit(p, 'shop-buy', 1, 'x');"],
+      ['src/engine/shop/note.ts', "// debit( rewards/cash\nconst t = 'debit(';"],
+    ];
+    expect(debitCallers(debits)).toEqual(['src/engine/day/chain.ts']);
+  });
+
+  it('монеты списывает только Лавка: `debit(` — только из DEBIT_CALLERS (067-Р24, ТЗ-3.9)', async () => {
+    // Ловит: движок или экран списывает монеты мимо покупки — вызов `debit(` из файла, которого нет в DEBIT_CALLERS.
+    const { DEBIT_CALLERS, CASH_FILE } = await import('../../src/engine/rewards/sources');
+    expect(debitCallers(files).filter((p) => p !== CASH_FILE && !DEBIT_CALLERS.includes(p))).toEqual([]);
   });
 
   it('реестр наград: файлы существуют, у каждой награды свой вызов кассы', async () => {

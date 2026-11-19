@@ -1,9 +1,9 @@
 <script setup lang="ts">
 /**
  * Ярлык-кнопка («Лист лиги», «сегодня») и подсказка наведения (`tip`) — `chip` и `tipChip` из tools/mock-kit/kit.mjs.
- * open — окно ярлыка открыто (золотом над затемнением); on — выбран; sm — мелкий. Подсказка — не кнопка: строки колонкой.
+ * open — окно ярлыка открыто (золотом над затемнением); on — выбран; sm — мелкий; disabled — погашен (только просмотр). Подсказка — не кнопка: строки колонкой.
  */
-defineProps<{ sm?: boolean; on?: boolean; open?: boolean; tip?: string[] }>();
+defineProps<{ sm?: boolean; on?: boolean; open?: boolean; tip?: string[]; disabled?: boolean }>();
 defineEmits<{ click: [] }>();
 </script>
 
@@ -23,6 +23,7 @@ defineEmits<{ click: [] }>();
     type="button"
     class="kb-chip"
     :class="{ sm, on, open }"
+    :disabled="disabled"
     @click="$emit('click')"
   >
     <slot />

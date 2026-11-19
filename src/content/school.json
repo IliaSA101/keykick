@@ -1,0 +1,21 @@
+{
+  "kinds": [
+    { "id": "number", "from": 1, "to": 2, "answers": ["integer"], "size": 4, "trainer": false },
+    { "id": "choice", "from": 3, "to": 4, "answers": ["choice"], "size": 5, "trainer": false },
+    { "id": "multi", "from": 5, "to": 6, "answers": ["multi", "pictures"], "size": 5, "trainer": true },
+    { "id": "fields", "from": 7, "to": 8, "answers": ["fields", "text"], "size": 4, "trainer": true },
+    { "id": "expr", "from": 9, "to": 10, "answers": ["expr"], "size": 4, "trainer": false },
+    { "id": "fraction", "from": 11, "to": 12, "answers": ["fraction"], "size": 3, "trainer": false },
+    { "id": "select", "from": 13, "to": 14, "answers": ["select"], "size": 5, "trainer": true },
+    { "id": "order", "from": 15, "to": 16, "answers": ["order"], "size": 4, "trainer": false },
+    { "id": "match", "from": 17, "to": 18, "answers": ["match"], "size": 4, "trainer": true }
+  ],
+  "mixed": { "id": "mixed", "from": 19, "size": 5 },
+  "repeatKind": "repeat",
+  "repeatEvery": [5, 6, 7],
+  "grade1Size": 4,
+  "expertAt": 15,
+  "medals": { "3": [2, 3, 0], "4": [2, 3, 4], "5": [3, 4, 5] },
+  "kicks": { "size": 3 },
+  "level": { "start": 1, "max": 3, "upMedal": 2 }
+}

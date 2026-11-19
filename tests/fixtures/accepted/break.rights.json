@@ -1,0 +1,124 @@
+{
+ "id": "break.rights",
+ "codes": {
+  "1024": "Э4.48",
+  "1920": "Э4.20"
+ },
+ "screen": "break",
+ "route": "/match",
+ "state": "«Права на компьютер»: 2 из 8",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 413741,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.vl",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 0,
+     "best": 100,
+     "tries": 1,
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 20,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 4,
+   "days": 2,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 1000,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "learn": {
+   "games": {
+    "arrows": {
+     "step": 2,
+     "plays": 3,
+     "best": 41000,
+     "last": "2026-11-16"
+    },
+    "mouse": {
+     "step": 2,
+     "plays": 1,
+     "best": 36000,
+     "last": "2026-11-16"
+    }
+   },
+   "recent": [
+    "mouse"
+   ]
+  }
+ },
+ "match": {
+  "seed": 413741,
+  "lesson": 3,
+  "started": true,
+  "spec": {
+   "outcomes": "kkss",
+   "toBreak": true
+  },
+  "show": {
+   "street": "Водопроводной"
+  },
+  "after": {
+   "id": "mouse",
+   "end": {
+    "tier": 2,
+    "coins": 3,
+    "ms": 36000,
+    "best": 36000,
+    "record": false,
+    "misses": 1,
+    "goldRepeat": false,
+    "was": null
+   }
+  },
+  "rights": {
+   "fresh": "mouse"
+  }
+ }
+}

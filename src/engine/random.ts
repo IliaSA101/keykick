@@ -26,3 +26,13 @@ export function pick<T>(rnd: () => number, items: readonly T[]): T {
   if (item === undefined) throw new Error('pick from empty list');
   return item;
 }
+
+/** Перемешанная копия (Фишер–Йейтс); зерно — в `rnd`. */
+export function shuffle<T>(rnd: () => number, items: readonly T[]): T[] {
+  const a = [...items];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = randomInt(rnd, i + 1);
+    [a[i], a[j]] = [a[j] as T, a[i] as T];
+  }
+  return a;
+}

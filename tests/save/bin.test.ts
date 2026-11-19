@@ -8,6 +8,7 @@ import { newDevice, type Store } from '../../src/app/save/store';
 import { binEntries, canDelete, clearConfirmed, clearPhrase, halfDeleted, restoreCheck, trashName } from '../../src/engine/save/bin';
 import { withBinCleared, withPlayer, withoutPlayer, type Device } from '../../src/engine/save/device';
 import { createPlayer } from '../../src/engine/save/envelope';
+import type { LocksApi } from '../../src/app/save/locks';
 import { P, defs, fakeLocks, player, setup } from '../fixtures/storageKit';
 
 const NAMES: Record<string, string> = { p1: 'Саша', p2: 'Миша', p3: 'Аня', p4: 'Коля', p5: 'Вера' };
@@ -24,6 +25,7 @@ const listed = (store: Store): string[] => {
   return d.kind === 'ok' ? d.device.players.map((p) => p.pid) : [];
 };
 const entry = (pid: string, name: string, day: string | null = null) => ({ pid, name, day, days: null });
+const named = (...names: string[]) => names.map((n, i) => entry(`q${i}`, n));
 
 describe('К14: корзина — правила движка', () => {
   it('К14: подтверждение очистки — тот же текст; регистр и пробелы не важны, лишняя буква важна; пустая корзина — нечего подтверждать', () => {
@@ -39,6 +41,31 @@ describe('К14: корзина — правила движка', () => {
     expect(clearPhrase([entry('p2', 'Миша'), entry('p3', 'Аня')])).toBe('Миша Аня');
     expect(clearConfirmed([entry('p2', 'Миша'), entry('p3', 'Аня')], 'миша аня')).toBe(true);
     expect(clearConfirmed([entry('p2', 'Миша'), entry('p3', 'Аня')], 'Миша')).toBe(false);
+  });
+
+  it('К13 (063-Р66, Р70) очистка корзины: порядок имён не важен, регистр и пробелы не важны, каждое имя ровно один раз; лишнее, нехватка и пустая корзина — нет', () => {
+    // Ловит: имена принимаются только в порядке заголовка (поле «молчит» при верном вводе в другом порядке); лишнее или недостающее имя пропускается; пустая корзина «подтверждается».
+    expect(clearConfirmed(named('Миша', 'Аня'), 'Миша Аня')).toBe(true);
+    expect(clearConfirmed(named('Миша', 'Аня'), '  аня   МИША ')).toBe(true);
+    expect(clearConfirmed(named('Миша', 'Аня'), 'Миша')).toBe(false);
+    expect(clearConfirmed(named('Миша', 'Аня'), 'Миша Аня Аня')).toBe(false);
+    expect(clearConfirmed(named('Миша', 'Аня'), 'Миша Ань')).toBe(false);
+    expect(clearConfirmed(named('Миша'), '')).toBe(false);
+    expect(clearConfirmed([], '')).toBe(false);
+    expect(clearConfirmed([], 'Миша')).toBe(false);
+  });
+
+  it('К13 (063-Р66, Р70) имена из нескольких слов и одинаковые имена: «Ваня Иванов» целиком в любом порядке; два Саши — два раза, не больше и не меньше; имя не читается — вводится pid', () => {
+    // Ловит: многословное имя разбито по пробелам и не принято; два одинаковых имени сведены в одно (множество вместо набора) или принято третье.
+    expect(clearConfirmed(named('Ваня Иванов', 'Аня'), 'аня ваня иванов')).toBe(true);
+    expect(clearConfirmed(named('Ваня Иванов', 'Аня'), 'ваня иванов')).toBe(false);
+    expect(clearConfirmed(named('Ваня Иванов', 'Аня'), 'ваня аня иванов')).toBe(false);
+    expect(clearConfirmed(named('Саша', 'Саша'), 'Саша Саша')).toBe(true);
+    expect(clearConfirmed(named('Саша', 'Саша'), 'Саша')).toBe(false);
+    expect(clearConfirmed(named('Саша', 'Саша'), 'Саша Саша Саша')).toBe(false);
+    expect(clearConfirmed(named('Саша', 'Саша', 'Миша'), 'саша миша саша')).toBe(true);
+    expect(clearConfirmed(named('Ваня', 'Ваня Иванов'), 'Ваня Иванов Ваня')).toBe(true);
+    expect(clearConfirmed([{ pid: 'p7', name: null, day: null, days: null }, entry('p2', 'Миша')], 'миша p7')).toBe(true);
   });
 
   it('К14: последнего игрока не удалить; вернуть нельзя при 4 игроках (063-Р11) и тому, кто уже в списке', () => {
@@ -107,6 +134,19 @@ describe('К14: корзина — запись через хранилище', 
     expect(bin.list('2026-11-18').map((e) => e.pid)).toEqual(['p4']);
   });
 
+  it('К13 (063-Р70) очистка в хранилище по тому же правилу, что на экране: два игрока в корзине — имена в обратном порядке принимаются, одно имя — phrase', async () => {
+    // Ловит: второе правило в хранилище (фраза только в порядке заголовка) — экран говорит «готово», а запись отказывает phrase.
+    const { store, mem } = setup();
+    club(store, ['p1', 'p2', 'p3']);
+    const bin = createBin({ store });
+    await bin.remove('p2', '2026-11-18');
+    await bin.remove('p3', '2026-11-19');
+    const [first = '', second = ''] = bin.list('2026-11-20').map((e) => e.name ?? '');
+    expect(bin.empty(first)).toEqual({ ok: false, why: 'phrase' });
+    expect(bin.empty(`${second} ${first}`.toUpperCase())).toEqual({ ok: true, count: 2 });
+    expect(mem.map.has(`${P}trash.p2`) || mem.map.has(`${P}trash.p3`)).toBe(false);
+  });
+
   it('К14: очистить при пустой корзине — отказ empty; чужое имя — phrase, ничего не стёрто; верное (другой регистр, пробелы) — стёрто насовсем', async () => {
     // Ловит: очистка без подтверждения или по чужому имени; очистка пустой корзины «успешна»; данные игрока остаются после очистки.
     const { store, mem } = setup();
@@ -158,7 +198,7 @@ describe('К14: корзина — запись через хранилище', 
     expect(await bin.restart('p2', 'Игрок')).toEqual({ ok: false, why: 'binned' });
     expect(store.loadPlayer('p2').kind).toBe('absent'); // поверх ничего не записано
     expect(store.peekTrash('p2').ok).toBe(true);
-    expect(bin.settle('2026-11-19')).toBe(true); // как при открытии страницы: игрока вкладки нет, замков нет
+    expect(await bin.settle('2026-11-19')).toBe(true); // как при открытии страницы: игрока вкладки нет, замков нет
     expect(listed(store)).toEqual(['p1']);
     expect(bin.restore('p2')).toEqual({ ok: true });
     const back = store.loadPlayer('p2');
@@ -180,6 +220,70 @@ describe('К14: корзина — запись через хранилище', 
     if (held.kind === 'held') held.release();
   });
 
+  it('К14 (063-Р71) settle не трогает игрока под замком другой вкладки: сирота и оборванное удаление остаются как были, пока замок занят; после отпускания — подбираются', async () => {
+    // Ловит: settle кладёт в корзину файл, который другая вкладка сейчас пишет (create между файлом и устройством), и дописывает чужое удаление (у той вкладки saveDevice потом даёт conflict).
+    const locks = fakeLocks();
+    const first = setup({ locks });
+    club(first.store, ['p1', 'p2']);
+    expect(first.store.savePlayer('p9', createPlayer({ pid: 'p9', name: 'Новичок' }, defs), null)).toEqual({ ok: true }); // сирота
+    expect(first.store.trash('p2')).toEqual({ ok: true }); // оборванное удаление: конверт в корзине, в списке ещё есть
+    const other = first.open(defs, locks);
+    const heldNew = await other.hold('p9');
+    const heldOld = await other.hold('p2');
+    expect(heldNew.kind).toBe('held');
+    expect(heldOld.kind).toBe('held');
+    const before = first.mem.snapshot();
+    const bin = createBin({ store: first.store, defs });
+    expect(await bin.settle('2026-11-19')).toBe(false);
+    expect(first.mem.snapshot()).toEqual(before);
+    if (heldNew.kind === 'held') heldNew.release();
+    if (heldOld.kind === 'held') heldOld.release();
+    await new Promise((r) => setTimeout(r, 0)); // замок отпускается на следующем такте
+    expect(await bin.settle('2026-11-19')).toBe(true);
+    expect(listed(first.store)).toEqual(['p1']);
+    expect(first.mem.map.has(`${P}trash.p9`)).toBe(true);
+    expect(first.mem.map.has(`${P}player.p9`)).toBe(false);
+    // Замки settle отпущены после записи (finally): обе вкладки могут взять тех же игроков.
+    await new Promise((r) => setTimeout(r, 0));
+    const again = await other.hold('p9');
+    const againOld = await other.hold('p2');
+    expect(again.kind).toBe('held');
+    expect(againOld.kind).toBe('held');
+    if (again.kind === 'held') again.release();
+    if (againOld.kind === 'held') againOld.release();
+  });
+
+  it('К14 (063-Р71, Р74) settle перечитывает устройство после замков: пока ждал замок, другая вкладка записала нового игрока и положила файл-сироту — оба на месте, устройство не откатывается', async () => {
+    // Ловит: settle пишет устройство по прочитанному до замков (`const d = first`) — запись нового игрока другой вкладки откатывается или даёт conflict, день корзины не ложится; settle кладёт в корзину файл, которого не было в списке замков (сирота другой вкладки, ещё без записи устройства).
+    const base = fakeLocks();
+    let fired = false;
+    const first = setup();
+    const other = first.open(defs); // вкладка без замков: пишет мимо них, как create между файлом и устройством
+    const dev = club(first.store, ['p1']);
+    expect(first.store.savePlayer('p9', createPlayer({ pid: 'p9', name: 'Старый' }, defs), null)).toEqual({ ok: true }); // сирота из списка settle
+    const locks: LocksApi = {
+      request(name, options, callback) {
+        if (!fired) {
+          fired = true; // в момент первого замка: новый игрок записан целиком, ещё один файл — без устройства
+          expect(other.savePlayer('p10', createPlayer({ pid: 'p10', name: 'Новый' }, defs), null)).toEqual({ ok: true });
+          expect(other.saveDevice(withPlayer(dev, 'p10'), dev.rev)).toEqual({ ok: true });
+          expect(other.savePlayer('p11', createPlayer({ pid: 'p11', name: 'Пишется' }, defs), null)).toEqual({ ok: true });
+        }
+        return base.request(name, options, callback);
+      },
+    };
+    const store = first.open(defs, locks);
+    expect(await createBin({ store, defs }).settle('2026-11-19')).toBe(true);
+    expect(listed(store)).toEqual(['p1', 'p10']);
+    const d = store.loadDevice();
+    expect(d.kind === 'ok' ? d.device.bin?.p9 : null).toBe('2026-11-19');
+    expect(first.mem.map.has(`${P}player.p10`)).toBe(true);
+    expect(first.mem.map.has(`${P}trash.p10`)).toBe(false);
+    expect(first.mem.map.has(`${P}player.p11`)).toBe(true);
+    expect(first.mem.map.has(`${P}trash.p11`)).toBe(false);
+    expect(first.mem.map.has(`${P}trash.p9`)).toBe(true);
+  });
+
   it('К14: игрока держит другая вкладка — busy с именем, ничего не тронуто', async () => {
     // Ловит: удаление игрока, который сейчас играет в другой вкладке (у него пропал бы файл под руками).
     const locks = fakeLocks();
@@ -197,16 +301,16 @@ describe('К14: корзина — запись через хранилище', 
     expect(await bin.remove('p2', '2026-11-18')).toEqual({ ok: true });
   });
 
-  it('К14: перезагрузка посреди удаления — конверт в корзине, игрок в списке: settle дописывает устройство, целый игрок не трогается', () => {
+  it('К14: перезагрузка посреди удаления — конверт в корзине, игрок в списке: settle дописывает устройство, целый игрок не трогается', async () => {
     // Ловит: игрок «в списке без файла» навсегда после обрыва; settle убирает из списка игрока, чей файл ещё на диске.
     const { store } = setup();
     const device = club(store, ['p1', 'p2', 'p3']);
     const bin = createBin({ store });
-    expect(bin.settle('2026-11-18')).toBe(false);
+    expect(await bin.settle('2026-11-18')).toBe(false);
     // оборвалось: конверт p2 уже в корзине, устройство не записано
     expect(store.trash('p2')).toEqual({ ok: true });
     expect(listed(store)).toEqual(['p1', 'p2', 'p3']);
-    expect(bin.settle('2026-11-18')).toBe(true);
+    expect(await bin.settle('2026-11-18')).toBe(true);
     expect(listed(store)).toEqual(['p1', 'p3']);
     expect(bin.list('2026-11-18').map((e) => [e.pid, e.day])).toEqual([['p2', '2026-11-18']]);
     expect(device.players).toHaveLength(3);
@@ -214,7 +318,7 @@ describe('К14: корзина — запись через хранилище', 
     expect(store.trash('p3')).toEqual({ ok: true });
     expect(store.savePlayer('p3', createPlayer({ pid: 'p3', name: 'Аня' }, defs), null)).toEqual({ ok: true });
     expect(store.peekTrash('p3').ok).toBe(true);
-    expect(bin.settle('2026-11-19')).toBe(false);
+    expect(await bin.settle('2026-11-19')).toBe(false);
     expect(listed(store)).toEqual(['p1', 'p3']);
     expect(store.loadPlayer('p3')).toMatchObject({ kind: 'ok', env: { name: 'Аня' } });
   });
@@ -261,17 +365,17 @@ describe('К14: корзина — запись через хранилище', 
     expect(mem.map.has(`${P}trash.p2`)).toBe(false); // и из корзины ушёл
     expect(listed(store)).toEqual(['p1']);
     const bin = createBin({ store });
-    expect(bin.settle('2026-11-19')).toBe(true);
+    expect(await bin.settle('2026-11-19')).toBe(true);
     expect(mem.map.has(`${P}player.p2`)).toBe(false);
     expect(bin.list('2026-11-19').map((e) => [e.pid, e.day])).toEqual([['p2', '2026-11-19'], ['p3', '2026-11-18']]);
     expect(listed(store)).toEqual(['p1']);
     expect(store.loadPlayer('p1')).toMatchObject({ kind: 'ok' });
-    expect(bin.settle('2026-11-20')).toBe(false);
+    expect(await bin.settle('2026-11-20')).toBe(false);
     expect(bin.restore('p2')).toEqual({ ok: true }); // и вернуть его можно
     expect(listed(store)).toEqual(['p1', 'p2']);
   });
 
-  it('К14 (063-Р65) свежий файл без данных (rev 0) тоже сирота — уходит в корзину; ключи не игроков (карантин, чужие) не трогаются', () => {
+  it('К14 (063-Р65) свежий файл без данных (rev 0) тоже сирота — уходит в корзину; ключи не игроков (карантин, чужие) не трогаются', async () => {
     // Ловит: сирота rev 0 остаётся (его «пустота» принимается за готовность); settle забирает чужие ключи или карантин.
     const { store, mem } = setup();
     club(store, ['p1', 'p2']);
@@ -279,7 +383,7 @@ describe('К14: корзина — запись через хранилище', 
     mem.map.set(`${P}quarantine.p1.1`, '{не json');
     const before = mem.snapshot();
     const bin = createBin({ store });
-    expect(bin.settle('2026-11-19')).toBe(true);
+    expect(await bin.settle('2026-11-19')).toBe(true);
     const after = mem.snapshot();
     expect(Object.keys(before).filter((k) => !(k in after))).toEqual([`${P}player.p9`]);
     expect(Object.keys(after).filter((k) => !(k in before))).toEqual([`${P}trash.p9`]);
@@ -319,23 +423,23 @@ describe('К14: корзина — запись через хранилище', 
     expect(await createBin({ store: { ...store } }).restart('p2', 'Игрок')).toEqual({ ok: false, why: 'readonly' });
   });
 
-  it('К14 (063-Р65) «Новый клуб»: битое устройство — новое поверх карантина, файлы прежних игроков уходят в корзину; quota — отказ, битое на месте; читается — healthy; «новее» — readonly', () => {
+  it('К14 (063-Р65) «Новый клуб»: битое устройство — новое поверх карантина, файлы прежних игроков уходят в корзину; quota — отказ, битое на месте; читается — healthy; «новее» — readonly', async () => {
     // Ловит: «Новый клуб» затирает битое без карантина; прежние игроки остаются сиротами; живое устройство перезаписывается.
     const { store, mem } = setup();
     club(store, ['p1', 'p2']);
     const bin = createBin({ store });
-    expect(bin.newClub('2026-11-19')).toEqual({ ok: false, why: 'healthy' });
+    expect(await bin.newClub('2026-11-19')).toEqual({ ok: false, why: 'healthy' });
     mem.map.set(`${P}device`, '{не json');
     const full: Store = { ...store, saveDevice: () => ({ ok: false, err: 'quota' }) };
-    expect(createBin({ store: full }).newClub('2026-11-19')).toEqual({ ok: false, why: 'quota' });
+    expect(await createBin({ store: full }).newClub('2026-11-19')).toEqual({ ok: false, why: 'quota' });
     expect(mem.map.get(`${P}device`)).toBe('{не json');
-    expect(bin.newClub('2026-11-19')).toEqual({ ok: true });
+    expect(await bin.newClub('2026-11-19')).toEqual({ ok: true });
     expect(store.quarantined('device')).toEqual(['{не json']);
     expect(listed(store)).toEqual([]);
     expect(bin.list('2026-11-19').map((e) => [e.pid, e.name])).toEqual([['p1', 'Саша'], ['p2', 'Миша']]);
     mem.map.set(`${P}device`, JSON.stringify({ kind: 'keykick-device', fmt: 99, rev: 1, players: [] }));
-    expect(createBin({ store: setup().store }).newClub('2026-11-19')).toEqual({ ok: false, why: 'absent' }); // устройства нет — это первый запуск, а не тупик
-    expect(createBin({ store: { ...store, loadDevice: () => ({ kind: 'newer', raw: 'x' }) } }).newClub('2026-11-19')).toEqual({ ok: false, why: 'readonly' });
+    expect(await createBin({ store: setup().store }).newClub('2026-11-19')).toEqual({ ok: false, why: 'absent' }); // устройства нет — это первый запуск, а не тупик
+    expect(await createBin({ store: { ...store, loadDevice: () => ({ kind: 'newer', raw: 'x' }) } }).newClub('2026-11-19')).toEqual({ ok: false, why: 'readonly' });
   });
 
   it('К14 (063-Р65) очистка корзины при устройстве «новее» — readonly, корзина не тронута', async () => {

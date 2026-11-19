@@ -19,6 +19,10 @@ export interface Task {
   solution: string;
   verified: boolean;
   level: TaskLevel;
+  /** Рисунок к условию — безопасная SVG-разметка (`svgPicture`); листы выводят его справа от условия (067-Р106). */
+  figure?: string;
+  /** Подсказка тренера в колонке тура (067-Р106). */
+  hint?: string;
 }
 
 /**
@@ -66,7 +70,56 @@ const allowedKeys: Record<TaskAnswer['kind'], readonly string[]> = {
   multi: ['options', 'correct'],
   order: ['items'],
   text: ['accepted'],
+  select: ['row', 'correct'],
+  match: ['left', 'right', 'pairs'],
+  pictures: ['pictures', 'correct'],
+  expr: ['parts', 'values'],
 };
+
+/** Рисунок в контенте: только SVG-разметка из безопасных тегов и атрибутов (белый список), без скриптов, стилей и ссылок. */
+const SVG_TAGS = new Set(['svg', 'g', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'path']);
+const SVG_ATTRS = new Set([
+  'viewBox', 'xmlns', 'x', 'y', 'width', 'height', 'cx', 'cy', 'r', 'rx', 'ry', 'x1', 'y1', 'x2', 'y2',
+  'points', 'd', 'fill', 'stroke', 'stroke-width', 'transform', 'opacity',
+]);
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const SVG_TAG = /<(\/?)([a-zA-Z][\w-]*)([^<>]*)>/g;
+const SVG_ATTR = /\s+([^\s=/>]+)\s*=\s*"([^"<>]*)"/y;
+
+function svgPicture(v: unknown, where: string): string {
+  const bad = (why: string): Error => new Error(`${where}: unsafe svg (${why})`);
+  if (!isText(v) || !v.startsWith('<svg') || !v.endsWith('</svg>')) throw new Error(`${where}: expected <svg> markup`);
+  if (v.includes('<!') || /url\(|style/i.test(v)) throw bad('<!, url( or style');
+  // Между тегами — только пробелы: текста и CDATA в рисунке нет.
+  if (v.replace(SVG_TAG, '').trim() !== '') throw bad('text between tags');
+  for (const m of v.matchAll(SVG_TAG)) {
+    const [, closing = '', name = '', rest = ''] = m;
+    if (!SVG_TAGS.has(name)) throw bad(`tag ${name}`);
+    if (closing === '/') {
+      if (rest.trim() !== '') throw bad('closing tag');
+      continue;
+    }
+    let pos = 0;
+    for (;;) {
+      SVG_ATTR.lastIndex = pos;
+      const a = SVG_ATTR.exec(rest);
+      if (a === null) break;
+      if (!SVG_ATTRS.has(a[1] as string)) throw bad(`attribute ${a[1]}`);
+      if (a[1] === 'xmlns' && a[2] !== SVG_NS) throw bad('xmlns');
+      pos = SVG_ATTR.lastIndex;
+    }
+    if (rest.slice(pos).trim().replace(/^\/$/, '') !== '') throw bad('attribute syntax');
+  }
+  return v;
+}
+
+/** Номера верных (с нуля) среди n вариантов: непусто, без повторов, по возрастанию. */
+function correctSet(v: unknown, n: number, where: string): number[] {
+  if (!Array.isArray(v) || v.length === 0) throw new Error(`${where}: expected non-empty list`);
+  const list = v.map((x: unknown) => index(x, n, where));
+  if (new Set(list).size !== list.length) throw new Error(`${where}: duplicate`);
+  return list.sort((a, b) => a - b);
+}
 
 /**
  * Ответ задачи. Целое можно записать просто числом («answer»: 15) — так записаны первые задачи.
@@ -121,11 +174,7 @@ export function parseAnswer(v: unknown, where: string): TaskAnswer {
 
     case 'multi': {
       const options = textList(r.options, 2, MAX_OPTIONS, `${where}.options`);
-      const c = r.correct;
-      if (!Array.isArray(c) || c.length === 0) throw new Error(`${where}.correct: expected non-empty list`);
-      const correct = c.map((x: unknown) => index(x, options.length, `${where}.correct`));
-      if (new Set(correct).size !== correct.length) throw new Error(`${where}.correct: duplicate`);
-      return { kind: 'multi', options, correct: correct.sort((a, b) => a - b) };
+      return { kind: 'multi', options, correct: correctSet(r.correct, options.length, `${where}.correct`) };
     }
 
     case 'order':
@@ -133,6 +182,51 @@ export function parseAnswer(v: unknown, where: string): TaskAnswer {
 
     case 'text':
       return { kind: 'text', accepted: textList(r.accepted, 1, 10, `${where}.accepted`) };
+
+    case 'select': {
+      if (!Array.isArray(r.row) || r.row.length > 12) throw new Error(`${where}.row: expected list of parts`);
+      const row = r.row.map((p: unknown, i) => {
+        if (Array.isArray(p)) return textList(p, 2, MAX_OPTIONS, `${where}.row[${i}]`);
+        if (!isText(p)) throw new Error(`${where}.row[${i}]: expected string or list`);
+        return p;
+      });
+      const lists = row.filter((p): p is string[] => typeof p !== 'string');
+      if (lists.length === 0 || lists.length > 5) throw new Error(`${where}.row: expected 1–5 lists`);
+      const c = r.correct;
+      if (!Array.isArray(c) || c.length !== lists.length) throw new Error(`${where}.correct: one index per list`);
+      return { kind: 'select', row, correct: c.map((x: unknown, i) => index(x, (lists[i] as string[]).length, `${where}.correct`)) };
+    }
+
+    case 'match': {
+      const left = textList(r.left, 2, MAX_OPTIONS, `${where}.left`);
+      const right = textList(r.right, left.length, left.length, `${where}.right`);
+      const p = r.pairs;
+      if (!Array.isArray(p) || p.length !== left.length) throw new Error(`${where}.pairs: one index per left item`);
+      const pairs = p.map((x: unknown) => index(x, right.length, `${where}.pairs`));
+      if (new Set(pairs).size !== pairs.length) throw new Error(`${where}.pairs: duplicate`);
+      return { kind: 'match', left, right, pairs };
+    }
+
+    case 'pictures': {
+      if (!Array.isArray(r.pictures) || r.pictures.length < 2 || r.pictures.length > MAX_OPTIONS) {
+        throw new Error(`${where}.pictures: expected 2–${MAX_OPTIONS} pictures`);
+      }
+      const pictures = r.pictures.map((x: unknown, i) => svgPicture(x, `${where}.pictures[${i}]`));
+      return { kind: 'pictures', pictures, correct: correctSet(r.correct, pictures.length, `${where}.correct`) };
+    }
+
+    case 'expr': {
+      if (!Array.isArray(r.parts) || r.parts.length < 3 || r.parts.length > 12) throw new Error(`${where}.parts: expected 3–12 parts`);
+      const parts = r.parts.map((x: unknown, i) => {
+        if (x !== null && !isText(x)) throw new Error(`${where}.parts[${i}]: expected string or null`);
+        return x;
+      });
+      const fieldCount = parts.filter((x) => x === null).length;
+      if (fieldCount < 1 || fieldCount > 4 || fieldCount === parts.length) throw new Error(`${where}.parts: expected 1–4 fields and some text`);
+      const values = r.values;
+      if (!Array.isArray(values) || values.length !== fieldCount || !values.every(isInt)) throw new Error(`${where}.values: one integer per field`);
+      return { kind: 'expr', parts, values };
+    }
   }
 }
 
@@ -166,6 +260,8 @@ export function parseTasks(raw: unknown): Task[] {
       solution: str('solution'),
       verified,
       level: level as TaskLevel,
+      ...(r.figure === undefined ? {} : { figure: svgPicture(r.figure, `tasks[${n}].figure`) }),
+      ...(r.hint === undefined ? {} : { hint: str('hint') }),
     };
   });
 }
@@ -261,9 +357,17 @@ export const penaltyLevel = (lessonNo: number): TaskLevel => (lessonNo <= 12 ? 1
 const PENALTY_SALT = 0x9e3779b1;
 
 /**
- * Задача пенальти матча: по зерну матча и номеру урока, любая проверенная (длинная тоже — лист листается, Э1.20).
+ * Виды ответа, которые поле ответа пенальти умеет (AnswerField.vue). С 067 Т15 — все: список, соединялка, картинки и выражение
+ * тоже (Э1.21: «соединялка, как в МЭШ»). Новый вид добавляют сюда вместе с веткой в поле; тест К3 сверяет список с полем.
+ */
+export const PENALTY_KINDS: readonly TaskAnswer['kind'][] = ['integer', 'fraction', 'fields', 'choice', 'multi', 'order', 'text', 'select', 'match', 'pictures', 'expr'];
+
+/**
+ * Задача пенальти матча: по зерну матча и номеру урока, проверенная, только из видов PENALTY_KINDS
+ * (длинная тоже — лист листается, Э1.20).
  * Решённых пока не помним (раздел `school` растёт в волне 4): `solved` передаёт вызывающий.
  */
 export function pickPenaltyTask(tasks: readonly Task[], matchSeed: number, lessonNo: number, solved: readonly string[] = []): Task {
-  return pickTask(tasks, (matchSeed ^ PENALTY_SALT) >>> 0, solved, penaltyLevel(lessonNo));
+  const known = tasks.filter((t) => PENALTY_KINDS.includes(t.answer.kind));
+  return pickTask(known, (matchSeed ^ PENALTY_SALT) >>> 0, solved, penaltyLevel(lessonNo));
 }

@@ -1,0 +1,17 @@
+{
+  "about": "Тренировочная база (067 Т6, ТЗ-7.10, 7.12): игры на интерес. Id игр — навсегда (059): keepy — Чеканка, mini — Мини-футбол, free — Штрафной через стенку, memo — Мемори формы, keeper — Вратарь ФЫВА ОЛДЖ. open.kind: base — с открытия Базы; lesson — когда пройден урок after (номер текущего урока больше after); cup — то же и сыгран первый матч Кубка. better: high — рекорд больше, low — меньше. homeRow — ряд ФЫВА ОЛДЖ слева направо: сектора Вратаря и порядок плашек «Твои клавиши» у Штрафного. Числа с why 067-Р23 — подстановка до проверки на ребёнке.",
+  "perDay": 2,
+  "homeRow": ["ф", "ы", "в", "а", "о", "л", "д", "ж"],
+  "games": [
+    { "id": "keepy", "open": { "kind": "base", "after": 0 }, "better": "high" },
+    { "id": "mini", "open": { "kind": "lesson", "after": 3 }, "better": "high" },
+    { "id": "free", "open": { "kind": "cup", "after": 9 }, "better": "high" },
+    { "id": "memo", "open": { "kind": "lesson", "after": 14 }, "better": "low" },
+    { "id": "keeper", "open": { "kind": "lesson", "after": 21 }, "better": "high" }
+  ],
+  "keepy": { "lives": 3, "fallMs": 1800, "minFallMs": 900, "speedUpMs": 30, "zone": 0.3, "why": "067-Р23" },
+  "memo": { "maxPairs": 8, "hideMs": 900, "why": "067-Р23" },
+  "keeper": { "shots": 20, "windowMs": 2500, "why": "067-Р23" },
+  "mini": { "matchMs": 90000, "minPasses": 1, "holdMs": 4000, "holdPerRankMs": 500, "foeMs": 30000, "stealsPerGoal": 3, "shotBase": 0.18, "shotPerRank": 0.03, "sizes": [{ "after": 10, "n": 4 }, { "after": 6, "n": 3 }], "tactics": { "wing": { "tour": 4, "shotBonus": 0.03 }, "press": { "tour": 8, "stealsPerGoal": 4 }, "short": { "tour": 12, "foeBonusMs": 15000 }, "counter": { "tour": 16, "restartAtForward": true } }, "why": "067-Р23" },
+  "free": { "shots": 5, "wordMs": 10000, "warnMs": 3000, "minWordLen": 2, "maxWordLen": 5, "why": "067-Р23" }
+}

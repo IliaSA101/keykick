@@ -9,12 +9,15 @@ import type { CourseProgress } from '../../engine/course/reconcile';
 import type { Day } from '../../engine/day/section';
 import type { Stadium } from '../../engine/home/section';
 import type { Wallet } from '../../engine/rewards/section';
+import type { Shop } from '../../engine/shop/section';
 
 export interface HomeSections {
   course: CourseProgress;
   day: Day;
   wallet: Wallet;
   stadium: Stadium;
+  /** Купленное в Лавке (067 Т12); нет раздела — ничего не куплено. */
+  shop?: Shop;
 }
 
 /** Что Дому нужно от пакета: порядок уроков и товарищеские. */
@@ -60,7 +63,7 @@ export function homeInputOf(s: HomeSections, facts: PackFacts, extras: HomeExtra
     best: curId === undefined ? 0 : (s.course.lessons[curId]?.best ?? 0),
     coins: s.wallet.coins,
     fans: s.stadium.fans,
-    bought: [],
+    bought: s.shop?.bought ?? [],
     friendly: curId !== undefined && facts.friendly.has(curId),
     round: null,
     end: false,

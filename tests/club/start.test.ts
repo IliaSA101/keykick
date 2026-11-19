@@ -3,17 +3,25 @@
  */
 import { describe, expect, it } from 'vitest';
 import clubs from '../../src/content/clubs.json';
-import { hexToRgb, paintKit, patternAt, yellowWithBlue, type KitLayers } from '../../src/engine/club/paint';
+import { RIVAL_TRIM, rivalBodyOf, rivalKitOf } from '../../src/engine/club/rival';
+import { blends, rivalOf } from '../../src/engine/cup/teams';
+import { hexToRgb, inStar, kantTrim, KANT_GOLD, milestoneTone, paintKit, patternAt, starSpots, yellowWithBlue, type KitLayers } from '../../src/engine/club/paint';
 import { NEUTRAL_DARK, NEUTRAL_LIGHT, opaqueBox, outfitFor, paintZones } from '../../src/engine/club/outfit';
+import { milestoneDeco } from '../../src/engine/album/locker';
+import { KIT_IDS } from '../../src/engine/album/order';
+import { kitOf } from '../../src/engine/album/kit';
+import { stored } from '../../src/app/club/edit';
 import { crowdHue, recolorCrowd } from '../../src/engine/club/crowd';
 import { clubDef, type ClubKit } from '../../src/engine/club/section';
-import { PALETTES, clubFromDraft, cityHints, defaultDraft, draftProblems, dmy, loadCheck, nextStep, numberDigits, numberOf, playerNameOf, coachEnter, shortVersion, badReason, coachNameOf, restoreFile } from '../../src/engine/club/start';
+import { PALETTES, clubFromDraft, cityHints, defaultDraft, draftProblems, dmy, loadCheck, nextStep, numberDigits, numberOf, playerNameOf, coachEnter, draftOfClub, shortVersion, badReason, coachNameOf, restoreFile } from '../../src/engine/club/start';
 import { factLine, fileLine } from '../../src/components/club/restoreLines';
 import type { Device } from '../../src/engine/save/device';
 import { createPlayer, writePlayer } from '../../src/engine/save/envelope';
 import { planImport } from '../../src/engine/save/import';
 import { makeSnapshot, serializeSnapshot } from '../../src/engine/save/snapshot';
 import { SECTIONS } from '../../src/app/save/sections';
+import { providedHardKeys } from '../../src/app/club/provide';
+import { backLine, bestSpeed, clubCard, hardKeysOf, swapCoach } from '../../src/engine/club/card';
 
 const seq = (...xs: number[]) => {
   let i = 0;
@@ -239,5 +247,206 @@ describe('люди на трибуне в цветах клуба (065 Т7в, Р
     expect(out[3]).toBe(0); // пусто — прозрачно
     expect(opaqueBox(layers)).toEqual({ x: 0, y: 0.5, w: 0.75, h: 0.5 });
     expect(opaqueBox({ ...layers, shade: new Uint8ClampedArray(32) })).toBeNull();
+  });
+});
+
+describe('карточка клуба (067 Т11 §6, ТЗ-1.13)', () => {
+  const mark = (best: number) => ({ stars: 1 as const, best, tries: 1, fails: 0 });
+  const course = { lessons: { a: mark(12), b: mark(24) }, archive: { c: mark(30) } };
+
+  it('067 Т11 §6: карточка берёт числа из разделов, лучшую скорость — максимум по урокам и архиву; пустой клуб — нули', () => {
+    // Ловит: скорость берётся с последнего урока, а не лучшая; архивные уроки не считаются; на пустом сохранении карточка падает или показывает NaN.
+    expect(bestSpeed(course)).toBe(30);
+    expect(clubCard({ played: 31, goals: 70, solved: 67, course, hardKeys: [] })).toMatchObject({ matches: 31, goals: 70, tasks: 67, bestSpeed: 30, hard: [] });
+    expect(clubCard({ played: 0, goals: 0, solved: 0, course: { lessons: {}, archive: {} }, hardKeys: [] })).toMatchObject({ matches: 0, goals: 0, tasks: 0, bestSpeed: 0, hard: [], minute: [] });
+  });
+
+  it('067 Т11 §6: трудных клавиш не больше трёх, без повторов и пустых, заглавными; «Минута тренера» берёт первые две', () => {
+    // Ловит: четвёртая клавиша в окне; «ы» и «Ы» дважды; подпись называет все три (регрессия kk-control Р44) вместо двух.
+    expect(hardKeysOf(['ы', 'Ы', ' ', 'ж', 'д', 'ф'])).toEqual(['Ы', 'Ж', 'Д']);
+    expect(clubCard({ played: 0, goals: 0, solved: 0, course, hardKeys: ['ы', 'ж', 'д'] }).minute).toEqual(['Ы', 'Ж']);
+  });
+
+  it('К13 067 Т24б: Клуб показывает три худшие по точности буквы из раздела coach; порог — 50 нажатий; раздела или нажатий нет — пусто («пока нет»)', () => {
+    // Ловит: берутся первые по алфавиту, а не худшие по точности; буква с 30 нажатиями (ниже порога 50) попадает в трудные; четвёртая клавиша сверх трёх; пустой раздел или `null` (старое сохранение) роняет окно; безошибочная буква считается трудной.
+    const win = (miss: number, n = 60) => '1'.repeat(n - miss) + '0'.repeat(miss);
+    const coach = { keys: { а: win(1), ж: win(12), д: win(8), ы: win(18), п: win(25, 30), т: win(0) } };
+    expect(providedHardKeys({ coach })).toEqual(['ы', 'ж', 'д']);
+    expect(clubCard({ played: 0, goals: 0, solved: 0, course, hardKeys: providedHardKeys({ coach }) }).hard).toEqual(['Ы', 'Ж', 'Д']);
+    expect(providedHardKeys({ coach: { keys: { п: win(25, 30), т: win(0) } } })).toEqual([]);
+    expect(providedHardKeys({ coach: { keys: {} } })).toEqual([]);
+    expect(providedHardKeys({ coach: null })).toEqual([]);
+    expect(providedHardKeys({})).toEqual([]);
+    expect(clubCard({ played: 0, goals: 0, solved: 0, course, hardKeys: providedHardKeys({}) }).hard).toEqual([]);
+  });
+
+  it('067 Т11 §6: «На спине» — имя заглавными и номер через точку; чего нет — части нет; номер 0 не показывается', () => {
+    // Ловит: «САША · 0» при пустом номере; точка-разделитель при одной части; имя строчными.
+    expect(backLine('Саша', 7)).toBe('САША · 7');
+    expect(backLine('Саша', 0)).toBe('САША');
+    expect(backLine('', 99)).toBe('99');
+    expect(backLine('  ', 0)).toBe('');
+  });
+
+  it('067 Т11 §6: смена тренера — только на другого из четырёх; тот же и чужой id клуб не меняют (двойной клик ничего не ломает)', () => {
+    // Ловит: «Сменить» на текущего тренера пишет клуб заново; неизвестный id попадает в раздел `club` и ломает его проверку.
+    const known = ['young', 'veteran', 'ponytail', 'bigbeard'];
+    expect(swapCoach('young', 'veteran', known)).toBe('veteran');
+    expect(swapCoach('young', 'young', known)).toBeNull();
+    expect(swapCoach('young', 'nobody', known)).toBeNull();
+  });
+
+  it('067 Т11 §6: «Изменить» открывает окно заполненным текущим клубом; расцветка не из набора не меняется молча на другую', () => {
+    // Ловит: черновик окна правки пустой («Назови клуб» сразу); «Изменить» → «Сохранить» подменяет расцветку клуба первой зелёной из набора.
+    const own = { name: 'Прогресс', city: 'Тверь', coach: 'young', backName: 'САША', backNumber: 7, kit: { pattern: 'plain', body: '#1e6b34', sleeves: '#ffffff', trim: '#ffffff' } };
+    // Своя расцветка — тёмно-зелёная, такой плитки в наборе нет (зелёная с белыми рукавами образца — плитка 4, 023-Р30)
+    const d = draftOfClub(own, 'young');
+    expect(d).toMatchObject({ name: 'Прогресс', city: 'Тверь', backName: 'САША', backNumber: 7, coach: 'young', palette: -1 });
+    expect(draftProblems(d)).toEqual([]);
+    expect(clubFromDraft(d).kit).toEqual(own.kit);
+    const fromSet = { ...own, kit: { ...PALETTES[2]! } };
+    expect(draftOfClub(fromSet, 'young').palette).toBe(2);
+    expect(clubFromDraft(draftOfClub(fromSet, 'young')).kit).toEqual(PALETTES[2]);
+  });
+});
+
+describe('узоры призовых и вехи на форме (067 Т13 ш6, Р158)', () => {
+  /** Слой 40×40: весь корпус (R), всё непрозрачное, без тени и блика; кант и рукава — нигде. */
+  function flat(zone: [number, number, number] = [255, 0, 0]): KitLayers {
+    const n = 40 * 40;
+    const zones = new Uint8ClampedArray(n * 4);
+    const shade = new Uint8ClampedArray(n * 4);
+    for (let i = 0; i < n; i++) {
+      zones.set([...zone, 255], i * 4);
+      shade.set([255, 0, 255, 255], i * 4);
+    }
+    return { width: 40, height: 40, zones, shade };
+  }
+  const at = (px: Uint8ClampedArray, x: number, y: number) => [...px.slice((y * 40 + x) * 4, (y * 40 + x) * 4 + 3)];
+
+  it('К13 узор stars: семь звёзд, у «champ» одна, у прочих узоров звёзд нет; точка в центре звезды внутри, вдали — снаружи', () => {
+    // Ловит: узор призовой «в жёлтых звёздах» вернулся к простой белой; звезда считается кругом, а не пятью лучами.
+    expect(starSpots('stars')).toHaveLength(7);
+    expect(starSpots('champ')).toHaveLength(1);
+    expect(starSpots('plain')).toHaveLength(0);
+    expect(inStar(0, 0, 10)).toBe(true);
+    expect(inStar(0, -9, 10)).toBe(true); // луч вверх
+    expect(inStar(7, -7, 10)).toBe(false); // между лучами
+  });
+
+  it('К13 «в жёлтых звёздах»: жёлтое ложится на белую ткань только в звезде; «champ» — полоса по низу', () => {
+    // Ловит: цвет звезды `alt` не доходит до холста; звёзды красят всю форму; полоса «champ» пропала.
+    const kit: ClubKit = { pattern: 'stars', body: '#ffffff', alt: '#f5c400', sleeves: '#ffffff', trim: '#f5c400' };
+    const out = paintKit(flat(), kit, { x0: 0, y0: 0, sx: 1 / 40, sy: 1 / 40 });
+    expect(at(out, 11, 12)).toEqual([245, 196, 0]); // центр первой звезды (0,28 · 40; 0,3 · 40)
+    expect(at(out, 1, 1)).toEqual([255, 255, 255]); // ткань вне звезды — белая
+    const champ = paintKit(flat(), { ...kit, pattern: 'champ', alt: '#d9a520' }, { x0: 0, y0: 0, sx: 1 / 40, sy: 1 / 40 });
+    expect(at(champ, 5, 37)).toEqual([217, 165, 32]); // полоса 0,9…0,935 высоты
+    expect(at(champ, 5, 30)).toEqual([255, 255, 255]);
+  });
+
+  it('К13 шеврон «Бирюзы»: острие «V» белое на бирюзовом, дальше от плеча ткань бирюзовая', () => {
+    // Ловит: шеврон не рисуется (форма цвета корпуса); «V» залила корпус целиком.
+    const kit: ClubKit = { pattern: 'chevron', body: '#12a4a8', sleeves: '#12a4a8', trim: '#ffffff' };
+    const out = paintKit(flat(), kit, { x0: 0, y0: 0, sx: 1 / 40, sy: 1 / 40 });
+    expect(at(out, 20, 19)[0]).toBeGreaterThan(200); // острие (0,5 · 40; 0,47 · 40): белое
+    expect(at(out, 20, 38)).toEqual(hexToRgb('#12a4a8').map((c) => Math.round(c * 255)));
+    const back = paintKit(flat(), kit, { x0: 0, y0: 0, sx: 1 / 40, sy: 1 / 40, mirror: true });
+    expect(at(back, 20, 19)).toEqual(hexToRgb('#12a4a8').map((c) => Math.round(c * 255))); // на спине шеврона нет
+  });
+
+  it('К13 кант вехи: золото на зелёной, белый на синей и красной (ТАБУ: жёлтое не касается синего); кант виден в зоне отделки', () => {
+    // Ловит: золотой кант на синем клубе (веха 20★) — сине-жёлтое на форме; кант не доходит до ткани.
+    expect(milestoneTone({ pattern: 'plain', body: '#2f9a27', sleeves: '#ffffff', trim: '#ffffff' })).toBe('gold');
+    expect(milestoneTone({ pattern: 'plain', body: '#1f4fd8', sleeves: '#1f4fd8', trim: '#ffffff' })).toBe('white');
+    expect(milestoneTone({ pattern: 'plain', body: '#d4202c', sleeves: '#d4202c', trim: '#ffffff' })).toBe('white');
+    const blue: ClubKit = { pattern: 'plain', body: '#1f4fd8', sleeves: '#1f4fd8', trim: '#ffffff' };
+    expect(yellowWithBlue({ ...blue, trim: kantTrim(blue) })).toBe(false);
+    const green: ClubKit = { pattern: 'plain', body: '#2f9a27', sleeves: '#ffffff', trim: '#ffffff' };
+    const out = paintKit(flat([0, 0, 255]), green, { x0: 0, y0: 0, sx: 1 / 40, sy: 1 / 40 }, { kant: true });
+    expect(at(out, 3, 3)).toEqual(hexToRgb(kantTrim(green)).map((c) => Math.round(c * 255)));
+    expect(at(paintKit(flat([0, 0, 255]), green, { x0: 0, y0: 0, sx: 1 / 40, sy: 1 / 40 }), 3, 3)).toEqual([255, 255, 255]); // без вехи — свой кант формы
+  });
+
+  it('К13 кант вехи на настоящей синей палитре — белый, не золото; кант вехи нигде не даёт сине-жёлтого (перебор палитр и форм альбома)', () => {
+    // Ловит: кант вехи всегда золотой (золото касается синего); тон вехи не сверяется с `yellowWithBlue`.
+    const blue = PALETTES.find((p) => p.body === '#2f6fe0')!;
+    const out = paintKit(flat([0, 0, 255]), blue, { x0: 0, y0: 0, sx: 1 / 40, sy: 1 / 40 }, { kant: true });
+    expect(at(out, 3, 3)).toEqual([255, 255, 255]);
+    expect(at(out, 3, 3)).not.toEqual(hexToRgb(KANT_GOLD).map((c) => Math.round(c * 255)));
+    const kits = [...PALETTES, ...KIT_IDS.map((id) => kitOf(id)?.kit).filter((k): k is ClubKit => k !== undefined)];
+    for (const k of kits) expect(yellowWithBlue({ ...k, trim: kantTrim(k) }), JSON.stringify(k)).toBe(false);
+  });
+
+  it('К13 звёзды вехи на синей палитре — не золотые; на красной (ТАБУ: красное со звездой) — не рисуются, кант белый', () => {
+    // Ловит: звёзды вехи всегда золотые (на синей); звёзды вехи на красной или бордо форме.
+    const box = { x0: 0, y0: 0, sx: 1 / 40, sy: 1 / 40, mirror: true };
+    const blue = PALETTES.find((p) => p.body === '#2f6fe0')!;
+    const plain = paintKit(flat(), blue, box);
+    const one = paintKit(flat(), blue, box, { stars: 1 });
+    expect(at(one, 20, 3)).not.toEqual(at(plain, 20, 3)); // звезда есть
+    expect(at(one, 20, 3)).not.toEqual(hexToRgb(KANT_GOLD).map((c) => Math.round(c * 255)));
+    for (const body of ['#c8102e', '#7a1020']) {
+      const red: ClubKit = { pattern: 'plain', body, sleeves: body, trim: '#ffffff' };
+      expect(paintKit(flat(), red, box, { stars: 1 }), body).toEqual(paintKit(flat(), red, box));
+      expect(paintKit(flat(), red, box, { stars: 2 }), body).toEqual(paintKit(flat(), red, box));
+      expect(milestoneTone(red)).toBe('white');
+    }
+  });
+
+  it('067 Т11: запись клуба «легла», если диск не принял (квота, конфликт) — окно закрывается; отказ записи — нет', () => {
+    // Ловит: при квоте окно «Твой клуб» не закрывается (ребёнок застревает в нём).
+    expect(stored({ ok: true })).toBe(true);
+    expect(stored({ ok: false, status: 'quota' })).toBe(true);
+    expect(stored({ ok: false, status: 'conflict' })).toBe(true);
+    expect(stored({ ok: false, status: 'readonly' })).toBe(false);
+  });
+
+  it('К13 звёзды вехи — только на спине (одна у «Звёздной I», две у II); блик — только спереди', () => {
+    // Ловит: звезда вехи нарисована спереди поверх узора; блик лёг и на спину.
+    const kit: ClubKit = { pattern: 'plain', body: '#2f9a27', sleeves: '#ffffff', trim: '#ffffff' };
+    const box = { x0: 0, y0: 0, sx: 1 / 40, sy: 1 / 40 };
+    const plain = paintKit(flat(), kit, { ...box, mirror: true });
+    const one = paintKit(flat(), kit, { ...box, mirror: true }, { stars: 1 });
+    const two = paintKit(flat(), kit, { ...box, mirror: true }, { stars: 2 });
+    expect(at(one, 20, 3)).not.toEqual(at(plain, 20, 3)); // звезда у верха по оси
+    expect(at(two, 20, 3)).toEqual(at(plain, 20, 3)); // у II их две — по бокам от оси
+    expect(at(two, 16, 3)).not.toEqual(at(plain, 16, 3));
+    expect(paintKit(flat(), kit, box, { stars: 1 })).toEqual(paintKit(flat(), kit, box)); // спереди звёзд вехи нет
+    expect(paintKit(flat(), kit, { ...box, mirror: true }, { sheen: true })).toEqual(plain); // блик — не на спине
+    expect(paintKit(flat(), kit, box, { sheen: true })).not.toEqual(paintKit(flat(), kit, box));
+  });
+
+  it('К13 звёздный кант на форме: до 20★ нет, с 20★ есть', () => {
+    // Ловит: граница вехи сдвинулась (19★ с кантом) или кант пропал совсем.
+    expect(milestoneDeco(19)).toEqual({});
+    expect(milestoneDeco(20)).toEqual({ kant: true });
+  });
+});
+
+describe('цвет соперника (067-Р105, Т21)', () => {
+  it('К8 Р105: соперник — команда двора урока: цвет c1 (при зелёном c1 — c2), при слиянии с формой клуба второй цвет; сине-жёлтого нет ни при какой расцветке', () => {
+    // Ловит: форма соперника из другого места, чем фишки арены (rivalKitOf ≠ rivalBodyOf), соперник сливается с формой клуба, жёлтый соперник рядом с синим клубом.
+    for (const p of clubs.palettes) {
+      for (const lesson of [3, 17, 22, 32]) {
+        const team = rivalOf(lesson);
+        const rival = rivalKitOf(team, p);
+        expect(rival.body).toBe(rivalBodyOf(team, p));
+        expect(rival.trim).toBe(RIVAL_TRIM);
+        expect(yellowWithBlue(rival), `${p.body} урок ${lesson}`).toBe(false);
+      }
+    }
+    expect(rivalBodyOf(rivalOf(3), { body: '#2f9a27' })).toBe(rivalOf(3).c1); // урок 3 — «Старт», оранжевый, против зелёного клуба образца
+  });
+
+  it('К8 Р239: на всех 32 уроках и всех 9 расцветках клуба цвет соперника не сливается с основным цветом формы клуба', () => {
+    // Ловит: правило сверяет не с body (красный против красного у клуба #c8102e, фиолетовый против фиолетового), а подгоняет под зелёный клуб образца.
+    expect(clubs.palettes).toHaveLength(9);
+    for (const p of clubs.palettes) {
+      for (let lesson = 1; lesson <= 32; lesson++) {
+        const team = rivalOf(lesson);
+        expect(blends(rivalBodyOf(team, p), p.body), `${p.body} урок ${lesson} (${team.name})`).toBe(false);
+      }
+    }
   });
 });

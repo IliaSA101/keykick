@@ -457,8 +457,8 @@ describe('игрок: запись, чтение, rev', () => {
 
   it('реестр сборки — ровно разделы этапа Э1 (club, course:ru, seen) и волны 2 (wallet, day, school, form, stadium), без тестовых', () => {
     // Ловит: в реестр случайно попал тестовый раздел — он окажется в сохранениях детей; раздел этапа пропал или переименован.
-    // До этапа Э1 реестр был пуст (060-Р21); разделы зарегистрировала 063 Т5 — ожидание сменилось вместе с поведением; волна 2 (065-Т2, Р23) дописала wallet, day, school, form.
-    expect(SECTIONS.map((d) => d.name)).toEqual(['club', 'course:ru', 'seen', 'wallet', 'day', 'school', 'form', 'stadium']);
+    // До этапа Э1 реестр был пуст (060-Р21); разделы зарегистрировала 063 Т5 — ожидание сменилось вместе с поведением; волна 2 (065-Т2, Р23) дописала wallet, day, school, form; волна 4 (067 Т1) — path, album, shop, learn, base; 067 Т24 — coach.
+    expect(SECTIONS.map((d) => d.name)).toEqual(['club', 'course:ru', 'seen', 'wallet', 'day', 'school', 'form', 'stadium', 'path', 'album', 'shop', 'learn', 'base', 'coach']);
   });
 });
 

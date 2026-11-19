@@ -16,8 +16,9 @@ const num = (n: number): string => n.toLocaleString('ru-RU').replace(/\s/g, NB);
 /** Подстановка `{x}` в строку i18n. */
 export const fill = (s: string, vars: Record<string, string | number>): string => s.replace(/\{(\w+)\}/g, (_, k: string) => String(vars[k] ?? ''));
 
-const rival = (street: number): string => fill(t.rival, { street: streetName(street) }).replace(' ', NB);
-const whereOf = (home: boolean, street: number): string => fill(home ? t.homeGame : t.away, { rival: rival(street) });
+/** «двор на <улица>» с неразрывным пробелом после «двор»: подпись не рвётся после первого слова. `street` — улица в родительном падеже. */
+export const rivalName = (street: string): string => fill(t.rival, { street }).replace(' ', NB);
+const whereOf = (home: boolean, street: number): string => fill(home ? t.homeGame : t.away, { rival: rivalName(streetName(street)) });
 
 export interface MainText {
   /** Лента над кнопкой; вторая строка — метка вида урока. */

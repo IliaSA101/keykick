@@ -11,7 +11,7 @@ import KeyButton from '../kit/KeyButton.vue';
 import FansIcon from './FansIcon.vue';
 
 defineProps<{ card: ResultCardModel }>();
-defineEmits<{ primary: []; home: [] }>();
+defineEmits<{ primary: []; home: []; minute: [] }>();
 const t = ru.result;
 const coins = [0, 1, 2];
 </script>
@@ -72,6 +72,12 @@ const coins = [0, 1, 2];
           </button>
           <small>{{ card.help.note }}</small>
         </div>
+        <KeyButton
+          v-if="card.minute"
+          @click="$emit('minute')"
+        >
+          {{ card.minute }}
+        </KeyButton>
         <KeyButton
           quiet
           @click="$emit('home')"
@@ -163,6 +169,12 @@ const coins = [0, 1, 2];
           @click="$emit('primary')"
         >
           {{ card.primary.label }}
+        </KeyButton>
+        <KeyButton
+          v-if="card.minute"
+          @click="$emit('minute')"
+        >
+          {{ card.minute }}
         </KeyButton>
         <KeyButton
           quiet

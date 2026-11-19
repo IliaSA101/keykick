@@ -10,7 +10,7 @@ import type { AnswerInput } from '../../engine/school/answers';
 import type { Task } from '../../engine/school/tasks';
 import { ru } from '../../i18n/ru';
 import AnswerField from './AnswerField.vue';
-import type { PaperVerdict } from './paper';
+import { keysOf, svgSrc, type PaperVerdict } from './paper';
 
 const props = defineProps<{
   task: Task;
@@ -18,6 +18,8 @@ const props = defineProps<{
   /** Подсказка «ответ не принят»; null — нет. */
   hint?: string | null;
   verdict?: PaperVerdict | null;
+  /** Выбор цифрами-клавишами (Школа, 067-Р7); без него — буквы (пенальти). */
+  digits?: boolean | undefined;
   /** Кадр стенда: лист уже прокручен до конца (Э1.21). */
   scrollEnd?: boolean | undefined;
 }>();
@@ -29,6 +31,8 @@ const kindText = computed(() => {
   return a.kind === 'fraction' && a.mixed ? t.kind.mixed : t.kind[a.kind];
 });
 const locked = computed(() => props.verdict != null);
+/** Строка клавиш под листом: по виду ответа — общая `keysOf`. */
+const keysText = computed(() => keysOf(props.task.answer.kind, props.digits === true));
 
 // прокрутка: «листай вниз» и затухание — пока под листом есть что читать
 const scroller = ref<HTMLElement | null>(null);
@@ -66,14 +70,24 @@ watch(() => props.task.id, () => void nextTick(measure));
         tabindex="-1"
         @scroll="measure"
       >
-        <p class="q">
-          {{ task.text }}
-        </p>
+        <div class="row">
+          <p class="q">
+            {{ task.text }}
+          </p>
+          <img
+            v-if="task.figure"
+            class="fig"
+            alt=""
+            :src="svgSrc(task.figure)"
+          >
+        </div>
         <AnswerField
+          :key="task.id"
           :answer="task.answer"
           :model-value="input"
           :locked="locked"
           :reveal="locked"
+          :digits="digits"
           @update:model-value="emit('update:input', $event)"
         />
       </div>
@@ -122,7 +136,7 @@ watch(() => props.task.id, () => void nextTick(measure));
         >
           {{ t.go }}
         </button>
-        <span class="note">{{ task.answer.kind === 'choice' || task.answer.kind === 'multi' ? t.keysChoice : t.keys }}</span>
+        <span class="note">{{ keysText }}</span>
         <button
           type="button"
           class="skip"
@@ -141,7 +155,9 @@ watch(() => props.task.id, () => void nextTick(measure));
 .paper { display: flex; flex-direction: column; left: 50%; margin-left: -380px; width: 760px; top: 136px; max-height: 476px; padding-bottom: 12px; }
 .scroll { position: relative; flex: 1 1 auto; min-height: 0; margin-top: 6px; border-top: 1px solid #ecebf2; border-bottom: 1px solid #ecebf2; display: flex; }
 .body { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 6px 10px 0; scrollbar-width: thin; }
-.q { margin: 0 0 8px; font-size: 18px; white-space: pre-line; }
+.row { display: flex; gap: 22px; align-items: flex-start; }
+.q { flex: 1; margin: 0 0 8px; font-size: 18px; white-space: pre-line; }
+.fig { flex: none; width: 180px; height: 126px; }
 .fade { position: absolute; left: 0; right: 14px; bottom: 0; height: 56px; background: linear-gradient(rgb(255 255 255 / 0), #fff 85%); pointer-events: none; }
 .more { position: absolute; left: 50%; transform: translateX(-50%); bottom: 8px; padding: 6px 14px; border-radius: 999px; background: #2a2840; color: #fff; font-size: 14px; font-weight: 700; white-space: nowrap; box-shadow: 0 4px 12px rgb(0 0 0 / 0.25); pointer-events: none; }
 .warn { margin: 8px 0 0; color: var(--paper-wrong); font-size: 15px; font-weight: 700; }

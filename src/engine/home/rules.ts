@@ -46,9 +46,10 @@ export function mainAction(i: HomeInput): MainAction {
   };
 }
 
-/** Мечта в шапке (ТЗ-10.1): в день 1 — наклейка; дальше ближайшая некупленная вещь дороже порога. */
+/** Мечта в шапке (ТЗ-10.1): в день 1 — наклейка, пока не куплена; дальше ближайшая некупленная вещь дороже порога. */
 export function dreamOf(i: HomeInput): Dream {
-  const pick = i.day === 1 ? cfg.catalog[0] : cfg.catalog.find((c) => c.price > cfg.dream.above && !i.bought.includes(c.id));
+  const first = cfg.catalog[0];
+  const pick = i.day === 1 && first && !i.bought.includes(first.id) ? first : cfg.catalog.find((c) => c.price > cfg.dream.above && !i.bought.includes(c.id));
   if (!pick) return { kind: 'done', pct: 100 };
   if (i.cur < pick.from) return { kind: 'locked', item: pick.id, from: pick.from, pct: 0 };
   if (i.coins >= pick.price) return { kind: 'buy', item: pick.id, pct: 100 };

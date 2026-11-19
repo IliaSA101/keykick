@@ -1,0 +1,28 @@
+{
+  "about": "Учебные игры (067 Т4, ТЗ-7.2–7.6, 3.3; таблица «Игры» спеки 057). Id игр навсегда (059). lesson — урок-запас, tour — тур «Школы»: игра открыта по тому, что раньше (tour null — только по уроку). t — время «золота», секунды; norm — норма игры в минутах для ставки (≈ 1,5 × t; подстановка 067-Р23, пока не замерено проходом тестировщика по ТЗ-7.5).",
+  "rate": { "factor": 0.8, "divisor": 20, "min": 1, "max": 6, "first": 2, "window": 3 },
+  "rights": { "minBronze": 2, "showMs": 10000 },
+  "play": {
+    "why": "067-Р23",
+    "arrows": { "cols": 8, "rows": 5, "defenders": [5, 7, 9] },
+    "mouse": { "clicks": 5, "carries": 3, "radius": 8 },
+    "tab": { "passes": 5, "players": 6, "numberMax": 30 },
+    "keyboard": { "tray": 10 },
+    "forms": {
+      "squad": ["choice", "multi", "pictures"],
+      "board": ["fields", "expr", "fraction", "fields"],
+      "roster": ["select", "select", "select", "select", "select"],
+      "pairs": ["match", "match"]
+    }
+  },
+  "games": [
+    { "id": "arrows", "lesson": 1, "tour": null, "t": 35, "norm": 0.88, "why": "067-Р23" },
+    { "id": "mouse", "lesson": 2, "tour": null, "t": 30, "norm": 0.75, "why": "067-Р23" },
+    { "id": "tab", "lesson": 3, "tour": null, "t": 30, "norm": 0.75, "why": "067-Р23" },
+    { "id": "keyboard", "lesson": 6, "tour": null, "t": 45, "norm": 1.13, "why": "067-Р23" },
+    { "id": "squad", "lesson": 9, "tour": 5, "t": 50, "norm": 1.25, "why": "067-Р23" },
+    { "id": "board", "lesson": 12, "tour": 7, "t": 50, "norm": 1.25, "why": "067-Р23" },
+    { "id": "roster", "lesson": 18, "tour": 13, "t": 45, "norm": 1.13, "why": "067-Р23" },
+    { "id": "pairs", "lesson": 24, "tour": 17, "t": 50, "norm": 1.25, "why": "067-Р23" }
+  ]
+}

@@ -32,9 +32,11 @@ export interface StadiumView {
   tablo: { kind: 'none' | 'fans' | 'over'; n: number; goal: boolean };
 }
 
+/** Сколько ступеней Двора построено на уроке `cur` (за титул `end` — все): единственное место, откуда Дом и догрузка графики берут ступень. */
+export const builtOf = (cur: number, end = false): number => Math.min(cfg.stepsTotal, STEPS.filter((s) => s.after < cur).length + (end ? 1 : 0));
+
 export function stadiumView(i: HomeInput): StadiumView {
-  const done = STEPS.filter((s) => s.after < i.cur).length;
-  const built = Math.min(cfg.stepsTotal, done + (i.end ? 1 : 0));
+  const built = builtOf(i.cur, i.end);
   const next = STEPS.find((s) => s.after >= i.cur);
   const owned = Array.from({ length: Math.min(built, cfg.stepsTotal) }, (_, k) => k + 1).filter((k) => stageGold(i, k));
   const enough = total(i) >= cfg.gold.fromStars;

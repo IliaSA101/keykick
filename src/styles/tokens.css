@@ -36,6 +36,13 @@
   --paper-correct: #1b6e2f;
   --paper-wrong: #b3261e;
   --paper-note: #f3f5f8;
+  --paper-node: #9b98ab; /* точка соединялки */
+  --paper-muted: #6b6b76;
+  --paper-ring: #8a8a96; /* кружок с цифрой у варианта */
+  --paper-ring-text: #4a4a55;
+  --paper-ok-bg: #eef7ef;
+  --paper-bad-bg: #fdeeed;
+  --paper-selected: #f1f1f4;
 
   /* Зоны пальцев: левая и правая рука — зеркальные пары одного цвета, как в учебниках.
      Здесь яркие цвета (нужная клавиша и палец); приглушённые компоненты смешивают с --surface. */

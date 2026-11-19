@@ -12,28 +12,34 @@ import { quiet, shownOf, type Shown } from '../../app/match/effects';
 import { frameRun, type FrameMatch } from '../../app/match/frame';
 import { finishRun, matchRead } from '../../app/match/finish';
 import { openPenalty, skipPenalty, submitPenalty, typeInto, type PenaltyFlow } from '../../app/match/penaltyFlow';
+import { rivalName } from '../../app/home/texts';
 import { tasks } from '../../app/school/tasks';
 import { putFinished } from '../../app/match/handoff';
 import { matchJournal } from '../../app/journal/app';
+import { useMatchBreak } from '../../app/match/breakFlow';
 import { usePack } from '../../app/packs/usePack';
 import { useSession } from '../../app/save/session';
+import RightsCard from '../../components/break/RightsCard.vue';
 import KeyButton from '../../components/kit/KeyButton.vue';
 import ShellHeader from '../../components/shell/ShellHeader.vue';
 import { soundOn } from '../../components/shell/sound';
 import { stageScale } from '../../components/shell/stageScale';
-import { clubDef, type Club, type ClubKit } from '../../engine/club/section';
+import { rivalKitOf } from '../../engine/club/rival';
+import { rivalOf } from '../../engine/cup/teams';
+import { clubDef, type Club } from '../../engine/club/section';
 import { ruCourseDef } from '../../engine/course/section';
 import { dayDef } from '../../engine/day/section';
-import { streetName, streetOf } from '../../engine/home';
+import { matchIdOf } from '../../engine/journal';
 import { isComeback, type MatchSave, type RunningMatch } from '../../engine/match';
 import { pickPenaltyTask, parseTasks, type Task } from '../../engine/school/tasks';
 import { correctInput, type AnswerInput } from '../../engine/school/answers';
 import { ru } from '../../i18n/ru';
+import BreakLearn from './BreakLearn.vue';
 import ComebackBanner from './ComebackBanner.vue';
 import MatchScene from './MatchScene.vue';
 import MatchWindows from './MatchWindows.vue';
 import PenaltyWindow from './PenaltyWindow.vue';
-import { litCodes, viewOf, withShow } from './view';
+import { litCodes, viewOf, withPenaltySheet, withShow } from './view';
 import leagues from '../../content/courses/ru/leagues.json';
 
 /** Кадр стенда (065 К-Г): матч доигран до места по фикстуре, без клавиш, таймеров и записи. */
@@ -52,13 +58,14 @@ const today = (): string => new Date().toLocaleDateString('sv-SE');
 const player = computed(() => (session.player.value.kind === 'ok' ? session.player.value : null));
 const sec = <T,>(def: { name: string; empty(): T }): T => (player.value?.env.sections[def.name]?.data as T | undefined) ?? def.empty();
 const club = computed<Club>(() => sec(clubDef));
-const rivalKit = (k: ClubKit): ClubKit => ({ pattern: k.pattern, body: '#f28a1c', sleeves: 'split', trim: '#1f1f1f' });
 
 // --- ход матча
 const shown = ref<Shown>(quiet());
 const run = shallowRef<Run | null>(null);
 const started = ref(false);
 const newKeys = ref('');
+/** Буквы, выученные к уроку матча (`keys` урока): от них зависит, собирается ли учебная игра. */
+const lessonKeys = ref('');
 const lessonNo = ref(1);
 const matchId = ref('');
 const finished = ref(false);
@@ -73,14 +80,17 @@ function begin(): void {
   const lessons = lessonsOf(p, 'yard', count);
   const cur = sec(ruCourseDef).current;
   const want = router.currentRoute.value.query.lesson; // Карта передаёт выбранный урок (065-Р90); без него — текущий
-  const picked = (props.frame ? lessons.find((l) => l.n === props.frame?.lesson) : (lessons.find((l) => l.id === want) ?? lessons.find((l) => l.id === cur))) ?? lessons[0];
+  const frameLesson = props.frame ? lessons.find((l) => l.n === props.frame?.lesson) : undefined;
+  if (props.frame && !frameLesson) throw new Error(`frame: no lesson ${props.frame.lesson}`); // кадр не берёт молча урок 1 (как `frameRun`)
+  const picked = frameLesson ?? lessons.find((l) => l.id === want) ?? lessons.find((l) => l.id === cur) ?? lessons[0];
   if (!picked) return;
   const t0 = now();
   comeback.value = props.frame ? props.frame.banner === 'comeback' : isComeback(sec(dayDef).last, t0);
   const lesson = comeback.value && !props.frame ? comebackLesson(lessons, picked) : picked; // ТЗ-2.11: не строже пройденного
   lessonNo.value = lesson.n;
   newKeys.value = lesson.newKeys;
-  matchId.value = `m-${player.value.pid}-${t0}`;
+  lessonKeys.value = lesson.keys;
+  matchId.value = matchIdOf(player.value.pid, t0);
   if (props.frame) {
     run.value = frameRun(buildStart(lesson, props.frame.seed, dictionaryOf()), props.frame.spec);
     started.value = props.frame.started;
@@ -104,7 +114,11 @@ function frameFlow(show: NonNullable<FrameMatch['show']>): PenaltyFlow {
 watch([pack.state, player], begin, { immediate: true });
 
 const state = computed<RunningMatch | null>(() => (run.value && run.value.state.phase !== 'idle' ? run.value.state : null));
-const view = computed(() => (state.value ? withShow(viewOf(state.value), props.frame?.show, state.value.keymap) : null));
+const view = computed(() => {
+  if (!state.value) return null;
+  const v = withShow(viewOf(state.value), props.frame?.show, state.value.keymap);
+  return flow.value === null ? v : withPenaltySheet(v);
+});
 const phase = computed(() => state.value?.phase ?? 'idle');
 
 // --- возгласы и звук
@@ -185,6 +199,8 @@ function closeAll(): void {
 const secondHalf = (): void => {
   if (run.value) apply(feed(run.value, { type: 'half2', t: now() }));
 };
+/** Перерыв с учебной игрой и «Права на компьютер» (067 Т17, Т18): состояние и «Второй тайм» — `app/match/breakFlow.ts`. */
+const { learn, learnOpen, learnSecond, rightsClosed, ownerLine } = useMatchBreak(session, { frame: props.frame, phase, lessonNo, lessonKeys, club, now, day: today, secondHalf });
 const start = (): void => void (started.value = true);
 
 /** Клавиши листа: Enter — ответить (после ответа — дальше), Пробел после ответа — дальше, Esc — пауза, как во всём матче (065-Р122 «а», ТЗ-2.21); «Не бить» — кнопкой; печать не идёт. */
@@ -210,7 +226,7 @@ function penaltyKey(e: KeyboardEvent, f: PenaltyFlow): void {
 
 function onKey(e: KeyboardEvent): void {
   const r = run.value;
-  if (!r || finished.value) return;
+  if (e.defaultPrevented || !r || finished.value || learn.entry.value !== null || learn.rights.value !== null) return; // клавиши окна учебной игры и «Прав» — их собственные
   if (flow.value !== null && r.overlay === 'none') {
     penaltyKey(e, flow.value);
     return;
@@ -264,14 +280,14 @@ onUnmounted(() => {
 });
 
 // --- вступление (окна — MatchWindows.vue)
-const NB = ' ';
 const lessonInfo = computed(() => {
   const s = state.value;
   const text = pack.pack.value?.text.ru?.lessons[s?.lessonId ?? ''];
   return { name: text?.name ?? '', keys: newKeys.value, tip: (text as { tip?: string[] } | undefined)?.tip?.[0] ?? '' };
 });
-const rivalName = computed(() => {
-  const s = ru.home.rival.replace('{street}', props.frame?.show?.street ?? streetName(streetOf(lessonNo.value))).replace(' ', NB);
+const rival = computed(() => rivalOf(lessonNo.value));
+const rivalTitle = computed(() => {
+  const s = rivalName(props.frame?.show?.street ?? rival.value.street);
   return s.charAt(0).toUpperCase() + s.slice(1);
 });
 const overlay = computed(() => run.value?.overlay ?? 'none');
@@ -283,11 +299,11 @@ const overlay = computed(() => run.value?.overlay ?? 'none');
       <MatchScene
         :view="view"
         :kit="club.kit"
-        :rival-kit="rivalKit(club.kit)"
+        :rival-kit="rivalKitOf(rival, club.kit)"
         :us="{ name: club.name || t.sides.us, backName: club.backName, backNumber: club.backNumber }"
-        :rival="{ name: rivalName, city: club.city }"
+        :rival="{ name: rivalTitle, city: club.city }"
         :width="width"
-        :layout="flow ? undefined : state.layout"
+        :layout="flow || learnOpen ? undefined : state.layout"
         :shout="shown.shout"
         :bump="shown.bump"
         :lit="started ? [] : litCodes(newKeys, state.keymap, state.layout)"
@@ -297,7 +313,7 @@ const overlay = computed(() => run.value?.overlay ?? 'none');
       />
       <ShellHeader
         match
-        :pause="overlay === 'none'"
+        :pause="overlay === 'none' && !learnOpen"
         @pause="act('pause')"
       />
 
@@ -317,12 +333,36 @@ const overlay = computed(() => run.value?.overlay ?? 'none');
         :overlay="overlay"
         :started="started"
         :info="lessonInfo"
+        :plan="learn.plan.value"
+        :after="learn.after.value"
         @act="act"
         @start="start"
         @second="secondHalf"
+        @learn="(id) => void learn.open(id)"
         @close-all="closeAll"
         @home="router.push('/home')"
         @leave="router.push('/map')"
+      />
+      <BreakLearn
+        v-if="learn.entry.value"
+        :entry="learn.entry.value"
+        :deps="learn.deps"
+        :fail="learn.fail.value"
+        :kit-body="club.kit.body"
+        :rival-body="rivalKitOf(rival, club.kit).body"
+        :layout="state.layout"
+        @close="learn.close()"
+        @second="learnSecond"
+        @next="(id) => void learn.open(id)"
+        @again="void learn.again()"
+        @done="learn.done"
+      />
+      <RightsCard
+        v-if="learn.rights.value && learn.entry.value === null"
+        :card="learn.rights.value.card"
+        :fresh="learn.rights.value.fresh"
+        :owner="ownerLine"
+        @close="rightsClosed"
       />
     </template>
     <p

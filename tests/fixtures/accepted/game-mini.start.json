@@ -1,0 +1,137 @@
+{
+ "id": "game-mini.start",
+ "codes": {
+  "1920": "Э4.21"
+ },
+ "screen": "game-mini",
+ "route": "/base/mini",
+ "state": "Старт: 2×2, день открытия",
+ "clock": {
+  "now": 1794996000000,
+  "day": "2026-11-18"
+ },
+ "seed": 146015,
+ "player": {
+  "pid": "p1",
+  "name": "Саша"
+ },
+ "sections": {
+  "course:ru": {
+   "current": "ru.yard.yd",
+   "lessons": {
+    "ru.yard.ao": {
+     "stars": 3,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.ao-pairs": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    }
+   },
+   "archive": {},
+   "leaguesDone": {}
+  },
+  "wallet": {
+   "coins": 64,
+   "rest": 0,
+   "paid": []
+  },
+  "day": {
+   "played": 9,
+   "days": 3,
+   "today": "2026-11-18",
+   "todayN": 1,
+   "last": 1794992400000
+  },
+  "stadium": {
+   "fans": 2680,
+   "goals": 0
+  },
+  "club": {
+   "name": "Прогресс",
+   "city": "Тверь",
+   "coach": "",
+   "backName": "САША",
+   "backNumber": 7,
+   "kit": {
+    "pattern": "plain",
+    "body": "#2f9a27",
+    "sleeves": "#ffffff",
+    "trim": "#ffffff"
+   }
+  },
+  "base": {
+   "day": null,
+   "today": 0,
+   "records": {},
+   "lastN": {},
+   "played": [],
+   "last": null,
+   "seen": [
+    "keepy"
+   ]
+  },
+  "learn": {
+   "games": {
+    "arrows": {
+     "step": 2,
+     "plays": 3,
+     "best": 40000,
+     "last": "2026-11-17"
+    },
+    "mouse": {
+     "step": 2,
+     "plays": 3,
+     "best": 40000,
+     "last": "2026-11-17"
+    },
+    "tab": {
+     "step": 2,
+     "plays": 3,
+     "best": 40000,
+     "last": "2026-11-17"
+    }
+   },
+   "recent": []
+  },
+  "seen": {
+   "news": "2.0.0",
+   "firsts": {
+    "base": "2026-11-17"
+   }
+  }
+ },
+ "base": {
+  "mini": {
+   "phase": "start",
+   "seed": 54
+  }
+ }
+}

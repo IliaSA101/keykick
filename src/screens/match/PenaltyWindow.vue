@@ -27,7 +27,16 @@ const hint = computed(() => (props.flow.hint === null ? null : t.hint[props.flow
 
 <template>
   <div class="penalty">
-    <p class="lead">
+    <p
+      v-if="verdict?.kind === 'goal'"
+      class="goal"
+    >
+      {{ ru.base.mini.events.goal }}
+    </p>
+    <p
+      v-else
+      class="lead"
+    >
       {{ t.penalty.lead }} <span>{{ t.penalty.sub }}</span>
     </p>
     <TaskPaper
@@ -46,7 +55,12 @@ const hint = computed(() => (props.flow.hint === null ? null : t.hint[props.flow
 
 <style scoped>
 .lead { position: absolute; top: 100px; left: 50%; margin: 0 0 0 -370px; width: 740px; font-size: 22px; font-weight: 800; color: var(--text); z-index: 3; }
+.goal { position: absolute; top: 84px; left: 50%; margin: 0 0 0 -370px; width: 740px; text-align: center; font-size: 40px; font-weight: 900; color: var(--accent); text-shadow: 0 3px 0 #7a5a10, 0 5px 14px rgb(0 0 0 / 0.7); z-index: 3; }
 .lead span { color: var(--text-muted); font-weight: 700; }
 .penalty { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
 .penalty :deep(.sheet) { pointer-events: auto; }
+/* итог «гол» — в одну строку, как на эталоне Э1.19: слова владельца длиннее эталонных, поэтому кегль 15 и зазор 10 (067 Т22) */
+.penalty :deep(.verdict) { font-size: 15px; gap: 10px; }
+.penalty :deep(.verdict:not(.bad) > span:first-child) { white-space: nowrap; }
+.penalty :deep(.verdict .badge), .penalty :deep(.verdict .next) { white-space: nowrap; }
 </style>

@@ -12,5 +12,5 @@ export type { Assist, Stars } from './stars';
 export { recordOf } from './record';
 export type { RecordKind, RecordValue, RecordView } from './record';
 export { playStats, totalOf } from './verdict';
-export { finishMatch, finishMinute, matchPatch } from './finish';
-export type { FinishCtx, MatchSave, Missing, MinuteView, ResultView } from './finish';
+export { finishMatch, finishMinute, matchPatch, minutePatch } from './finish';
+export type { FinishCtx, MatchSave, Missing, MinuteSave, MinuteView, ResultView } from './finish';

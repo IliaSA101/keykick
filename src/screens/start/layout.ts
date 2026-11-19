@@ -5,19 +5,11 @@
  * `tools/mock-story/start.mjs` (кадры 1920 и 1024); реплика тренера — на месте тренера Дома (`components/panel/coachWidth.ts`, 063-Р49), «Твой клуб», выбор тренера и приветствие — `tools/mock-collection/e2k-club.mjs`.
  */
 import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
+import type { Place } from '../../components/club/places';
 import { isNarrowStage, stageScale } from '../../components/shell/stageScale';
-
-export interface Place {
-  width: number;
-  top: number;
-}
 
 /** Окна «Новый клуб», «Клуб пропал?», «Файл не подошёл», «Клуб вернулся» (Э6.71, 73, 75, 79, 81). */
 export const SYSTEM_WINDOW: Place = { width: 600, top: 190 };
-/** «Твой клуб» (Э2К.36): окно-список, прижат слева внутри (`left`). */
-export const CLUB_WINDOW: Place = { width: 860, top: 96 };
-/** Приветствие тренера (Э2К.41). */
-export const GREET_WINDOW: Place = { width: 460, top: 220 };
 
 /** «Что изменится» (Э6.77): на 1920 — 760 / 110, на 1024 — 700 / 16. */
 export const checkWindow = (narrow: boolean): Place => (narrow ? { width: 700, top: 16 } : { width: 760, top: 110 });

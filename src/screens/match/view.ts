@@ -76,6 +76,9 @@ export function viewOf(s: RunningMatch): MatchView {
   };
 }
 
+/** Пока лист пенальти на экране (в том числе вердикт «гол»), справа на табло — «Пенальти», а не номер атаки (Э1.19; 067 Т22). */
+export const withPenaltySheet = (v: MatchView): MatchView => ({ ...v, detail: ru.match.phase.penalty });
+
 /** Кадр стенда (065-Р96): подставляет строки, цель и номер строки из кадра; без `show` — вид как есть. Неизвестная клавиша — ошибка. */
 export function withShow(v: MatchView, show: FrameShow | undefined, keymap: Keymap): MatchView {
   if (show === undefined) return v;

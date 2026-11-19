@@ -6,7 +6,7 @@ import { courseLessons, dictionary } from '../course/yard';
 import { frameRun } from '../../src/app/match/frame';
 import { buildStart } from '../../src/app/match/run';
 import type { RunningMatch } from '../../src/engine/match';
-import { viewOf, withShow } from '../../src/screens/match/view';
+import { viewOf, withPenaltySheet, withShow } from '../../src/screens/match/view';
 
 const start = (n: number) => buildStart(courseLessons.find((l) => l.n === n)!, 51932, dictionary);
 const at = (n: number, spec: Parameters<typeof frameRun>[1]): RunningMatch => {
@@ -64,6 +64,30 @@ describe('К-Т9г: frameRun — матч до нужного места', () =>
   });
 });
 
+describe('К13 Р160: frameRun — стоп в перерыве (окно учебной игры, Э8)', () => {
+  it('К13 Р160: toBreak — матч стоит в перерыве со счётом 1 : 0, на уроках учебных игр', () => {
+    // Ловит: кадр игры на фоне вступления или «Второго тайма» вместо перерыва (в шапке «Разминка 0 : 0», а не «Перерыв 1 : 0»).
+    for (const n of [1, 2, 3, 6, 9, 12, 18, 24]) {
+      const s = at(n, { outcomes: '', toBreak: true });
+      expect(s.phase, `урок ${n}`).toBe('break');
+      expect(s.score, `урок ${n}`).toEqual({ me: 1, opp: 0 });
+      expect(s.typing).toBeNull();
+    }
+  });
+
+  it('К13 Э1.16, 29, 30: исходы на весь первый тайм («gggc») с toBreak — перерыв со счётом 3 : 1, а не второй тайм', () => {
+    // Ловит: `frameRun` проходит перерыв внутри строки исходов и бросает «no break before phase half2» — кадр стенда «Ой, что-то сломалось».
+    const s = at(3, { outcomes: `${warmOf(3)}gggc`, toBreak: true });
+    expect(s.phase).toBe('break');
+    expect(s.score).toEqual({ me: 3, opp: 1 });
+  });
+
+  it('К13: исход после перерыва с toBreak — ошибка, а не молчаливая потеря', () => {
+    // Ловит: `toBreak` обрезает лишние исходы (`gggcgg`) без ошибки — кадр собирается не с тем, что записано в фикстуре.
+    expect(() => at(3, { outcomes: `${warmOf(3)}gggcgg`, toBreak: true })).toThrow(/after break/);
+  });
+});
+
 describe('К7: frameRun — пенальти (Э1.18, Э1.19)', () => {
   const half1 = (n: number): number => at(n, { outcomes: '' }).plan.filter((a) => a.phase === 'half1').length;
   /** Разминка, 1-й тайм «ggcs…» и первая чистая атака 2-го тайма — именно после неё матч предлагает пенальти. */
@@ -83,6 +107,15 @@ describe('К7: frameRun — пенальти (Э1.18, Э1.19)', () => {
     expect(s.penalty).toEqual({ offered: true, scored: true });
     expect(s.score).toEqual({ me: 3, opp: 1 }); // печать — 3 гола, пенальти идёт отдельно (звезду не даёт, М4)
     expect(viewOf(s).score).toEqual({ me: 4, opp: 1 }); // а табло показывает общий счёт (Э1.19: «Счёт матча 4 : 1»)
+  });
+
+  it('К22: пока лист пенальти открыт, справа на табло «Пенальти», а не «Атака N из M» (Э1.19), слева — «2-й тайм»', () => {
+    const v = viewOf(at(3, { outcomes: upTo(3), penalty: 'hit' }));
+    expect(v.detail).toMatch(/^Атака \d из \d$/); // без листа — номер атаки, как до правки
+    const open = withPenaltySheet(v);
+    expect(open.detail).toBe('Пенальти');
+    expect(open.phase).toBe('2-й тайм');
+    expect(open.score).toEqual({ me: 4, opp: 1 });
   });
 
   it('К7: без поля penalty пенальти пропускается, как раньше (старые кадры не меняются)', () => {

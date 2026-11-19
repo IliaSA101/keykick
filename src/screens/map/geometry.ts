@@ -1,17 +1,9 @@
 /**
- * Координаты Карты Двора (065 Т8): доли кадра из `content/map-yard.json` → px сцены. Картинка карты 1920×1072 лежит «cover»
- * по высоте 640 и по центру ширины сцены (как у Дома, `components/home/geometry.ts`). Чистые функции.
+ * Линии и места Карты Двора (065 Т8): маршрут, ярлыки дворов, автобус. Привязка кадра к сцене (`H`, `pointOf`) — в
+ * `components/home/yardGeometry.ts` (общая с Путём клуба). Чистые функции.
  */
 import cfg from '../../content/map-yard.json';
-
-export const H = 640;
-/** Ширина картинки в сцене, px. */
-export const IW: number = cfg.frame.w;
-export type Pt = [number, number];
-
-/** Сдвиг картинки по ширине сцены `W`. */
-export const offOf = (W: number): number => (W - IW) / 2;
-export const pointOf = (W: number, [fx, fy]: readonly number[]): Pt => [offOf(W) + fx! * IW, fy! * H];
+import { pointOf, type Pt } from '../../components/home/yardGeometry';
 
 /** Гладкая линия через точки (Catmull-Rom → кривые Безье), как `smooth` макета. */
 export function smooth(pts: readonly Pt[]): string {

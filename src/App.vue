@@ -19,7 +19,7 @@ const name = computed(() => (session.player.value.kind === 'ok' ? session.player
   <StageScale>
     <ShellHeader
       v-if="!bare"
-      :page="String(route.name ?? '')"
+      :page="String(route.meta.menu ?? route.name ?? '')"
     />
     <RouterView />
     <SessionNotice

@@ -3,7 +3,7 @@
  * Чистые функции без Vue и DOM: случайность — от зерна. Строки атак тайма — в `attack.ts`.
  */
 import { HOME_KEYS, lettersOf, unique } from './lessonModel';
-import { createRandom, randomInt } from '../random';
+import { createRandom, randomInt, shuffle } from '../random';
 import type { Keymap } from '../typing/keymap';
 import type { TypingStats } from '../typing/typing';
 import type { CourseLesson, Dictionary } from './lesson';
@@ -17,11 +17,7 @@ const SALT_WARMUP = 0x5eed;
 function letterStream(rnd: () => number, letters: readonly string[], count: number): string[] {
   const out: string[] = [];
   while (out.length < count) {
-    const round = [...letters];
-    for (let i = round.length - 1; i > 0; i--) {
-      const j = randomInt(rnd, i + 1);
-      [round[i], round[j]] = [round[j] ?? '', round[i] ?? ''];
-    }
+    const round = shuffle(rnd, letters);
     if (round.length > 1 && round[0] === out.at(-1)) round.push(round.shift() ?? '');
     out.push(...round);
   }

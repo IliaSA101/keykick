@@ -7,23 +7,28 @@
  */
 import { nextTick, onMounted, ref, watch } from 'vue';
 import { artUrl, type ArtKey } from '../../art/assets';
-import { bodyBox, paintKit, shirtInk, type BodyBox, type KitLayers } from '../../engine/club/paint';
+import { bodyBox, paintKit, shirtInk, type BodyBox, type KitDeco, type KitLayers } from '../../engine/club/paint';
 import { opaqueBox, outfitFor, paintZones, type OpaqueBox } from '../../engine/club/outfit';
 import type { ClubKit } from '../../engine/club/section';
 
-const props = withDefaults(defineProps<{ kit: ClubKit; back?: { name: string; number: number } | null; label?: string; part?: 'shirt' | 'shorts' | 'socks'; crop?: boolean }>(), { back: null, label: '', part: 'shirt', crop: false });
+/** Виды: футболка спереди и сзади, шорты и гетры; «на вешалке» (067 Т13 ш6) — футболка с опущенными рукавами спиной, шорты под вешалкой, гетры парой через штангу. */
+type Part = 'shirt' | 'shorts' | 'socks' | 'hang' | 'shortsHang' | 'socksBar';
+const props = withDefaults(defineProps<{ kit: ClubKit; back?: { name: string; number: number } | null; label?: string; part?: Part; crop?: boolean; deco?: KitDeco }>(), { back: null, label: '', part: 'shirt', crop: false, deco: () => ({}) });
 
 interface Base {
   layers: KitLayers;
   box: BodyBox | null;
   frame: OpaqueBox | null;
 }
-type View = 'front' | 'back' | 'shorts' | 'socks';
+type View = 'front' | 'back' | 'shorts' | 'socks' | 'hang' | 'shortsHang' | 'socksBar';
 const KEYS: Record<View, [ArtKey, ArtKey]> = {
   front: ['kitZones', 'kitShade'],
   back: ['kitBackZones', 'kitBackShade'],
   shorts: ['shortsZones', 'shortsShade'],
   socks: ['socksZones', 'socksShade'],
+  hang: ['albumKitHangZones', 'albumKitHangShade'],
+  shortsHang: ['albumKitShortsHangZones', 'albumKitShortsHangShade'],
+  socksBar: ['albumKitSocksBarZones', 'albumKitSocksBarShade'],
 };
 const pending: Partial<Record<View, Promise<Base>>> = {};
 
@@ -44,7 +49,7 @@ function loadBase(view: View): Promise<Base> {
   pending[view] ??= Promise.all([pixels(KEYS[view][0]), pixels(KEYS[view][1])])
     .then(([zones, shade]) => {
       const layers: KitLayers = { width: zones.width, height: zones.height, zones: zones.data, shade: shade.data };
-      return { layers, box: view === 'front' || view === 'back' ? bodyBox(layers, view === 'back') : null, frame: opaqueBox(layers) };
+      return { layers, box: view === 'front' || view === 'back' || view === 'hang' ? bodyBox(layers, view !== 'front') : null, frame: opaqueBox(layers) };
     })
     .catch((e: unknown) => {
       delete pending[view]; // сбой сети не оставляет форму пустой навсегда: следующий показ пробует снова
@@ -74,6 +79,7 @@ function text(g: CanvasRenderingContext2D, s: string, x: number, y: number, size
 async function draw(): Promise<void> {
   const mine = ++drawing;
   const view: View = props.part === 'shirt' ? (props.back ? 'back' : 'front') : props.part;
+  const isShirt = view === 'front' || view === 'back' || view === 'hang';
   const { layers, box, frame } = await loadBase(view);
   if (mine !== drawing) return;
   // обрезка по рамке предмета; смена размера холста стирает картинку, поэтому рисуем после того, как Vue применил размер
@@ -84,13 +90,14 @@ async function draw(): Promise<void> {
   const g = el?.getContext('2d');
   if (!el || !g || mine !== drawing) return;
   let rgba: Uint8ClampedArray<ArrayBuffer>;
-  if (props.part === 'shirt' && box) rgba = paintKit(layers, props.kit, box);
+  if (isShirt && box) rgba = paintKit(layers, props.kit, box, props.deco);
   else {
     const o = outfitFor(props.kit);
-    rgba = paintZones(layers, props.part === 'shorts' ? [o.shorts.body, o.shorts.stripe, o.shorts.waist] : [o.socks.leg, o.socks.top, o.socks.foot]);
+    const shorts = view === 'shorts' || view === 'shortsHang';
+    rgba = paintZones(layers, shorts ? [o.shorts.body, o.shorts.stripe, o.shorts.waist] : [o.socks.leg, o.socks.top, o.socks.foot]);
   }
   g.putImageData(new ImageData(rgba, layers.width, layers.height), -c.x, -c.y, c.x, c.y, c.w, c.h);
-  if (props.part === 'shirt' && props.back && box) {
+  if (isShirt && props.back && box) {
     g.setTransform(1, 0, 0, 1, -c.x, -c.y); // надпись в координатах слоя, холст обрезан
     await el.ownerDocument.fonts.ready;
     if (mine !== drawing) return;
@@ -111,7 +118,7 @@ async function draw(): Promise<void> {
 // сбой загрузки основы не роняет экран: форма просто не рисуется
 const safe = (): void => void draw().catch(() => undefined);
 onMounted(safe);
-watch(() => [props.kit, props.back?.name, props.back?.number, props.part, props.crop], safe);
+watch(() => [props.kit, props.back?.name, props.back?.number, props.part, props.crop, JSON.stringify(props.deco)], safe);
 </script>
 
 <template>

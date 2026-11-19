@@ -1,0 +1,13 @@
+{
+  "$comment": "Игроки-пальцы (067 Т13, ТЗ-5.11): порядок клавиатуры Ф Ы В А | О Л Д Ж; `from` — урок, с которого игрок приходит (А, О — 1; В, Л — 3; Ы, Д — 6; Ф, Ж — 10); `fig` — вырезка игрока. Ранги и окно — match.json, `form`.",
+  "team": [
+    { "finger": "lp", "key": "Ф", "from": 10, "fig": 1 },
+    { "finger": "lr", "key": "Ы", "from": 6, "fig": 2 },
+    { "finger": "lm", "key": "В", "from": 3, "fig": 3 },
+    { "finger": "li", "key": "А", "from": 1, "fig": 4 },
+    { "finger": "ri", "key": "О", "from": 1, "fig": 5 },
+    { "finger": "rm", "key": "Л", "from": 3, "fig": 6 },
+    { "finger": "rr", "key": "Д", "from": 6, "fig": 7 },
+    { "finger": "rp", "key": "Ж", "from": 10, "fig": 8 }
+  ]
+}

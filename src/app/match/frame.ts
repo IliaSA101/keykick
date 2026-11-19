@@ -5,6 +5,7 @@
  */
 import { expectedHit } from '../../engine/typing/typing';
 import type { Shown } from './effects';
+import type { AfterGame } from '../break/cards';
 import { feed, startRun, type Run } from './run';
 import type { RunningMatch, StartEvent } from '../../engine/match';
 
@@ -21,6 +22,11 @@ export interface FrameSpec {
   leave?: number;
   /** Пенальти у последней атаки: `ask` — стоим на листе (Э1.18), `hit` — верный ответ уже дан (Э1.19, счёт с голом). Без поля пенальти пропускается. */
   penalty?: 'ask' | 'hit';
+  /**
+   * Дойти до перерыва и остановиться в нём (067 Т18: окно учебной игры стоит поверх перерыва): недостающие атаки — разминка `k`,
+   * первая атака первого тайма — гол, остальные — вратарь отбил; перерыв не доигрывается. Счёт перерыва — «1 : 0».
+   */
+  toBreak?: boolean;
 }
 
 /**
@@ -59,6 +65,12 @@ export interface FrameMatch {
   show?: FrameShow;
   /** Плашка над вступлением (065 Т10г): `comeback` — «Капитан вернулся!» (Э1.25). */
   banner?: 'comeback';
+  /** Поверх перерыва открыто окно учебной игры (его рисует стенд отдельно): клавиатуры и «Пауза» за окном нет, как в игре. */
+  learn?: boolean;
+  /** Перерыв «после игры» (Э4.17): итог сыгранной игры вместо карточек. */
+  after?: AfterGame;
+  /** «Права на компьютер» поверх перерыва (Э4.20): игра, давшая умение, отмечена «новое». */
+  rights?: { fresh: string };
 }
 
 const STEP = 300;
@@ -107,13 +119,13 @@ function playAttack(run: Run, errors: number, t0: number): { run: Run; t: number
   return { run: r, t };
 }
 
-/** Между атаками: перерыв — «Второй тайм», пенальти — «Не бить»; `keep` — пенальти оставить (последняя атака кадра с листом). */
-function settle(run: Run, t0: number, keep = false): { run: Run; t: number } {
+/** Между атаками: перерыв — «Второй тайм», пенальти — «Не бить»; `keep` — пенальти оставить (последняя атака кадра с листом), `stay` — в перерыве остаться. */
+function settle(run: Run, t0: number, keep = false, stay = false): { run: Run; t: number } {
   let r = run;
   let t = t0;
   for (let i = 0; i < 4; i++) {
     const s = running(r);
-    if (s.phase === 'break') r = feed(r, { type: 'half2', t: (t += s.rules.breakMs + STEP) }).run;
+    if (s.phase === 'break' && !stay) r = feed(r, { type: 'half2', t: (t += s.rules.breakMs + STEP) }).run;
     else if (s.phase === 'penalty' && !keep) r = feed(r, { type: 'penalty', t: (t += STEP), answer: 'skip' }).run;
     else break;
   }
@@ -133,13 +145,26 @@ export function frameRun(start: StartEvent, spec: FrameSpec): Run {
   let t = 1000;
   for (const [i, o] of [...spec.outcomes].entries()) {
     const s = running(r);
+    if (s.phase === 'break') throw new Error(`frameRun: outcome ${i} after break`); // исходы за перерывом — не молча отбрасываем
     const warm = s.phase === 'warmup';
     if (o === 'k' !== warm) throw new Error(`frameRun: outcome ${i} '${o}' does not fit phase '${s.phase}'`);
     if (!'kgsc'.includes(o)) throw new Error(`frameRun: unknown outcome '${o}'`);
     const done = playAttack(r, o === 's' ? 1 : o === 'c' ? concedeMin : 0, t);
-    const next = settle(done.run, done.t, spec.penalty !== undefined && i === spec.outcomes.length - 1);
+    // `toBreak`: исходы покрыли весь первый тайм — в перерыве остаёмся, а не уходим во второй тайм
+    const next = settle(done.run, done.t, spec.penalty !== undefined && i === spec.outcomes.length - 1, spec.toBreak === true);
     r = next.run;
     t = next.t;
+  }
+  if (spec.toBreak === true) {
+    for (let guard = 0; guard < 200 && running(r).phase !== 'break'; guard++) {
+      const s = running(r);
+      if (s.phase !== 'warmup' && s.phase !== 'half1') throw new Error(`frameRun: no break before phase '${s.phase}'`);
+      const done = playAttack(r, s.phase === 'half1' && s.log.some((a) => a.phase === 'half1') ? 1 : 0, t);
+      const next = settle(done.run, done.t, false, true);
+      r = next.run;
+      t = next.t;
+    }
+    return r;
   }
   if (spec.penalty !== undefined) {
     if (running(r).phase !== 'penalty') throw new Error('frameRun: no penalty after the last outcome');

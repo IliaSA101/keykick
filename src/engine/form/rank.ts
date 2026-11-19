@@ -36,6 +36,12 @@ export function rank(form: FormState, finger: string): number {
   return form.fingers[finger]?.max ?? 0;
 }
 
+/** Точность окна битов, тысячные (округление до целого); окно пустое — `null`. Общая для пальца и клавиши (067-Р275). */
+export function windowPermille(w: string): number | null {
+  if (w.length === 0) return null;
+  return Math.round((Array.from(w).filter((b) => b === '1').length * 1000) / w.length);
+}
+
 /** Высший ранг, чьи условия окна и порога выполнены (подтверждение итогами — не здесь). */
 function reached(w: string, rules: FormCfg): number {
   if (w.length < rules.minPresses) return 0;

@@ -5,7 +5,7 @@
  */
 import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { tabloLine } from '../../src/app/home/texts';
+import { rivalName, tabloLine } from '../../src/app/home/texts';
 import { currentLesson, gameDay, homeInputOf, pausedLong } from '../../src/app/home/input';
 import { previewInputOf } from '../../src/app/home/preview';
 import { newStepId, rng, sceneOf, seatsOf, shieldOf, stepGrew } from '../../src/app/home/scene';
@@ -40,6 +40,15 @@ describe('вход Дома из разделов', () => {
     const all = done(facts.order);
     expect(currentLesson({ current: facts.order[31]!, lessons: all, archive: {}, leaguesDone: {} }, facts.order)).toBe(33);
     expect(currentLesson({ current: 'x', lessons: all, archive: {}, leaguesDone: {} }, facts.order)).toBe(33);
+  });
+
+  it('К7 край: купленное в Лавке доходит до входа Дома; нет раздела shop — ничего не куплено', () => {
+    // Ловит: подмену `bought: []` во входе (Лавка пишет раздел shop, а мечта, сцена и вид Дома его не видят).
+    const [, fx] = fixtures[0]!;
+    const s = fx.sections as never as { 'course:ru': never; day: never; wallet: never; stadium: never };
+    const sections = { course: s['course:ru'], day: s.day, wallet: s.wallet, stadium: s.stadium };
+    expect(homeInputOf({ ...sections, shop: { bought: ['drum'] } }, facts, {}, fx.clock.day).bought).toEqual(['drum']);
+    expect(homeInputOf(sections, facts, {}, fx.clock.day).bought).toEqual([]);
   });
 
   it('К7 край: день по счёту и пауза ≥ 5 дней', () => {
@@ -175,5 +184,15 @@ describe('сцена Дома', () => {
 
   it('К7 край: витрина не зависит от пакета целиком — порядок короче урока: текущий пуст, падения нет', () => {
     expect(previewInputOf(['a', 'b'], 17, '2026-11-18').cur).toBe(3);
+  });
+});
+
+describe('имя соперника «двор на …» (067 Т21)', () => {
+  it('Т21 rivalName: полный текст «двор на <улица>», пробел после «двор» неразрывный, остальные обычные', () => {
+    // Ловит: подпись «бьёт двор на …» рвётся после «двор» (на узком кадре «двор» остаётся один в строке).
+    const s = rivalName('Лесной');
+    expect(s).toBe('двор\u00a0на Лесной');
+    expect(s.split('\u00a0')).toHaveLength(2);
+    expect(rivalName('Яблоневой')).toBe('двор\u00a0на Яблоневой');
   });
 });

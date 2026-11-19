@@ -116,14 +116,24 @@ const SAMPLES = [
   [0.75, 0.75],
 ] as const;
 
-/** Готовая форма в формате ImageData (RGBA): корпус, рукава (`split` — в цвет своей половины), окантовка и узор. */
-export function paintKit(layers: KitLayers, kit: ClubKit, box: BodyBox = bodyBox(layers)): Uint8ClampedArray<ArrayBuffer> {
+/**
+ * Что добавляют веха и призовая поверх расцветки (067 Т13 ш6, Р158): `kant` — кант в цвет вехи (`kantTrim`), `sheen` — косой блик
+ * по корпусу (форма «Звёздная I»), `stars` — звёзды вехи над именем на спине (одна или две, «Звёздная II»); у вида спереди звёзд нет.
+ */
+export interface KitDeco {
+  kant?: boolean;
+  sheen?: boolean;
+  stars?: 1 | 2;
+}
+
+/** Готовая форма в формате ImageData (RGBA): корпус, рукава (`split` — в цвет своей половины), окантовка, узор и отделка призовой (`decorate`). */
+export function paintKit(layers: KitLayers, kit: ClubKit, box: BodyBox = bodyBox(layers), deco: KitDeco = {}): Uint8ClampedArray<ArrayBuffer> {
   const { width: w, height: h, zones: z, shade: s } = layers;
   const out = new Uint8ClampedArray(w * h * 4);
   const split = kit.sleeves === 'split';
   const body = hexToRgb(kit.body);
   const sleeves = split ? body : hexToRgb(kit.sleeves);
-  const trim = hexToRgb(kit.trim);
+  const trim = hexToRgb(deco.kant === true ? kantTrim(kit) : kit.trim);
   const alt = hexToRgb(kit.alt ?? kit.body);
   const none = hexToRgb(NO_ZONE);
   const tone: [number, number, number] = [0, 0, 0];
@@ -150,11 +160,151 @@ export function paintKit(layers: KitLayers, kit: ClubKit, box: BodyBox = bodyBox
       shadePixel(out, i, z, s, [tone, second, trim], none);
     }
   }
+  decorate(out, layers, kit, box, deco);
   return out;
 }
 
+// ---------- отделка призовых и вех (Э2К.16, 18, 19; код макета tools/mock-collection/kits.mjs) ----------
+
+/** Узоры, которых нет в `patternAt`: рисуются поверх ткани `decorate`. */
+export const OVERLAY_PATTERNS = ['stars', 'champ', 'chevron'] as const;
+/** Цвета шеврона «Бирюзовый»: белая «V» и тонкий кант (050-Р48). */
+export const CHEVRON = { fill: '#f4f6f6', kant: '#0d3b4f' } as const;
+/** Кант вехи: золото; у красного, синего, бирюзового и фиолетового — белый (ТАБУ, 049-Р10). */
+export const KANT_GOLD = '#eab92f';
+export const KANT_WHITE = '#ffffff';
+
+/** Красный или бордо (340…12°) в форме — со звездой ТАБУ (ассоциации): звёзды вехи на такой форме не рисуются, кант — белый. */
+export function hasRed(kit: ClubKit): boolean {
+  return [kit.body, kit.alt, kit.sleeves === 'split' ? undefined : kit.sleeves, kit.trim].some((c) => {
+    const h = c === undefined ? null : hue(c);
+    return h !== null && (h >= 340 || h <= 12);
+  });
+}
+
+/** Тон вех по расцветке: `white` — золото канта коснулось бы синего (`yellowWithBlue`) или в форме есть красный/бордо. */
+export function milestoneTone(kit: ClubKit): 'gold' | 'white' {
+  return yellowWithBlue({ ...kit, trim: KANT_GOLD }) || hasRed(kit) ? 'white' : 'gold';
+}
+
+/** Цвет канта вехи для формы. */
+export function kantTrim(kit: ClubKit): string {
+  return milestoneTone(kit) === 'gold' ? KANT_GOLD : KANT_WHITE;
+}
+
+/** Место звезды на корпусе: центр в долях рамки корпуса и радиус в долях её высоты. */
+export interface StarSpot {
+  u: number;
+  v: number;
+  r: number;
+}
+
+/** Звёзды узора: «stars» — семь вразброс, «champ» — одна у плеча; прочие узоры звёзд не имеют. */
+export function starSpots(pattern: string): StarSpot[] {
+  if (pattern === 'stars') {
+    return [[0.28, 0.3], [0.66, 0.22], [0.5, 0.48], [0.24, 0.66], [0.74, 0.62], [0.46, 0.84], [0.8, 0.88]].map(([u, v]) => ({ u: u ?? 0, v: v ?? 0, r: 0.065 }));
+  }
+  return pattern === 'champ' ? [{ u: 0.68, v: 0.24, r: 0.07 }] : [];
+}
+
+/** Лежит ли точка (dx, dy) от центра в пятиконечной звезде радиуса r (вершина вверх, внутренний радиус 0,45 r). */
+export function inStar(dx: number, dy: number, r: number): boolean {
+  const pts: [number, number][] = [];
+  for (let i = 0; i < 10; i++) {
+    const a = (Math.PI / 5) * i - Math.PI / 2;
+    const rr = i % 2 === 1 ? r * 0.45 : r;
+    pts.push([rr * Math.cos(a), rr * Math.sin(a)]);
+  }
+  let inside = false;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const [xi, yi] = pts[i] ?? [0, 0];
+    const [xj, yj] = pts[j] ?? [0, 0];
+    if (yi > dy !== yj > dy && dx < ((xj - xi) * (dy - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+/** Доля пикселя (x, y) внутри фигуры: по тем же четырём точкам, что и узор, края без лесенки. */
+function cover(x: number, y: number, inside: (px: number, py: number) => boolean): number {
+  let k = 0;
+  for (const [dx, dy] of SAMPLES) if (inside(x + dx, y + dy)) k += 0.25;
+  return k;
+}
+
+/** Доля пикселя (x, y) внутри звезды с центром (cx, cy) и радиусом rad; далёкие пиксели отбрасываются сразу (форма — 400 тыс. пикселей). */
+function starCover(x: number, y: number, cx: number, cy: number, rad: number): number {
+  if (Math.abs(x - cx) > rad + 1 || Math.abs(y - cy) > rad + 1) return 0;
+  return cover(x, y, (px, py) => inStar(px - cx, py - cy, rad));
+}
+
+/** Расстояние от точки до отрезка. */
+function segDist(x: number, y: number, ax: number, ay: number, bx: number, by: number): number {
+  const dx = bx - ax;
+  const dy = by - ay;
+  const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy)));
+  return Math.hypot(x - ax - t * dx, y - ay - t * dy);
+}
+
+/** Доля 0…1 для края радиуса r на расстоянии d: край без лесенки. */
+const edge = (d: number, r: number): number => Math.max(0, Math.min(1, r - d + 0.5));
+
+/**
+ * Отделка поверх готовой ткани `out` (меняет её на месте): звёзды «stars» и «champ» (цвет `alt` умножается на ткань — складки остаются)
+ * и золотая полоса «champ»; шеврон «chevron» — белая «V» с тонким кантом, только спереди; блик `deco.sheen` (у шеврона слабее) — только
+ * спереди; звёзды вехи `deco.stars` — только на спине. Пиксели без непрозрачности не трогаем.
+ */
+export function decorate(out: Uint8ClampedArray, layers: KitLayers, kit: ClubKit, box: BodyBox, deco: KitDeco): void {
+  const { width: w, height: h, zones, shade } = layers;
+  const bw = 1 / box.sx;
+  const bh = 1 / box.sy;
+  const front = box.mirror !== true;
+  const spots = starSpots(kit.pattern);
+  const fill = hexToRgb(kit.alt ?? kit.trim);
+  const chevron = front && kit.pattern === 'chevron';
+  const plain = { ...kit, pattern: 'plain' };
+  const white = chevron ? paintKit(layers, { ...plain, body: CHEVRON.fill }, box) : null;
+  const dark = chevron ? paintKit(layers, { ...plain, body: CHEVRON.kant }, box) : null;
+  const tip = [box.x0 + bw * 0.5, box.y0 + bh * 0.47] as const;
+  const arms = [[box.x0 + bw * 0.1, box.y0], [box.x0 + bw * 0.9, box.y0]] as const;
+  const half = bw * 0.1;
+  const rim = Math.max(2, bw * 0.022);
+  const gain = kit.pattern === 'chevron' ? 0.6 : 1;
+  const mark = hexToRgb(milestoneTone(kit) === 'gold' ? KANT_GOLD : KANT_WHITE);
+  const marks: StarSpot[] = !front && deco.stars !== undefined && !hasRed(kit) ? (deco.stars === 2 ? [{ u: 0.4, v: 0.07, r: 0.05 }, { u: 0.6, v: 0.07, r: 0.05 }] : [{ u: 0.5, v: 0.07, r: 0.05 }]) : [];
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      if ((out[i + 3] ?? 0) === 0) continue;
+      const body = (zones[i] ?? 0) / 255;
+      for (const s of spots) {
+        const k = starCover(x, y, box.x0 + bw * s.u, box.y0 + bh * s.v, bh * s.r);
+        for (let c = 0; c < 3; c++) out[i + c] = Math.round((out[i + c] ?? 0) * (1 - k + k * (fill[c] ?? 0)));
+      }
+      if (kit.pattern === 'champ' && y >= box.y0 + bh * 0.9 && y < box.y0 + bh * 0.935) {
+        for (let c = 0; c < 3; c++) out[i + c] = Math.round((out[i + c] ?? 0) * (fill[c] ?? 0));
+      }
+      if (white !== null && dark !== null && body > 0) {
+        const d = Math.min(segDist(x + 0.5, y + 0.5, arms[0][0], arms[0][1], tip[0], tip[1]), segDist(x + 0.5, y + 0.5, arms[1][0], arms[1][1], tip[0], tip[1]));
+        const outer = edge(d, half + rim) * body;
+        const inner = edge(d, half) * body;
+        if (outer > 0) for (let c = 0; c < 3; c++) out[i + c] = Math.round((out[i + c] ?? 0) * (1 - outer) + (dark[i + c] ?? 0) * (outer - inner) + (white[i + c] ?? 0) * inner);
+      }
+      if (front && (deco.sheen === true || chevron) && body > 0) {
+        const t = ((x - 0.25 * w) * 0.5 * w + y * h) / ((0.5 * w) ** 2 + h * h);
+        const a = (t < 0.3 || t > 0.7 ? 0 : t < 0.46 ? ((t - 0.3) / 0.16) * 0.55 : t < 0.5 ? 0.55 + ((t - 0.46) / 0.04) * 0.25 : t < 0.54 ? 0.8 - ((t - 0.5) / 0.04) * 0.25 : 0.55 - ((t - 0.54) / 0.16) * 0.55) * gain * body;
+        for (let c = 0; c < 3; c++) out[i + c] = Math.round((out[i + c] ?? 0) * (1 - a) + 255 * a);
+      }
+      for (const s of marks) {
+        const k = starCover(x, y, box.x0 + bw * s.u, box.y0 + bh * s.v, bh * s.r);
+        const dim = (shade[i] ?? 0) / 255;
+        for (let c = 0; c < 3; c++) out[i + c] = Math.round((out[i + c] ?? 0) * (1 - k) + 255 * (mark[c] ?? 0) * dim * k);
+      }
+    }
+  }
+}
+
 /** Яркость цвета по-простому (0…1). */
-function lightness(hex: string): number {
+export function lightness(hex: string): number {
   const [r, g, b] = hexToRgb(hex);
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
@@ -169,7 +319,7 @@ export function shirtInk(kit: ClubKit): { fill: string; outline: string } {
 }
 
 /** Оттенок цвета 0…360; у серого, белого и почти чёрного оттенка нет — null. */
-function hue(hex: string): number | null {
+export function hue(hex: string): number | null {
   const [r, g, b] = hexToRgb(hex);
   const max = Math.max(r, g, b);
   const c = max - Math.min(r, g, b);

@@ -18,13 +18,13 @@
  },
  "sections": {
   "course:ru": {
-   "current": "ru.yard.vl",
+   "current": "ru.yard.six-keys-review",
    "lessons": {
     "ru.yard.ao": {
      "stars": 3,
      "best": 0,
      "tries": 1,
-     "done": "2026-11-13",
+     "done": "2026-11-14",
      "fails": 0
     },
     "ru.yard.ao-pairs": {
@@ -33,32 +33,80 @@
      "tries": 1,
      "done": "2026-11-15",
      "fails": 0
+    },
+    "ru.yard.vl": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-15",
+     "fails": 0
+    },
+    "ru.yard.vl-combos": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.first-words": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-16",
+     "fails": 0
+    },
+    "ru.yard.yd": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.yd-combos": {
+     "stars": 2,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-17",
+     "fails": 0
+    },
+    "ru.yard.six-keys-words": {
+     "stars": 1,
+     "best": 0,
+     "tries": 1,
+     "done": "2026-11-18",
+     "fails": 0
+    },
+    "ru.yard.six-keys-review": {
+     "stars": 0,
+     "best": 65,
+     "tries": 1,
+     "fails": 0
     }
    },
    "archive": {},
    "leaguesDone": {}
   },
   "wallet": {
-   "coins": 20,
+   "coins": 156,
    "rest": 0,
    "paid": []
   },
   "day": {
-   "played": 4,
-   "days": 9,
+   "played": 14,
+   "days": 5,
    "today": "2026-11-18",
    "todayN": 1,
    "last": 1794992400000
   },
   "stadium": {
-   "fans": 1000,
+   "fans": 4520,
    "goals": 0
   },
   "club": {
    "name": "Прогресс",
    "city": "Тверь",
    "coach": "",
-   "backName": "Саша",
+   "backName": "САША",
    "backNumber": 7,
    "kit": {
     "pattern": "plain",
@@ -66,11 +114,51 @@
     "sleeves": "#ffffff",
     "trim": "#ffffff"
    }
+  },
+  "learn": {
+   "games": {
+    "arrows": {
+     "step": 2,
+     "plays": 3,
+     "best": 41000,
+     "last": "2026-11-16"
+    },
+    "mouse": {
+     "step": 2,
+     "plays": 3,
+     "best": 41000,
+     "last": "2026-11-16"
+    },
+    "tab": {
+     "step": 2,
+     "plays": 3,
+     "best": 41000,
+     "last": "2026-11-16"
+    },
+    "keyboard": {
+     "step": 2,
+     "plays": 2,
+     "best": 41000,
+     "last": "2026-11-16"
+    }
+   },
+   "recent": [
+    "arrows",
+    "mouse",
+    "tab"
+   ]
   }
  },
  "match": {
-  "lesson": 3,
-  "phase": "new",
-  "model": "образец: счёт и ход атаки — по кадру, Т10 и позже дописывают"
+  "seed": 292106,
+  "lesson": 9,
+  "started": true,
+  "spec": {
+   "outcomes": "kkg",
+   "toBreak": true
+  },
+  "show": {
+   "street": "Водопроводной"
+  }
  }
 }

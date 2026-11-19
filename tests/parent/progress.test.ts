@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { SECTIONS } from '../../src/app/save/sections';
-import { binNoteKey, changeRows, clearTyped, defaultPicks, lastFile, progressFacts } from '../../src/engine/parent/progress';
+import { binNoteKey, changeRows, defaultPicks, lastFile, progressFacts } from '../../src/engine/parent/progress';
 import { binLeftNames, deviceRow, repairNoteKey, stuckRows } from '../../src/engine/parent/repair';
 import { createPlayer, writePlayer } from '../../src/engine/save/envelope';
 import type { ImportPlan } from '../../src/engine/save/import';
@@ -103,11 +103,18 @@ describe('К12 (063-Р65) repair: что показать про игроков 
     expect(stuckRows([])).toEqual([]);
   });
 
-  it('К12 (063-Р65) deviceRow: broken — «Загрузить файл» и «Новый клуб»; newer — только текст; ok, absent (первый запуск) и denied — строки нет', () => {
+  it('К12 (063-Р65) deviceRow: broken — «Загрузить файл» и «Новый клуб»; newer — только текст; ok и absent (первый запуск) — строки нет', () => {
     // Ловит: «Новый клуб» на первом запуске или на устройстве «новее» (затёрли бы клуб новой версии); битое устройство без выхода.
     expect(deviceRow('broken')).toEqual({ pid: null, kind: 'broken', name: null, actions: ['load', 'newClub'] });
     expect(deviceRow('newer')).toEqual({ pid: null, kind: 'newer', name: null, actions: [] });
-    for (const state of ['ok', 'absent', 'denied'] as const) expect(deviceRow(state)).toBeNull();
+    for (const state of ['ok', 'absent'] as const) expect(deviceRow(state)).toBeNull();
+  });
+
+  it('К13 (063-Р72) deviceRow: denied (хранилище недоступно) — строка с текстом и без действий: ни «Загрузить файл», ни «Новый клуб» — писать некуда; текст устройства не совпадает с игроком', () => {
+    // Ловит: на странице при недоступном хранилище пусто («Нет игроков») или предлагается запись, которая отказала бы.
+    expect(deviceRow('denied')).toEqual({ pid: null, kind: 'denied', name: null, actions: [] });
+    expect(ru.parent.players.stuck.deviceDenied.length).toBeGreaterThan(20);
+    expect(ru.parent.players.stuck.deviceDenied).not.toBe(ru.parent.players.stuck.noAccess);
   });
 
   it('К12 (063-Р65) repairNoteKey: у busy, readonly, healthy, binned, quota, denied — своя строка; absent, conflict и незнакомое — «обновите страницу»', () => {
@@ -126,31 +133,5 @@ describe('К12 (063-Р65) repair: что показать про игроков 
     expect(binLeftNames(['p-b', 'p-z'], plan, 'Игрок')).toEqual(['Миша', 'Игрок']);
     expect(binLeftNames(['p-b'], { kind: 'bad', why: [] }, 'Игрок')).toEqual(['Игрок']);
     expect(binLeftNames([], plan, 'Игрок')).toEqual([]);
-  });
-});
-
-describe('К13 clearTyped: очистка корзины вводом имён в любом порядке (063-Р66)', () => {
-  it('К13 порядок не важен, регистр и пробелы не важны, каждое имя ровно один раз; лишнее, нехватка и пустая корзина — нет', () => {
-    // Ловит: имена принимаются только в порядке заголовка (поле «молчит» при верном вводе в другом порядке); лишнее или недостающее имя пропускается; пустая корзина «подтверждается».
-    expect(clearTyped(['Миша', 'Аня'], 'Миша Аня')).toBe(true);
-    expect(clearTyped(['Миша', 'Аня'], '  аня   МИША ')).toBe(true);
-    expect(clearTyped(['Миша', 'Аня'], 'Миша')).toBe(false);
-    expect(clearTyped(['Миша', 'Аня'], 'Миша Аня Аня')).toBe(false);
-    expect(clearTyped(['Миша', 'Аня'], 'Миша Ань')).toBe(false);
-    expect(clearTyped(['Миша'], '')).toBe(false);
-    expect(clearTyped([], '')).toBe(false);
-    expect(clearTyped([], 'Миша')).toBe(false);
-  });
-
-  it('К13 имена из нескольких слов и одинаковые имена: «Ваня Иванов» целиком в любом порядке; два Саши — два раза, не больше и не меньше', () => {
-    // Ловит: многословное имя разбито по пробелам и не принято; два одинаковых имени сведены в одно (множество вместо набора) или принято третье.
-    expect(clearTyped(['Ваня Иванов', 'Аня'], 'аня ваня иванов')).toBe(true);
-    expect(clearTyped(['Ваня Иванов', 'Аня'], 'ваня иванов')).toBe(false);
-    expect(clearTyped(['Ваня Иванов', 'Аня'], 'ваня аня иванов')).toBe(false);
-    expect(clearTyped(['Саша', 'Саша'], 'Саша Саша')).toBe(true);
-    expect(clearTyped(['Саша', 'Саша'], 'Саша')).toBe(false);
-    expect(clearTyped(['Саша', 'Саша'], 'Саша Саша Саша')).toBe(false);
-    expect(clearTyped(['Саша', 'Саша', 'Миша'], 'саша миша саша')).toBe(true);
-    expect(clearTyped(['Ваня', 'Ваня Иванов'], 'Ваня Иванов Ваня')).toBe(true);
   });
 });

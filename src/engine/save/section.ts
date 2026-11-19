@@ -35,6 +35,15 @@ export function badCounters(x: Record<string, unknown>, keys: readonly string[])
   return keys.filter((k) => !isInt(x[k]) || x[k] < 0);
 }
 
+const ID = /^[a-z0-9][a-z0-9-]{0,47}$/;
+const ID_DOT = /^[a-z0-9][a-z0-9.-]{0,47}$/;
+
+/** Id вещи, игры, пака: строчные латинские и цифры через дефис, до 48 знаков. */
+export const isId = (x: unknown): x is string => typeof x === 'string' && ID.test(x);
+
+/** То же, что `isId`, но с точкой (id уроков и задач Школы: `ru.yard.ao`). */
+export const isDotId = (x: unknown): x is string => typeof x === 'string' && ID_DOT.test(x);
+
 function daysInMonth(year: number, month: number): number {
   if (month === 2) return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0 ? 29 : 28;
   return [4, 6, 9, 11].includes(month) ? 30 : 31;

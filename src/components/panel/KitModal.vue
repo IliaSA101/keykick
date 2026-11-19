@@ -5,7 +5,7 @@
  * (`cycleIndex`), Esc — `close`, при закрытии фокус возвращается туда, где был. Enter жмёт кнопку в фокусе сам.
  * `enterDelay` > 0 — окно цепочки: Enter не засчитывается, пока не прошла пауза после открытия и пока клавишу держат
  * (быстрый двойной Enter на кнопке прошлого окна не жмёт кнопку этого).
- * Слоты: по умолчанию — тело, `buttons` — строка кнопок, `after` — ниже всего. Окно-вопрос — по центру, окно-список (`left`) — слева.
+ * Слоты: `head` — справа в строке заголовка (кнопка «Закрыть Esc», `.mhead`), по умолчанию — тело, `buttons` — строка кнопок, `after` — ниже всего. Окно-вопрос — по центру, окно-список (`left`) — слева.
  */
 import { onBeforeUnmount, onMounted, ref, useId } from 'vue';
 import { cycleIndex, enterAllowed, FOCUSABLE } from './focusCycle';
@@ -57,7 +57,8 @@ function onKey(e: KeyboardEvent): void {
 onMounted(() => {
   before = globalThis.document.activeElement;
   const list = items();
-  (list.find((el) => el.classList.contains('primary')) ?? list[0] ?? card.value)?.focus();
+  // «Закрыть» в заголовке (слот `head`) — не стартовый фокус: двойной Enter не должен закрывать окно
+  (list.find((el) => el.classList.contains('primary')) ?? list.find((el) => !el.closest('.mhead')) ?? list[0] ?? card.value)?.focus();
   globalThis.addEventListener('keydown', onKey, true);
 });
 onBeforeUnmount(() => {
@@ -82,7 +83,19 @@ onBeforeUnmount(() => {
       aria-modal="true"
       tabindex="-1"
     >
-      <h2 :id="titleId">
+      <div
+        v-if="$slots.head"
+        class="mhead"
+      >
+        <h2 :id="titleId">
+          {{ title }}
+        </h2>
+        <slot name="head" />
+      </div>
+      <h2
+        v-else
+        :id="titleId"
+      >
         {{ title }}
       </h2>
       <p

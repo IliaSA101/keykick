@@ -18,6 +18,16 @@ defineProps<{ before: string; after: string }>();
     >{{ ru.system.telegram.nick }}</a>
     {{ after }}
   </p>
+  <p
+    v-if="ru.system.form.url"
+    class="note tg"
+  >
+    <a
+      :href="ru.system.form.url"
+      target="_blank"
+      rel="noopener"
+    >{{ ru.system.form.label }}</a>
+  </p>
 </template>
 
 <style scoped>

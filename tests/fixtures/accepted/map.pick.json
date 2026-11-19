@@ -162,7 +162,7 @@
    "name": "Прогресс",
    "city": "Тверь",
    "coach": "",
-   "backName": "Саша",
+   "backName": "САША",
    "backNumber": 7,
    "kit": {
     "pattern": "plain",
@@ -172,6 +172,7 @@
    }
   }
  },
+ "mapPick": 2,
  "home": {
   "cur": 17,
   "day": 9,
