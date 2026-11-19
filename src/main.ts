@@ -6,6 +6,7 @@ import { router } from './app/router';
 import { isParentRoute } from './engine/players/entry';
 import { useSession } from './app/save/session';
 import { mountCrashWindow } from './screens/system/mountCrash';
+import './styles/fonts.css';
 import './styles/tokens.css';
 import './styles/kit/index.css';
 

@@ -4,7 +4,7 @@
  * (docs/design.md, 04.11). Лист олимпиады (пенальти) — белый, свой набор --paper-*.
  */
 :root {
-  --font: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font: 'Noto Sans', system-ui, 'Segoe UI', Roboto, sans-serif; /* шрифт закреплён — styles/fonts.css (063-Р45) */
   --font-size: 18px; /* базовый шрифт не меньше 18px — правило идеи */
   --radius: 10px;
   --space-1: 4px;

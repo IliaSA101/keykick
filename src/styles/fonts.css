@@ -1,0 +1,23 @@
+/* Шрифт игры закреплён (063-Р45): кадры макетов сняты на Noto Sans, а system-ui у ребёнка свой на каждой ОС
+   (Segoe UI, San Francisco, Ubuntu Sans) — текст шире или уже кадра. Файлы — подмножество tools/fonts/subset.sh,
+   лицензия OFL 1.1 — fonts/OFL.txt. Bold отдаёт веса 600–900 (как системный Noto Sans при съёмке кадров).
+   Подключается только игрой (main.ts): макеты берут tokens.css и системный Noto Sans того же выпуска. */
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 100 500;
+  font-display: swap;
+  src: url('./fonts/noto-sans-Regular.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+0400-045F, U+0490-0491, U+2000-206F,
+    U+20BD, U+2116, U+2122;
+}
+
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 600 900;
+  font-display: swap;
+  src: url('./fonts/noto-sans-Bold.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+0400-045F, U+0490-0491, U+2000-206F,
+    U+20BD, U+2116, U+2122;
+}
