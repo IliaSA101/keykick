@@ -10,6 +10,7 @@ import KitChip from '../../components/kit/KitChip.vue';
 import KitPanel from '../../components/kit/KitPanel.vue';
 import KitTag from '../../components/kit/KitTag.vue';
 import { ru } from '../../i18n/ru';
+import { MAIN_BOTTOM, mainWidth } from '../../engine/home';
 
 defineProps<{ main: ReturnType<typeof mainText>; cup: ReturnType<typeof cupText>; width: number; narrow: boolean; canPlay: boolean }>();
 const emit = defineEmits<{ play: []; map: []; cup: [] }>();
@@ -20,7 +21,7 @@ const t = ru.home;
   <KitPanel
     soft
     class="gocard home"
-    :style="{ left: `${width / 2 - (narrow ? 170 : 200)}px`, bottom: '8px', width: `${narrow ? 340 : 400}px` }"
+    :style="{ left: `${width / 2 - mainWidth(narrow) / 2}px`, bottom: `${MAIN_BOTTOM}px`, width: `${mainWidth(narrow)}px` }"
   >
     <p class="lk">
       {{ main.lead }}<br v-if="main.tag || main.lead2">{{ main.lead2 }}
@@ -53,7 +54,7 @@ const t = ru.home;
   </KitPanel>
   <div
     class="homerow"
-    :style="{ left: `${width / 2 + (narrow ? 170 : 200) + 10}px` }"
+    :style="{ left: `${width / 2 + mainWidth(narrow) / 2 + 10}px` }"
   >
     <KitChip @click="emit('map')">
       {{ t.mapChip }}

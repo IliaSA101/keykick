@@ -3,9 +3,10 @@
  * ярлыков и окон. Ширина сцены `W` — в базовых px (1138 на 1920, 1024 на узком окне).
  */
 import yard from '../../content/home-yard.json';
+import { STAGE_H } from '../../engine/home';
 import type { Piece } from '../../app/home/scene';
 
-export const K = 640 / 1072;
+export const K = STAGE_H / 1072;
 /** Сдвиг картинки по ширине сцены: она по центру. */
 export const offOf = (W: number): number => (W - 1920 * K) / 2;
 export const sxOf = (W: number, x: number): number => offOf(W) + x * K;
